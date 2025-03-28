@@ -1,17 +1,17 @@
-#include "FLArETrackingAction.hh"
-#include "FLArETrackInformation.hh"
+#include "TrackingAction.hh"
+#include "TrackInformation.hh"
 #include "AnalysisManager.hh"
 
 #include "G4TrackingManager.hh"
 #include "G4Track.hh"
 
-FLArETrackingAction::FLArETrackingAction() : G4UserTrackingAction() {;}
+TrackingAction::TrackingAction() : G4UserTrackingAction() {;}
 
-void FLArETrackingAction::PreUserTrackingAction(const G4Track* aTrack)
+void TrackingAction::PreUserTrackingAction(const G4Track* aTrack)
 {
 }
 
-void FLArETrackingAction::PostUserTrackingAction(const G4Track* aTrack)
+void TrackingAction::PostUserTrackingAction(const G4Track* aTrack)
 {
   if (aTrack->GetParentID()==0) {
     AnalysisManager::GetInstance()->AddOnePrimaryTrack();
@@ -26,7 +26,7 @@ void FLArETrackingAction::PostUserTrackingAction(const G4Track* aTrack)
         if (nSeco>0) {
           for (size_t i=0; i<nSeco; ++i) {
             if ((*secondaries)[i]->GetCreatorProcess()->GetProcessName()=="Decay") {
-              FLArETrackInformation* info =  new FLArETrackInformation();
+              TrackInformation* info =  new TrackInformation();
               info->SetTrackIsFromPrimaryPizero(1);
               (*secondaries)[i]->SetUserInformation(info);
               AnalysisManager::GetInstance()->AddOnePrimaryTrack();
@@ -48,7 +48,7 @@ void FLArETrackingAction::PostUserTrackingAction(const G4Track* aTrack)
       if (nSeco>0) {
         for (size_t i=0; i<nSeco; ++i) {
           if ((*secondaries)[i]->GetCreatorProcess()->GetProcessName()=="Decay") {
-            FLArETrackInformation* info =  new FLArETrackInformation();
+            TrackInformation* info =  new TrackInformation();
             info->SetTrackIsFromPrimaryLepton(1);
             (*secondaries)[i]->SetUserInformation(info);
             AnalysisManager::GetInstance()->AddOnePrimaryTrack();
@@ -67,7 +67,7 @@ void FLArETrackingAction::PostUserTrackingAction(const G4Track* aTrack)
         if (nSeco>0) {
           for (size_t i=0; i<nSeco; ++i) {
             if ((*secondaries)[i]->GetCreatorProcess()->GetProcessName()=="Decay") {
-              FLArETrackInformation* info =  new FLArETrackInformation();
+              TrackInformation* info =  new TrackInformation();
               info->SetTrackIsFromFSLPizero(1);
               (*secondaries)[i]->SetUserInformation(info);
               AnalysisManager::GetInstance()->AddOnePrimaryTrack();
@@ -77,7 +77,7 @@ void FLArETrackingAction::PostUserTrackingAction(const G4Track* aTrack)
       }
     }
   }
-  //FLArETrackInformation* aTrackInfo = (FLArETrackInformation*)(aTrack->GetUserInformation());
+  //TrackInformation* aTrackInfo = (TrackInformation*)(aTrack->GetUserInformation());
   //if (aTrackInfo) {
   //  if (aTrackInfo->IsTrackFromPrimaryTau() | aTrackInfo->IsTrackFromPrimaryPizero()) {
   //    std::cout<<aTrack->GetParentID()<<" "<<aTrack->GetParticleDefinition()->GetPDGEncoding()<<std::endl;

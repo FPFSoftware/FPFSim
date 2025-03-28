@@ -1,4 +1,4 @@
-#include "FLArEPhysicsList.hh"
+#include "PhysicsList.hh"
 #include "G4PhysListFactory.hh"
 #include "G4StepLimiterPhysics.hh"
 #include "G4ProcessManager.hh"
@@ -7,7 +7,7 @@
 
 #include <algorithm>
 
-FLArEPhysicsList::FLArEPhysicsList() : G4VModularPhysicsList()
+PhysicsList::PhysicsList() : G4VModularPhysicsList()
 {
   factory = new G4PhysListFactory();
   G4VModularPhysicsList* physicsList = factory->ReferencePhysList();
@@ -24,26 +24,26 @@ FLArEPhysicsList::FLArEPhysicsList() : G4VModularPhysicsList()
   RegisterPhysics(stepLimiterPhys);
 }
 
-FLArEPhysicsList::~FLArEPhysicsList()
+PhysicsList::~PhysicsList()
 {
   delete factory;
   delete fStepLimiter;
   delete fUserSpecialCuts;
 }
 
-void FLArEPhysicsList::ConstructParticle()
+void PhysicsList::ConstructParticle()
 {
   G4VModularPhysicsList::ConstructParticle();
 }
 
-void FLArEPhysicsList::ConstructProcess()
+void PhysicsList::ConstructProcess()
 {
   G4VModularPhysicsList::ConstructProcess();
 
   AddStepMax();
 }
 
-void FLArEPhysicsList::AddStepMax()
+void PhysicsList::AddStepMax()
 {
   // Step limitation seen as a process
   auto particleIterator = GetParticleIterator();

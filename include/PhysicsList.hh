@@ -1,5 +1,5 @@
-#ifndef FLAREPHYSICSLIST_HH
-#define FLAREPHYSICSLIST_HH
+#ifndef PHYSICSLIST_HH
+#define PHYSICSLIST_HH
 
 #include "G4VModularPhysicsList.hh"
 
@@ -7,11 +7,11 @@ class G4PhysListFactory;
 class G4StepLimiter;
 class G4UserSpecialCuts;
 
-class FLArEPhysicsList: public G4VModularPhysicsList
+class PhysicsList: public G4VModularPhysicsList
 {
   public:
-    FLArEPhysicsList();
-    virtual ~FLArEPhysicsList();
+    PhysicsList();
+    virtual ~PhysicsList();
 
     void AddStepMax();
 

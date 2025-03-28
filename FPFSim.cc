@@ -9,7 +9,7 @@
 #include "ActionInitialization.hh"
 #include "DetectorConstruction.hh"
 #include "AnalysisManager.hh"
-#include "FLArEPhysicsList.hh"
+#include "PhysicsList.hh"
 
 using namespace std;
 
@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
 
   // Set mandatory initialization classes
   runManager->SetUserInitialization(new DetectorConstruction());
-  runManager->SetUserInitialization(new FLArEPhysicsList());
+  runManager->SetUserInitialization(new PhysicsList());
 
   // Set user action classes
   runManager->SetUserInitialization(new ActionInitialization());
