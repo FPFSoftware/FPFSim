@@ -53,7 +53,7 @@ DetectorConstruction::DetectorConstruction()
   DefineMaterial();
   messenger = new DetectorConstructionMessenger(this);
   m_saveGdml = false;
-  m_fileGdml = "FPF_FLArE_geo.gdml";
+  m_fileGdml = "FPF_geo.gdml";
   fCheckOverlap = false;
 }
 

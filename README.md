@@ -115,7 +115,7 @@ Older versions of FORESEE output events in the HepMC2 format. To run over HepMC2
 |Command |Description | Default |
 |:--|:--|:--|
 |/det/saveGdml          | option for saving detector geometry in a GDML file, run before `/run/initialize`     |`false`|
-|/det/fileGdml          | option for specifying the GDML file name, run before `/run/initialize`               |`FPF_FLArE_geo.gdml`|
+|/det/fileGdml          | option for specifying the GDML file name, run before `/run/initialize`               |`FPF_geo.gdml`|
 |/det/checkOverlap      | check overlap of volumes during detector construction, run before `/run/initialize`  |`false`|
 |/det/addFLArE          | option for adding the FLArE detector, run before `/run/initialize`                   |`true`|
 |/det/addFORMOSA        | option for adding the FORMOSA detector, run before `/run/initialize`                 |`true`|
