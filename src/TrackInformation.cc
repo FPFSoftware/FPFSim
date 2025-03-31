@@ -1,9 +1,9 @@
-#include "FLArETrackInformation.hh"
+#include "TrackInformation.hh"
 
-G4ThreadLocal G4Allocator<FLArETrackInformation> *
+G4ThreadLocal G4Allocator<TrackInformation> *
                                    aTrackInformationAllocator = 0;
 
-FLArETrackInformation::FLArETrackInformation()
+TrackInformation::TrackInformation()
   : G4VUserTrackInformation()
 {
   fFromPrimaryPizero = 0;
@@ -11,7 +11,7 @@ FLArETrackInformation::FLArETrackInformation()
   fFromPrimaryLepton = 0;
 }
 
-FLArETrackInformation::FLArETrackInformation(const G4Track* aTrack) 
+TrackInformation::TrackInformation(const G4Track* aTrack) 
   : G4VUserTrackInformation()
 {
   fFromPrimaryPizero = 0;
@@ -19,11 +19,11 @@ FLArETrackInformation::FLArETrackInformation(const G4Track* aTrack)
   fFromPrimaryLepton = 0;
 }
 
-FLArETrackInformation::~FLArETrackInformation()
+TrackInformation::~TrackInformation()
 {;}
 
-FLArETrackInformation& FLArETrackInformation
-::operator =(const FLArETrackInformation& aTrackInfo)
+TrackInformation& TrackInformation
+::operator =(const TrackInformation& aTrackInfo)
 {
   fFromPrimaryPizero = aTrackInfo.fFromPrimaryPizero;
   fFromFSLPizero = aTrackInfo.fFromFSLPizero;
@@ -32,7 +32,7 @@ FLArETrackInformation& FLArETrackInformation
   return *this;
 }
 
-void FLArETrackInformation::Print() const
+void TrackInformation::Print() const
 {
     G4cout << "Is from primary pizero " << fFromPrimaryPizero << G4endl;
     G4cout << "Is from final state lepton decay pizero " << fFromFSLPizero << G4endl;

@@ -14,5 +14,5 @@ mkdir -p /afs/cern.ch/work/m/mvicenzi/public/LOGS/${cluster}/log
 # import gst file if needed by mac file
 eos cp /eos/user/m/mvicenzi/genie/numu_kling_ar40_e5000.gst.root . 
 
-echo "Running ./FLArE macro.mac"
-./FLArE macro.mac
+echo "Running ./FPFSim macro.mac"
+./FPFSim macro.mac

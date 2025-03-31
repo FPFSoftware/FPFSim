@@ -26,8 +26,8 @@ echo "$macro"
 cp ${macropath} .
 
 # running !!
-echo "Running ./FLArE ${macro}"
-./FLArE ${macro}
+echo "Running ./FPFSim ${macro}"
+./FPFSim ${macro}
 
 # delete what you imported, or it is copied in output!
 rm ${macro} ${gst}

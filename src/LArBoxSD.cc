@@ -2,7 +2,7 @@
 #include <vector>
 
 #include "LArBoxSD.hh"
-#include "FLArETrackInformation.hh"
+#include "TrackInformation.hh"
 
 #include <G4SDManager.hh>
 #include <G4SystemOfUnits.hh>
@@ -65,7 +65,7 @@ G4bool LArBoxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* R0hist) {
   G4String PosVolume = PostStep->GetPhysicalVolume()->GetName();
   G4int StepStatus   = PostStep->GetStepStatus();
 
-  FLArETrackInformation* aTrackInfo = (FLArETrackInformation*)(aTrack->GetUserInformation());
+  TrackInformation* aTrackInfo = (TrackInformation*)(aTrack->GetUserInformation());
   G4int trackIsFromPrimaryPizero = 0;
   G4int trackIsFromFSLPizero = 0;
   G4int trackIsFromPrimaryLepton = 0;

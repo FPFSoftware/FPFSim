@@ -3,7 +3,7 @@
 //! Optional user classes
 #include "RunAction.hh"
 #include "EventAction.hh"
-#include "FLArETrackingAction.hh"
+#include "TrackingAction.hh"
 #include "StackingAction.hh"
 #include "SteppingAction.hh"
 
@@ -13,7 +13,7 @@ void ActionInitialization::Build() const {
   SetUserAction(theRunAction);
   EventAction* theEventAction = new EventAction();
   SetUserAction(theEventAction);
-  SetUserAction(new FLArETrackingAction);
+  SetUserAction(new TrackingAction);
   SetUserAction(new StackingAction(theRunAction, theEventAction));
   SetUserAction(new SteppingAction(theRunAction));
 }

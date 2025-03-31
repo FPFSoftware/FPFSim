@@ -1,7 +1,6 @@
-# FLArE
+# FPFSim
 
-Simulation code for R&D of the FLArE detector
-![nutau evt display](./flare_nutau_evd.jpg)
+Geant4-based simulation package for detectors in the Forward Physics Facility.
 
 ## Setting up on lxplus
 
@@ -9,7 +8,7 @@ The `LXPLUS` service at CERN (`lxplus.cern.ch`) provides a cluster of machines f
 
 1. Visit the list of services at the [CERN Resources Portal](https://resources.web.cern.ch/resources/Manage/ListServices.aspx), and search for boxes: LXPLUS and Linux, AFS Workspaces, EOS/CERNBox.
 2. Subscribe to LXPLUS and Linux.
-3. Subscribe and setup your AFS Workspaces: you can have up to 10GB in `/afs/cern.ch/user/<initial>/<username>` and up to 100GB in `/afs/cern.ch/work/<initial>/<username>`. You can set these limits from the Settings in the "AFS Workspace". 
+3. Subscribe and setup your AFS Workspaces: you can have up to 10GB in `/afs/cern.ch/user/<initial>/<username>` and up to 100GB in `/afs/cern.ch/work/<initial>/<username>`. You can set these limits from the Settings in the "AFS Workspace".
 4. Subscribe to EOS/CERNBox and login to cernbox: [https://cernbox.cern.ch/](https://cernbox.cern.ch/). This will allow you access to `/eos/user/<initial>/<username>` with up to 1TB of space.
 
 Users are recommended to setup code in their AFS Workspace areas and use their EOS/CERNBox for long term data storage.
@@ -30,7 +29,7 @@ To get started do:
 ```bash
 git clone https://github.com/benw22022/el9-cvmfs-docker.git
 cd el9-cvmfs-docker/
-./run_container /path/to/FLArE
+./run_container /path/to/FPFSim
 ```
 
 This will automatically pull and start the container and copy the `.bashrc` file which mounts `cvmfs` when the container starts.
@@ -39,40 +38,40 @@ As mentioned, this software relies upon the `HEP_HPC` library. A precompiled ver
 
 ```bash
 # You only need to do this once
-cd FLArE
-tar -xvf HEP_HPC-el9.tar 
+cd FPFSim
+tar -xvf HEP_HPC-el9.tar
 ```
 
 Then to set up the environment do
 
 ```bash
-source FLArE/local_setup.sh
+source FPFSim/local_setup.sh
 ```
 
 ## To compile the code
 
-* Create a new directory to contain the executables (assume the path is `/path/to/build`).
-* Assume the path to the source code is `/path/to/source`.
-* To compile, you need to go to the build directory `cd /path/to/build`.
-* And then `cmake -S /path/to/source -B /path/to/build`.
-* Finally, `make` or `make install`.
+- Create a new directory to contain the executables (assume the path is `/path/to/build`).
+- Assume the path to the source code is `/path/to/source`.
+- To compile, you need to go to the build directory `cd /path/to/build`.
+- And then `cmake -S /path/to/source -B /path/to/build`.
+- Finally, `make` or `make install`.
 
 The minimal software requirements are:
 
-* Geant4 v4_10_6_p01c
-* ROOT v6_22_06a
-* HEP_HPC v0_14_01
-* HDF5 v1_10_0+
+- Geant4 v4_10_6_p01c
+- ROOT v6_22_06a
+- HEP_HPC v0_14_01
+- HDF5 v1_10_0+
 
 These are automatically satisfied once the `lxplus_setup.sh` script is sourced.
 There is no longer an explicit GENIE dependency. However, the input GENIE `ghep` files need to be converted in the `gst` format (plain ROOT tree). The conversion can be perfomed with the native GENIE utility `gntpc`.
 
 ## Run the simulation
 
-Once the code has been compiled, the simulation can be run by passing a macro file to the `FLArE` executable:
+Once the code has been compiled, the simulation can be run by passing a macro file to the `FPFSim` executable:
 
 ```bash
-./FLArE /path/to/macro.mac
+./FPFSim /path/to/macro.mac
 ```
 
 Several examples of macros are available in the `macros` directory.
@@ -83,7 +82,7 @@ If no macro is passed as argument, the default is `macros\vis.mac` which simply 
 
 There are several `.mac` macros in `macros\single_particle` directory: `LAr_e-_mono.mac`, `LAr_mu-_mono.mac`, etc.
 As denoted by the name, they're used to simulate single e-/mu-/... particles inside the FLArE volume.
-To run a simulation, just do `./FLArE macros/single_particle/LAr_e-_mono.mac`.
+To run a simulation, just do `./FPFSim macros/single_particle/LAr_e-_mono.mac`.
 If you want to modify the energy you intend to simulate, modify the parameters inside the mac scripts.
 
 ### Neutrino events
@@ -107,7 +106,7 @@ An example dark photon HepMC3 file can be found here:
 
 An example macro for running over this file can be found in `macros/dark_photon_hepmc.mac`.
 
-Older versions of FORESEE output events in the HepMC2 format. To run over HepMC2 files set the option `/hepmc/useHepMC2 true` in your macro. An example macro can be found in `macros/dark_photon_hepmc2.mac`.
+Older versions of FORESEE output events in the HepMC2 format. To run over HepMC2 files set the option `/gen/hepmc/useHepMC2 true` in your macro. An example macro can be found in `macros/dark_photon_hepmc2.mac`.
 
 ## Macro commands
 
@@ -116,7 +115,7 @@ Older versions of FORESEE output events in the HepMC2 format. To run over HepMC2
 |Command |Description | Default |
 |:--|:--|:--|
 |/det/saveGdml          | option for saving detector geometry in a GDML file, run before `/run/initialize`     |`false`|
-|/det/fileGdml          | option for specifying the GDML file name, run before `/run/initialize`               |`FPF_FLArE_geo.gdml`|
+|/det/fileGdml          | option for specifying the GDML file name, run before `/run/initialize`               |`FPF_geo.gdml`|
 |/det/checkOverlap      | check overlap of volumes during detector construction, run before `/run/initialize`  |`false`|
 |/det/addFLArE          | option for adding the FLArE detector, run before `/run/initialize`                   |`true`|
 |/det/addFORMOSA        | option for adding the FORMOSA detector, run before `/run/initialize`                 |`true`|
@@ -197,11 +196,5 @@ Older versions of FORESEE output events in the HepMC2 format. To run over HepMC2
 
 There is [this tutorial](https://conferences.fnal.gov/g4tutorial/g4cd/Documentation/Visualization/G4DAWNTutorial/G4DAWNTutorial.html) for use at the October 2003 Fermilab Geant4 Tutorial.
 
-* Add `/vis/open DAWNFILE` to the mac file, after running a pass of simulation you'll find a ".prim" files suitable for viewing in DAWN.
-* Run `~/dune_data/app/dawn_3_91a/dawn -d filename.prim`, and it will generate a high resolution picture with the format of EPS.
-
-## Some initial results
-
-[cern indico 1](https://indico.cern.ch/event/1095064/contributions/4621162/attachments/2349156/4006611/20211118%40FLArEDetectorSimulation.pdf)
- 
-[cern indico 2](https://indico.cern.ch/event/1250086/#3-status-update-on-flare-simul)
+- Add `/vis/open DAWNFILE` to the mac file, after running a pass of simulation you'll find a ".prim" files suitable for viewing in DAWN.
+- Run `~/dune_data/app/dawn_3_91a/dawn -d filename.prim`, and it will generate a high resolution picture with the format of EPS.

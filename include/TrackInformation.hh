@@ -1,22 +1,22 @@
-#ifndef FLARETRACKINFORMATION_HH
-#define FLARETRACKINFORMATION_HH
+#ifndef TRACKINFORMATION_HH
+#define TRACKINFORMATION_HH
 
 #include "G4Track.hh"
 #include "G4Allocator.hh"
 #include "G4VUserTrackInformation.hh"
 
-class FLArETrackInformation : public G4VUserTrackInformation
+class TrackInformation : public G4VUserTrackInformation
 {
   public:
-    FLArETrackInformation();
-    FLArETrackInformation(const G4Track* aTrack);
-    //FLArETrackInformation(const FLArETrackInformation* aTrackInfo);
-    virtual ~FLArETrackInformation();
+    TrackInformation();
+    TrackInformation(const G4Track* aTrack);
+    //TrackInformation(const TrackInformation* aTrackInfo);
+    virtual ~TrackInformation();
 
     inline void *operator new(size_t);
     inline void operator delete(void *aTrackInfo);
 
-    FLArETrackInformation& operator =(const FLArETrackInformation& right);
+    TrackInformation& operator =(const TrackInformation& right);
 
     virtual void Print() const;
 
@@ -35,16 +35,16 @@ class FLArETrackInformation : public G4VUserTrackInformation
 };
 
 extern G4ThreadLocal
- G4Allocator<FLArETrackInformation> * aTrackInformationAllocator;
+ G4Allocator<TrackInformation> * aTrackInformationAllocator;
 
-inline void* FLArETrackInformation::operator new(size_t)
+inline void* TrackInformation::operator new(size_t)
 {
   if(!aTrackInformationAllocator)
-    aTrackInformationAllocator = new G4Allocator<FLArETrackInformation>;
+    aTrackInformationAllocator = new G4Allocator<TrackInformation>;
   return (void*)aTrackInformationAllocator->MallocSingle();
 }
 
-inline void FLArETrackInformation::operator delete(void *aTrackInfo)
-{ aTrackInformationAllocator->FreeSingle((FLArETrackInformation*)aTrackInfo);}
+inline void TrackInformation::operator delete(void *aTrackInfo)
+{ aTrackInformationAllocator->FreeSingle((TrackInformation*)aTrackInfo);}
 
 #endif

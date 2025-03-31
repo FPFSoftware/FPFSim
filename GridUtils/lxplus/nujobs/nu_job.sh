@@ -18,9 +18,9 @@ export n_evt_per_job=200
 # eg: espresso = 20 min, microcentury = 1 hour, longlunch = 2 hours
 export max_duration="longlunch"
 
-# Path to FLArE build directory in /afs/cern.ch
-export builddir="/afs/cern.ch/work/${USER:0:1}/${USER}/public/FLArE/build"
-export flare="${builddir}/FLArE"
+# Path to FPFsim build directory in /afs/cern.ch
+export builddir="/afs/cern.ch/work/${USER:0:1}/${USER}/public/FPFSim/build"
+export fpfsim="${builddir}/FPFSim"
 export setup="${builddir}/lxplus_setup.sh"
 export libdict="${builddir}/libDictOutput_rdict.pcm"
 
@@ -111,7 +111,7 @@ arguments               = \$(ClusterId) \$(ProcId) ${geniegst}
 output                  = ${logdir}/${prodname}/out/\$(ClusterId).\$(ProcId).out
 error                   = ${logdir}/${prodname}/err/\$(ClusterId).\$(ProcId).err
 log                     = ${logdir}/${prodname}/log/\$(ClusterId).\$(ProcId).log
-transfer_input_files    = ${setup},${flare},${geometry},${libdict},${listpath}
+transfer_input_files    = ${setup},${fpfsim},${geometry},${libdict},${listpath}
 output_destination      = root://eosuser.cern.ch/${outdir}/${prodname}/
 MY.XRDCP_CREATE_DIR     = True
 request_memory          = 8000

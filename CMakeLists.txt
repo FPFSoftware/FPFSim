@@ -2,7 +2,7 @@
 # Setup the project
 #
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
-project(FLArE)
+project(FPFSim)
 
 message(STATUS "Project Source Dir : ${PROJECT_SOURCE_DIR}")
 
@@ -105,9 +105,9 @@ target_include_directories(FPFClasses PUBLIC ${PROJECT_SOURCE_DIR}/include)
 #----------------------------------------------------------------------------
 # Add the executable, and link it to the Geant4 libraries
 #
-add_executable(FLArE FLArE.cc ${sources} ${headers})
+add_executable(FPFSim FPFSim.cc ${sources} ${headers})
 
-target_link_libraries(FLArE 
+target_link_libraries(FPFSim 
   ${ROOT_LIBRARIES} 
   ${Geant4_LIBRARIES} 
   ${HDF5_LIBRARIES}
@@ -119,6 +119,6 @@ target_link_libraries(FLArE
 #----------------------------------------------------------------------------
 # Install the executable to 'bin' directory under CMAKE_INSTALL_PREFIX
 #
-install(TARGETS FLArE DESTINATION ${PROJECT_SOURCE_DIR}/bin)
+install(TARGETS FPFSim DESTINATION ${PROJECT_SOURCE_DIR}/bin)
 install(TARGETS FPFClasses DESTINATION ${PROJECT_SOURCE_DIR}/lib)
 install(FILES ${PROJECT_SOURCE_DIR}/build/libDictOutput_rdict.pcm DESTINATION ${PROJECT_SOURCE_DIR}/lib)
