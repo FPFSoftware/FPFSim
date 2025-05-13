@@ -111,13 +111,12 @@ FASER2DetectorConstruction::FASER2DetectorConstruction()
   
   //* Place upstream tracking stations
   componentPosition += fDecayVolumeLength/2 + fScinThickness/2.;
+  auto trkLayerSolid = new G4Box("TrackerStationBox", fTrackingStationX/2, fTrackingStationY/2., fScinThickness/2.);
+  fTrackingStationsLogical = new G4LogicalVolume(trkLayerSolid, fMaterials->Material("Polystyrene"), "FASER2TrackerLogical");
   for (int i= 0; i<fNTrackingStations; ++i) { 
 
     std::string name = "F2UpstreamTrackerLayer_" + std::to_string(i+1);
-    auto trkLayerSolid = new G4Box(name+"Box", fTrackingStationX/2, fTrackingStationY/2., fScinThickness/2.);
-    auto trkLayerLogical = new G4LogicalVolume(trkLayerSolid, fMaterials->Material("Polystyrene"), name+"Logical");
-    auto trkLayerPhysical = new G4PVPlacement(0, G4ThreeVector(0,0,componentPosition), trkLayerLogical, name+"Phys", fFASER2Assembly, false, 0);
-    fTrackingStationsLogical.push_back(trkLayerLogical);
+    auto trkLayerPhysical = new G4PVPlacement(0, G4ThreeVector(0,0,componentPosition), fTrackingStationsLogical, name+"Phys", fFASER2Assembly, false, 0);
     
     if (i != fNTrackingStations-1)
     {
@@ -162,10 +161,7 @@ FASER2DetectorConstruction::FASER2DetectorConstruction()
   for (int i= 0; i<fNTrackingStations; ++i) { 
 
     std::string name = "F2DownstreamTrackerLayer_" + std::to_string(i+1);
-    auto trkLayerSolid = new G4Box(name+"Box", fTrackingStationX/2, fTrackingStationY/2., fScinThickness/2.);
-    auto trkLayerLogical = new G4LogicalVolume(trkLayerSolid, fMaterials->Material("Polystyrene"), name+"Logical");
-    auto trkLayerPhysical = new G4PVPlacement(0, G4ThreeVector(0,0,componentPosition), trkLayerLogical, name+"Phys", fFASER2Assembly, false, 0);
-    fTrackingStationsLogical.push_back(trkLayerLogical);
+    auto trkLayerPhysical = new G4PVPlacement(0, G4ThreeVector(0,0,componentPosition), fTrackingStationsLogical, name+"Phys", fFASER2Assembly, false, 0);
 
     componentPosition += fScinThickness + fTrackingStationGap;
   }
@@ -260,12 +256,10 @@ void FASER2DetectorConstruction::SetVisualisation()
   fDecayVolumeLogical->SetVisAttributes(DV_logVisAtt);
 
   //* Tracking stations
-  for (auto trkLayerLogical : fTrackingStationsLogical)
-  {
-    G4VisAttributes* stationVis = new G4VisAttributes(G4Colour(34./255, 148./255, 83./255, 0.8));
-    stationVis->SetVisibility(true);
-    trkLayerLogical->SetVisAttributes(stationVis);
-  }
+  G4VisAttributes* stationVis = new G4VisAttributes(G4Colour(34./255, 148./255, 83./255, 0.8));
+  stationVis->SetVisibility(true);
+  fTrackingStationsLogical->SetVisAttributes(stationVis);
+
 
   //* Magnets
   G4VisAttributes* nullVis = new G4VisAttributes(G4Colour(167./255, 168./255, 189./255));
@@ -297,7 +291,5 @@ void FASER2DetectorConstruction::SetVisualisation()
   fIronWallLogical->SetVisAttributes(IronWallVis);
 
   //* Muon detector
-  G4VisAttributes* stationVis = new G4VisAttributes(G4Colour(34./255, 148./255, 83./255, 0.8));
-  stationVis->SetVisibility(true);
   fMuonDetLogical->SetVisAttributes(stationVis);
 } 

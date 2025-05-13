@@ -9,6 +9,7 @@
 #include "AnalysisManager.hh"
 #include "geometry/GeometricalParameters.hh"
 #include "LArBoxSD.hh"
+#include "FASER2TrackerSD.hh"
 #include "LArBoxHit.hh"
 #include "PrimaryParticleInformation.hh"
 #include "reco/PCAAnalysis3D.hh"
@@ -155,6 +156,30 @@ void AnalysisManager::bookEvtTree() {
     evt->Branch("trkHitZFSL"              , &trkZFSL);        
     evt->Branch("trkHitPFSL"              , &trkPFSL);        
   }
+
+  if (m_saveActs) {
+    evt->Branch("event_id"               , &ActsHitsEventID);
+    evt->Branch("geometry_id"            , &ActsHitsGeometryID);
+    evt->Branch("particle_id"            , &ActsHitsParticleID);
+    evt->Branch("tx"                     , &ActsHitsX);
+    evt->Branch("ty"                     , &ActsHitsY);
+    evt->Branch("tz"                     , &ActsHitsZ);
+    evt->Branch("tt"                     , &ActsHitsT);
+    evt->Branch("tpx"                    , &ActsHitsPx);
+    evt->Branch("tpy"                    , &ActsHitsPy);
+    evt->Branch("tpz"                    , &ActsHitsPz);
+    evt->Branch("te"                     , &ActsHitsE);
+    evt->Branch("deltapx"                , &ActsHitsDeltaPx);
+    evt->Branch("deltapy"                , &ActsHitsDeltaPy);
+    evt->Branch("deltapz"                , &ActsHitsDeltaPz);
+    evt->Branch("deltae"                 , &ActsHitsDeltaE);
+    evt->Branch("index"                  , &ActsHitsIndex);
+    evt->Branch("volume_id"              , &ActsHitsVolumeID);
+    evt->Branch("boundary_id"            , &ActsHitsBoundaryID);
+    evt->Branch("layer_id"               , &ActsHitsLayerID);
+    evt->Branch("approach_id"            , &ActsHitsApproachID);
+  }
+
 
 }
 
@@ -314,6 +339,27 @@ void AnalysisManager::BeginOfEvent() {
   trackPointX.clear();  
   trackPointY.clear();  
   trackPointZ.clear();
+
+  ActsHitsEventID.clear();
+  ActsHitsGeometryID.clear();
+  ActsHitsParticleID.clear();
+  ActsHitsX.clear();
+  ActsHitsY.clear();
+  ActsHitsZ.clear();
+  ActsHitsT.clear();
+  ActsHitsPx.clear();
+  ActsHitsPy.clear();
+  ActsHitsPz.clear();
+  ActsHitsE.clear();
+  ActsHitsDeltaPx.clear();
+  ActsHitsDeltaPy.clear();
+  ActsHitsDeltaPz.clear();
+  ActsHitsDeltaE.clear();
+  ActsHitsIndex.clear();
+  ActsHitsVolumeID.clear();
+  ActsHitsBoundaryID.clear();
+  ActsHitsLayerID.clear();
+  ActsHitsApproachID.clear();
 
 }
 
@@ -567,6 +613,40 @@ void AnalysisManager::EndOfEvent(const G4Event* event) {
 
 void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName) 
 {
+
+  if (m_saveActs)
+  {
+    auto hitCollection = dynamic_cast<FASER2TrackerHitsCollection*>(hcofEvent->GetHC(sdId));
+    if (!hitCollection) 
+    {
+      G4cerr << "Error: hitCollection is not a FASER2TrackerHitsCollection" << G4endl;
+      return;
+    }
+    
+    for (auto hit: *hitCollection->GetVector()) 
+    {
+
+      ActsHitsEventID.push_back(evtID);
+      ActsHitsGeometryID.push_back(0);
+      ActsHitsParticleID.push_back(hit->GetTrackID());
+      ActsHitsX.push_back(hit->GetX());
+      ActsHitsY.push_back(hit->GetY());
+      ActsHitsZ.push_back(hit->GetZ());
+      ActsHitsT.push_back(hit->GetT());
+      ActsHitsPx.push_back(hit->GetPx());
+      ActsHitsPy.push_back(hit->GetPy());
+      ActsHitsPz.push_back(hit->GetPz());
+      ActsHitsE.push_back(hit->GetEnergy());
+      ActsHitsDeltaPx.push_back(hit->GetDeltaPx());
+      ActsHitsDeltaPy.push_back(hit->GetDeltaPy());
+      ActsHitsDeltaPz.push_back(hit->GetDeltaPz());
+      ActsHitsDeltaE.push_back(hit->GetDeltaE());
+      ActsHitsIndex.push_back(hit->GetCopyNumSensor());
+    } // end of loop over hits
+
+  }
+
+
   // Get and cast hit collection with LArBoxHits
   LArBoxHitsCollection* hitCollection = dynamic_cast<LArBoxHitsCollection*>(hcofEvent->GetHC(sdId));
   if (hitCollection) {

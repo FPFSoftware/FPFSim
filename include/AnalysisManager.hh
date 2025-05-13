@@ -37,6 +37,7 @@ class AnalysisManager {
     void save3DEvd(G4bool val) { m_save3DEvd = val; }
     void save2DEvd(G4bool val) { m_save2DEvd = val; }
     void circleFit(G4bool val) { m_circularFit = val; }
+    void saveActs(G4bool val) { m_saveActs = val; }
     void addDiffusion(G4String val) { m_addDiffusion = val; }
 
   private:
@@ -143,6 +144,7 @@ class AnalysisManager {
     G4bool m_save3DEvd;
     G4bool m_save2DEvd;
     G4bool m_circularFit;
+    G4bool m_saveActs;
     TString m_addDiffusion;
 
     PixelMap3D* pm3D;
@@ -184,6 +186,28 @@ class AnalysisManager {
     std::vector<double> trackPointX;  
     std::vector<double> trackPointY;  
     std::vector<double> trackPointZ;
+
+    // Acts Hit Information
+    std::vector<int> ActsHitsEventID;
+    std::vector<int> ActsHitsGeometryID;
+    std::vector<int> ActsHitsParticleID;
+    std::vector<double> ActsHitsX;
+    std::vector<double> ActsHitsY;
+    std::vector<double> ActsHitsZ;
+    std::vector<double> ActsHitsT;
+    std::vector<double> ActsHitsPx;
+    std::vector<double> ActsHitsPy;
+    std::vector<double> ActsHitsPz;
+    std::vector<double> ActsHitsE;
+    std::vector<double> ActsHitsDeltaPx;
+    std::vector<double> ActsHitsDeltaPy;
+    std::vector<double> ActsHitsDeltaPz;
+    std::vector<double> ActsHitsDeltaE;
+    std::vector<int> ActsHitsIndex;
+    std::vector<int> ActsHitsVolumeID;
+    std::vector<int> ActsHitsBoundaryID;
+    std::vector<int> ActsHitsLayerID;
+    std::vector<int> ActsHitsApproachID;
 
   private:
     void FillPrimaryTruthTree(G4int sdId, std::string sdName);

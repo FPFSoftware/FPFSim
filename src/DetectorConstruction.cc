@@ -2,6 +2,7 @@
 #include "DetectorConstructionMaterial.hh"
 #include "DetectorConstructionMessenger.hh"
 #include "LArBoxSD.hh"
+#include "FASER2TrackerSD.hh"
 
 #include "geometry/FASER2DetectorConstruction.hh"
 #include "geometry/GeometricalParameters.hh"
@@ -361,14 +362,12 @@ void DetectorConstruction::ConstructSDandField() {
   }
 
   if (m_addFASER2) {
-    for (auto& station: FASER2TrackingLogical)
-    {
-      LArBoxSD* TrkScinSD = new LArBoxSD("FASER2TrackerSD"+ std::to_string(SDIdx));
-      station->SetSensitiveDetector(TrkScinSD);
-      sdManager->AddNewDetector(TrkScinSD);
-      GeometricalParameters::Get()->AddSD2List(SDIdx, "FASER2TrackerSD"+ std::to_string(SDIdx)+"/lar_box");
-      SDIdx++;
-    }
+    
+    FASER2TrackerSD* TrkScinSD = new FASER2TrackerSD("FASER2TrackerSD");
+    FASER2TrackingLogical->SetSensitiveDetector(TrkScinSD);
+    sdManager->AddNewDetector(TrkScinSD);
+    GeometricalParameters::Get()->AddSD2List(SDIdx, "FASER2TrackerSD/lar_box");
+    SDIdx++;
 
     LArBoxSD* FASER2VetoSD = new LArBoxSD("FASER2VetoSD");
     FASER2VetoLogical->SetSensitiveDetector(FASER2VetoSD);
