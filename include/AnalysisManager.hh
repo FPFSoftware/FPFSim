@@ -48,6 +48,7 @@ class AnalysisManager {
     std::string  m_filename;
     TTree*   evt;
     TTree*   trk;
+    TTree*   acts_hits_tree;
     std::string  fH5Filename;
     hep_hpc::hdf5::File fH5file;
 

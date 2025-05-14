@@ -158,27 +158,28 @@ void AnalysisManager::bookEvtTree() {
   }
 
   if (m_saveActs) {
-    evt->Branch("event_id"               , &ActsHitsEventID);
-    evt->Branch("geometry_id"            , &ActsHitsGeometryID);
-    evt->Branch("particle_id"            , &ActsHitsParticleID);
-    evt->Branch("tx"                     , &ActsHitsX);
-    evt->Branch("ty"                     , &ActsHitsY);
-    evt->Branch("tz"                     , &ActsHitsZ);
-    evt->Branch("tt"                     , &ActsHitsT);
-    evt->Branch("tpx"                    , &ActsHitsPx);
-    evt->Branch("tpy"                    , &ActsHitsPy);
-    evt->Branch("tpz"                    , &ActsHitsPz);
-    evt->Branch("te"                     , &ActsHitsE);
-    evt->Branch("deltapx"                , &ActsHitsDeltaPx);
-    evt->Branch("deltapy"                , &ActsHitsDeltaPy);
-    evt->Branch("deltapz"                , &ActsHitsDeltaPz);
-    evt->Branch("deltae"                 , &ActsHitsDeltaE);
-    evt->Branch("index"                  , &ActsHitsIndex);
-    evt->Branch("volume_id"              , &ActsHitsVolumeID);
-    evt->Branch("boundary_id"            , &ActsHitsBoundaryID);
-    evt->Branch("layer_id"               , &ActsHitsLayerID);
-    evt->Branch("approach_id"            , &ActsHitsApproachID);
-    evt->Branch("sensitive_id"           , &ActsHitsSensitiveID);
+    acts_hits_tree = new TTree("hits", "ActsHitsTree");
+    acts_hits_tree->Branch("event_id"               , &ActsHitsEventID);
+    acts_hits_tree->Branch("geometry_id"            , &ActsHitsGeometryID);
+    acts_hits_tree->Branch("particle_id"            , &ActsHitsParticleID);
+    acts_hits_tree->Branch("tx"                     , &ActsHitsX);
+    acts_hits_tree->Branch("ty"                     , &ActsHitsY);
+    acts_hits_tree->Branch("tz"                     , &ActsHitsZ);
+    acts_hits_tree->Branch("tt"                     , &ActsHitsT);
+    acts_hits_tree->Branch("tpx"                    , &ActsHitsPx);
+    acts_hits_tree->Branch("tpy"                    , &ActsHitsPy);
+    acts_hits_tree->Branch("tpz"                    , &ActsHitsPz);
+    acts_hits_tree->Branch("te"                     , &ActsHitsE);
+    acts_hits_tree->Branch("deltapx"                , &ActsHitsDeltaPx);
+    acts_hits_tree->Branch("deltapy"                , &ActsHitsDeltaPy);
+    acts_hits_tree->Branch("deltapz"                , &ActsHitsDeltaPz);
+    acts_hits_tree->Branch("deltae"                 , &ActsHitsDeltaE);
+    acts_hits_tree->Branch("index"                  , &ActsHitsIndex);
+    acts_hits_tree->Branch("volume_id"              , &ActsHitsVolumeID);
+    acts_hits_tree->Branch("boundary_id"            , &ActsHitsBoundaryID);
+    acts_hits_tree->Branch("layer_id"               , &ActsHitsLayerID);
+    acts_hits_tree->Branch("approach_id"            , &ActsHitsApproachID);
+    acts_hits_tree->Branch("sensitive_id"           , &ActsHitsSensitiveID);
   }
 
 
@@ -229,6 +230,7 @@ void AnalysisManager::EndOfRun() {
   thefile->cd();
   evt->Write();
   if(m_saveTrack) trk->Write();
+  if (m_saveActs) acts_hits_tree->Write();
   thefile->Close();
   fH5file.close();
 }
@@ -623,6 +625,8 @@ void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
     
     for (auto hit: *hitCollection->GetVector()) 
     {
+      if (hit->GetCharge() == 0) continue; // skip neutral particles, they don't hit
+
       ActsHitsEventID.push_back(evtID);
       ActsHitsGeometryID.push_back(0);
       ActsHitsParticleID.push_back(hit->GetTrackID());
@@ -645,7 +649,7 @@ void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
       ActsHitsApproachID.push_back(0);
       ActsHitsSensitiveID.push_back(1);
     } // end of loop over hits
-
+    acts_hits_tree->Fill();
   }
 
 
