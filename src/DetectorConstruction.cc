@@ -369,13 +369,13 @@ void DetectorConstruction::ConstructSDandField() {
     GeometricalParameters::Get()->AddSD2List(SDIdx, "FASER2TrackerSD/lar_box");
     SDIdx++;
 
-    LArBoxSD* FASER2VetoSD = new LArBoxSD("FASER2VetoSD");
+    LArBoxSD* FASER2VetoSD = new LArBoxSD("FASER2VetoSD"); //TODO: Should implement a new SD class for FASER2Veto
     FASER2VetoLogical->SetSensitiveDetector(FASER2VetoSD);
     sdManager->AddNewDetector(FASER2VetoSD);
     GeometricalParameters::Get()->AddSD2List(SDIdx, "FASER2VetoSD/lar_box");
     SDIdx++;
 
-    LArBoxSD* FASER2MuonDetSD = new LArBoxSD("FASER2MuonSD");
+    LArBoxSD* FASER2MuonDetSD = new LArBoxSD("FASER2MuonSD"); //TODO: Should probably be a FASER2TrackerSD
     FASER2MuonLogical->SetSensitiveDetector(FASER2MuonDetSD);
     sdManager->AddNewDetector(FASER2MuonDetSD);
     GeometricalParameters::Get()->AddSD2List(SDIdx, "FASER2MuonSD/lar_box");
