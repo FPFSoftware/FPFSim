@@ -159,27 +159,28 @@ void AnalysisManager::bookEvtTree() {
 
   if (m_saveActs) {
     acts_hits_tree = new TTree("hits", "ActsHitsTree");
-    acts_hits_tree->Branch("event_id"               , &ActsHitsEventID);
-    acts_hits_tree->Branch("geometry_id"            , &ActsHitsGeometryID);
-    acts_hits_tree->Branch("particle_id"            , &ActsHitsParticleID);
-    acts_hits_tree->Branch("tx"                     , &ActsHitsX);
-    acts_hits_tree->Branch("ty"                     , &ActsHitsY);
-    acts_hits_tree->Branch("tz"                     , &ActsHitsZ);
-    acts_hits_tree->Branch("tt"                     , &ActsHitsT);
-    acts_hits_tree->Branch("tpx"                    , &ActsHitsPx);
-    acts_hits_tree->Branch("tpy"                    , &ActsHitsPy);
-    acts_hits_tree->Branch("tpz"                    , &ActsHitsPz);
-    acts_hits_tree->Branch("te"                     , &ActsHitsE);
-    acts_hits_tree->Branch("deltapx"                , &ActsHitsDeltaPx);
-    acts_hits_tree->Branch("deltapy"                , &ActsHitsDeltaPy);
-    acts_hits_tree->Branch("deltapz"                , &ActsHitsDeltaPz);
-    acts_hits_tree->Branch("deltae"                 , &ActsHitsDeltaE);
-    acts_hits_tree->Branch("index"                  , &ActsHitsIndex);
-    acts_hits_tree->Branch("volume_id"              , &ActsHitsVolumeID);
-    acts_hits_tree->Branch("boundary_id"            , &ActsHitsBoundaryID);
-    acts_hits_tree->Branch("layer_id"               , &ActsHitsLayerID);
-    acts_hits_tree->Branch("approach_id"            , &ActsHitsApproachID);
-    acts_hits_tree->Branch("sensitive_id"           , &ActsHitsSensitiveID);
+    // i == unsigned int; F == float; l == Long unsigned 64 int 
+    acts_hits_tree->Branch("event_id"               , &ActsHitsEventID,     "event_id/i");
+    acts_hits_tree->Branch("geometry_id"            , &ActsHitsGeometryID,  "geometryid/l");
+    acts_hits_tree->Branch("particle_id"            , &ActsHitsParticleID,  "particle_id/l");
+    acts_hits_tree->Branch("tx"                     , &ActsHitsX,           "tx/F");
+    acts_hits_tree->Branch("ty"                     , &ActsHitsY,           "ty/F");
+    acts_hits_tree->Branch("tz"                     , &ActsHitsZ,           "tz/F");
+    acts_hits_tree->Branch("tt"                     , &ActsHitsT,           "tt/F");
+    acts_hits_tree->Branch("tpx"                    , &ActsHitsPx,          "tpx/F");
+    acts_hits_tree->Branch("tpy"                    , &ActsHitsPy,          "tpy/F");
+    acts_hits_tree->Branch("tpz"                    , &ActsHitsPz,          "tpz/F");
+    acts_hits_tree->Branch("te"                     , &ActsHitsE,           "tpe/F");
+    acts_hits_tree->Branch("deltapx"                , &ActsHitsDeltaPx,     "deltapx/F");
+    acts_hits_tree->Branch("deltapy"                , &ActsHitsDeltaPy,     "deltapy/F");
+    acts_hits_tree->Branch("deltapz"                , &ActsHitsDeltaPz,     "deltapz/F");
+    acts_hits_tree->Branch("deltae"                 , &ActsHitsDeltaE,      "deltae/F");
+    acts_hits_tree->Branch("index"                  , &ActsHitsIndex,       "index/i");
+    acts_hits_tree->Branch("volume_id"              , &ActsHitsVolumeID,    "volume_id/i");
+    acts_hits_tree->Branch("boundary_id"            , &ActsHitsBoundaryID,  "boundary_id/i");
+    acts_hits_tree->Branch("layer_id"               , &ActsHitsLayerID,     "layer_id/i");
+    acts_hits_tree->Branch("approach_id"            , &ActsHitsApproachID,  "approach_id/i");
+    acts_hits_tree->Branch("sensitive_id"           , &ActsHitsSensitiveID, "sensitive_id/i");
   }
 
 
@@ -343,27 +344,27 @@ void AnalysisManager::BeginOfEvent() {
   trackPointY.clear();  
   trackPointZ.clear();
 
-  ActsHitsEventID.clear();
-  ActsHitsGeometryID.clear();
-  ActsHitsParticleID.clear();
-  ActsHitsX.clear();
-  ActsHitsY.clear();
-  ActsHitsZ.clear();
-  ActsHitsT.clear();
-  ActsHitsPx.clear();
-  ActsHitsPy.clear();
-  ActsHitsPz.clear();
-  ActsHitsE.clear();
-  ActsHitsDeltaPx.clear();
-  ActsHitsDeltaPy.clear();
-  ActsHitsDeltaPz.clear();
-  ActsHitsDeltaE.clear();
-  ActsHitsIndex.clear();
-  ActsHitsVolumeID.clear();
-  ActsHitsBoundaryID.clear();
-  ActsHitsLayerID.clear();
-  ActsHitsApproachID.clear();
-  ActsHitsSensitiveID.clear();
+  ActsHitsEventID = 0;
+  ActsHitsGeometryID = 0;
+  ActsHitsParticleID = 0;
+  ActsHitsX = 0;
+  ActsHitsY = 0;
+  ActsHitsZ = 0;
+  ActsHitsT = 0;
+  ActsHitsPx = 0;
+  ActsHitsPy = 0;
+  ActsHitsPz = 0;
+  ActsHitsE = 0;
+  ActsHitsDeltaPx = 0;
+  ActsHitsDeltaPy = 0;
+  ActsHitsDeltaPz = 0;
+  ActsHitsDeltaE = 0;
+  ActsHitsIndex = 0;
+  ActsHitsVolumeID = 0;
+  ActsHitsBoundaryID = 0;
+  ActsHitsLayerID = 0;
+  ActsHitsApproachID = 0;
+  ActsHitsSensitiveID = 0;
 
 }
 
@@ -627,29 +628,29 @@ void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
     {
       if (hit->GetCharge() == 0) continue; // skip neutral particles, they don't hit
 
-      ActsHitsEventID.push_back(evtID);
-      ActsHitsGeometryID.push_back(0);
-      ActsHitsParticleID.push_back(hit->GetTrackID());
-      ActsHitsX.push_back(hit->GetX());
-      ActsHitsY.push_back(hit->GetY());
-      ActsHitsZ.push_back(hit->GetZ());
-      ActsHitsT.push_back(hit->GetT());
-      ActsHitsPx.push_back(hit->GetPx());
-      ActsHitsPy.push_back(hit->GetPy());
-      ActsHitsPz.push_back(hit->GetPz());
-      ActsHitsE.push_back(hit->GetEnergy());
-      ActsHitsDeltaPx.push_back(hit->GetDeltaPx());
-      ActsHitsDeltaPy.push_back(hit->GetDeltaPy());
-      ActsHitsDeltaPz.push_back(hit->GetDeltaPz());
-      ActsHitsDeltaE.push_back(hit->GetDeltaE());
-      ActsHitsIndex.push_back(hit->GetCopyNumSensor()); // index of layer: 0, 1, 2, ...
-      ActsHitsVolumeID.push_back(0);
-      ActsHitsBoundaryID.push_back(0);
-      ActsHitsLayerID.push_back((hit->GetCopyNumSensor()+1)*2); // Acts specfic layer ID, goes 2, 4, 6, ...
-      ActsHitsApproachID.push_back(0);
-      ActsHitsSensitiveID.push_back(1);
+      ActsHitsEventID = evtID;
+      ActsHitsGeometryID = 0;
+      ActsHitsParticleID = hit->GetTrackID();
+      ActsHitsX = hit->GetX();
+      ActsHitsY = hit->GetY();
+      ActsHitsZ = hit->GetZ();
+      ActsHitsT = hit->GetT();
+      ActsHitsPx = hit->GetPx();
+      ActsHitsPy = hit->GetPy();
+      ActsHitsPz = hit->GetPz();
+      ActsHitsE = hit->GetEnergy();
+      ActsHitsDeltaPx = hit->GetDeltaPx();
+      ActsHitsDeltaPy = hit->GetDeltaPy();
+      ActsHitsDeltaPz = hit->GetDeltaPz();
+      ActsHitsDeltaE = hit->GetDeltaE();
+      ActsHitsIndex = hit->GetCopyNumSensor(); // index of layer: 0, 1, 2, ...
+      ActsHitsVolumeID = 0;
+      ActsHitsBoundaryID = 0;
+      ActsHitsLayerID = (hit->GetCopyNumSensor()+1)*2; // Acts specfic layer ID, goes 2, 4, 6, ...
+      ActsHitsApproachID = 0;
+      ActsHitsSensitiveID = 1;
+      acts_hits_tree->Fill();
     } // end of loop over hits
-    acts_hits_tree->Fill();
   }
 
 

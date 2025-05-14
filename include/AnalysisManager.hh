@@ -188,28 +188,28 @@ class AnalysisManager {
     std::vector<double> trackPointY;  
     std::vector<double> trackPointZ;
 
-    // Acts Hit Information
-    std::vector<int> ActsHitsEventID;
-    std::vector<int> ActsHitsGeometryID;
-    std::vector<int> ActsHitsParticleID;
-    std::vector<double> ActsHitsX;
-    std::vector<double> ActsHitsY;
-    std::vector<double> ActsHitsZ;
-    std::vector<double> ActsHitsT;
-    std::vector<double> ActsHitsPx;
-    std::vector<double> ActsHitsPy;
-    std::vector<double> ActsHitsPz;
-    std::vector<double> ActsHitsE;
-    std::vector<double> ActsHitsDeltaPx;
-    std::vector<double> ActsHitsDeltaPy;
-    std::vector<double> ActsHitsDeltaPz;
-    std::vector<double> ActsHitsDeltaE;
-    std::vector<int> ActsHitsIndex;
-    std::vector<int> ActsHitsVolumeID;
-    std::vector<int> ActsHitsBoundaryID;
-    std::vector<int> ActsHitsLayerID;
-    std::vector<int> ActsHitsApproachID;
-    std::vector<int> ActsHitsSensitiveID;
+    // Acts Hit Information - the types are set to match the types expected by Acts::RootSimHitReader
+    UInt_t ActsHitsEventID;
+    ULong64_t ActsHitsGeometryID;
+    ULong64_t ActsHitsParticleID;
+    Float_t ActsHitsX;
+    Float_t ActsHitsY;
+    Float_t ActsHitsZ;
+    Float_t ActsHitsT;
+    Float_t ActsHitsPx;
+    Float_t ActsHitsPy;
+    Float_t ActsHitsPz;
+    Float_t ActsHitsE;
+    Float_t ActsHitsDeltaPx;
+    Float_t ActsHitsDeltaPy;
+    Float_t ActsHitsDeltaPz;
+    Float_t ActsHitsDeltaE;
+    UInt_t ActsHitsIndex;
+    UInt_t ActsHitsVolumeID;
+    UInt_t ActsHitsBoundaryID;
+    UInt_t ActsHitsLayerID;
+    UInt_t ActsHitsApproachID;
+    UInt_t ActsHitsSensitiveID;
 
   private:
     void FillPrimaryTruthTree(G4int sdId, std::string sdName);
