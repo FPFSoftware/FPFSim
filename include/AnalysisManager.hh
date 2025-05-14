@@ -208,6 +208,7 @@ class AnalysisManager {
     std::vector<int> ActsHitsBoundaryID;
     std::vector<int> ActsHitsLayerID;
     std::vector<int> ActsHitsApproachID;
+    std::vector<int> ActsHitsSensitiveID;
 
   private:
     void FillPrimaryTruthTree(G4int sdId, std::string sdName);

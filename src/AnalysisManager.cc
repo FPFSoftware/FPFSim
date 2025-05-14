@@ -178,6 +178,7 @@ void AnalysisManager::bookEvtTree() {
     evt->Branch("boundary_id"            , &ActsHitsBoundaryID);
     evt->Branch("layer_id"               , &ActsHitsLayerID);
     evt->Branch("approach_id"            , &ActsHitsApproachID);
+    evt->Branch("sensitive_id"           , &ActsHitsSensitiveID);
   }
 
 
@@ -360,6 +361,7 @@ void AnalysisManager::BeginOfEvent() {
   ActsHitsBoundaryID.clear();
   ActsHitsLayerID.clear();
   ActsHitsApproachID.clear();
+  ActsHitsSensitiveID.clear();
 
 }
 
@@ -617,15 +619,10 @@ void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
   if (m_saveActs)
   {
     auto hitCollection = dynamic_cast<FASER2TrackerHitsCollection*>(hcofEvent->GetHC(sdId));
-    if (!hitCollection) 
-    {
-      G4cerr << "Error: hitCollection is not a FASER2TrackerHitsCollection" << G4endl;
-      return;
-    }
+    if (!hitCollection) return;
     
     for (auto hit: *hitCollection->GetVector()) 
     {
-
       ActsHitsEventID.push_back(evtID);
       ActsHitsGeometryID.push_back(0);
       ActsHitsParticleID.push_back(hit->GetTrackID());
@@ -641,7 +638,12 @@ void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
       ActsHitsDeltaPy.push_back(hit->GetDeltaPy());
       ActsHitsDeltaPz.push_back(hit->GetDeltaPz());
       ActsHitsDeltaE.push_back(hit->GetDeltaE());
-      ActsHitsIndex.push_back(hit->GetCopyNumSensor());
+      ActsHitsIndex.push_back(hit->GetCopyNumSensor()); // index of layer: 0, 1, 2, ...
+      ActsHitsVolumeID.push_back(0);
+      ActsHitsBoundaryID.push_back(0);
+      ActsHitsLayerID.push_back((hit->GetCopyNumSensor()+1)*2); // Acts specfic layer ID, goes 2, 4, 6, ...
+      ActsHitsApproachID.push_back(0);
+      ActsHitsSensitiveID.push_back(1);
     } // end of loop over hits
 
   }
