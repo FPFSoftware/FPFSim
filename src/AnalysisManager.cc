@@ -158,8 +158,8 @@ void AnalysisManager::bookEvtTree() {
   }
 
   if (m_saveActs) {
+    //* Acts Hits Tree [i == unsigned int; F == float; l == Long unsigned 64 int] 
     acts_hits_tree = new TTree("hits", "ActsHitsTree");
-    // i == unsigned int; F == float; l == Long unsigned 64 int 
     acts_hits_tree->Branch("event_id"               , &ActsHitsEventID,     "event_id/i");
     acts_hits_tree->Branch("geometry_id"            , &ActsHitsGeometryID,  "geometryid/l");
     acts_hits_tree->Branch("particle_id"            , &ActsHitsParticleID,  "particle_id/l");
@@ -181,6 +181,36 @@ void AnalysisManager::bookEvtTree() {
     acts_hits_tree->Branch("layer_id"               , &ActsHitsLayerID,     "layer_id/i");
     acts_hits_tree->Branch("approach_id"            , &ActsHitsApproachID,  "approach_id/i");
     acts_hits_tree->Branch("sensitive_id"           , &ActsHitsSensitiveID, "sensitive_id/i");
+
+    //* Acts truth particle tree
+    acts_particles_tree = new TTree("particle", "ActsParticlesTree");
+    acts_particles_tree->Branch("event_id"               , &ActsHitsEventID,     "event_id/i");
+    acts_particles_tree->Branch("particle_id"            , &ActsParticlesParticleId);
+    acts_particles_tree->Branch("particle_type"          , &ActsParticlesParticleType);
+    acts_particles_tree->Branch("process"                , &ActsParticlesProcess);
+    acts_particles_tree->Branch("vx"                     , &ActsParticlesVx);
+    acts_particles_tree->Branch("vy"                     , &ActsParticlesVy);
+    acts_particles_tree->Branch("vz"                     , &ActsParticlesVz);
+    acts_particles_tree->Branch("vt"                     , &ActsParticlesVt);
+    acts_particles_tree->Branch("px"                     , &ActsParticlesPx);
+    acts_particles_tree->Branch("py"                     , &ActsParticlesPy);
+    acts_particles_tree->Branch("pz"                     , &ActsParticlesPz);
+    acts_particles_tree->Branch("m"                      , &ActsParticlesM);
+    acts_particles_tree->Branch("q"                      , &ActsParticlesQ);
+    acts_particles_tree->Branch("eta"                    , &ActsParticlesEta);
+    acts_particles_tree->Branch("phi"                    , &ActsParticlesPhi);
+    acts_particles_tree->Branch("pt"                     , &ActsParticlesPt);
+    acts_particles_tree->Branch("p"                      , &ActsParticlesP);
+    acts_particles_tree->Branch("vertex_primary"         , &ActsParticlesVertexPrimary);
+    acts_particles_tree->Branch("vertex_secondary"       , &ActsParticlesVertexSecondary);
+    acts_particles_tree->Branch("particle"               , &ActsParticlesParticle);
+    acts_particles_tree->Branch("generation"             , &ActsParticlesGeneration);
+    acts_particles_tree->Branch("sub_particle"           , &ActsParticlesSubParticle);
+    acts_particles_tree->Branch("e_loss"                 , &ActsParticlesELoss);
+    acts_particles_tree->Branch("total_x0"               , &ActsParticlesPathInX0);
+    acts_particles_tree->Branch("total_l0"               , &ActsParticlesPathInL0);
+    acts_particles_tree->Branch("number_of_hits"         , &ActsParticlesNumberOfHits);
+    acts_particles_tree->Branch("outcome"                , &ActsParticlesOutcome);
   }
 
 
@@ -232,6 +262,7 @@ void AnalysisManager::EndOfRun() {
   evt->Write();
   if(m_saveTrack) trk->Write();
   if (m_saveActs) acts_hits_tree->Write();
+  if (m_saveActs) acts_particles_tree->Write();
   thefile->Close();
   fH5file.close();
 }
@@ -366,11 +397,84 @@ void AnalysisManager::BeginOfEvent() {
   ActsHitsApproachID = 0;
   ActsHitsSensitiveID = 0;
 
+  ActsParticlesParticleId.clear();
+  ActsParticlesParticleType.clear();
+  ActsParticlesProcess.clear();
+  ActsParticlesVx.clear();
+  ActsParticlesVy.clear();
+  ActsParticlesVz.clear();
+  ActsParticlesVt.clear();
+  ActsParticlesPx.clear();
+  ActsParticlesPy.clear();
+  ActsParticlesPz.clear();
+  ActsParticlesM.clear();
+  ActsParticlesQ.clear();
+  ActsParticlesEta.clear();
+  ActsParticlesPhi.clear();
+  ActsParticlesPt.clear();
+  ActsParticlesP.clear();
+  ActsParticlesVertexPrimary.clear();
+  ActsParticlesVertexSecondary.clear();
+  ActsParticlesParticle.clear();
+  ActsParticlesGeneration.clear();
+  ActsParticlesSubParticle.clear();
+  ActsParticlesELoss.clear();
+  ActsParticlesPathInX0.clear();
+  ActsParticlesPathInL0.clear();
+  ActsParticlesNumberOfHits.clear();
+  ActsParticlesOutcome.clear();
 }
 
 void AnalysisManager::EndOfEvent(const G4Event* event) {
   /// evtID
   evtID = event->GetEventID();
+
+  if (m_saveActs)
+  {
+    //* Fill the Acts particle truth tree - yeah we already do this but we need to do it again for Acts
+    for (G4int ivtx = 0; ivtx < event->GetNumberOfPrimaryVertex(); ++ivtx) {
+      for (G4int ipp = 0; ipp < event->GetPrimaryVertex(ivtx)->GetNumberOfParticle(); ++ipp) {
+        G4PrimaryParticle* primary_particle = event->GetPrimaryVertex(ivtx)->GetPrimary(ipp);
+          if (primary_particle) {
+            PrimaryParticleInformation* primary_particle_info = dynamic_cast<PrimaryParticleInformation*>(primary_particle->GetUserInformation());
+            ActsParticlesParticleId.push_back(primary_particle_info->GetPartID());
+            ActsParticlesParticleType.push_back(primary_particle_info->GetPDG());
+            ActsParticlesProcess.push_back(0);
+            ActsParticlesVx.push_back(primary_particle_info->GetVertexMC().x());
+            ActsParticlesVy.push_back(primary_particle_info->GetVertexMC().y());
+            ActsParticlesVz.push_back(primary_particle_info->GetVertexMC().z());
+            ActsParticlesPx.push_back(primary_particle_info->GetMomentumMC().x()/1000); //* divide by 1000 to convert MeV -> GeV
+            ActsParticlesPy.push_back(primary_particle_info->GetMomentumMC().y()/1000);
+            ActsParticlesPz.push_back(primary_particle_info->GetMomentumMC().z()/1000);
+            ActsParticlesM.push_back(primary_particle_info->GetMass()/1000);
+            ActsParticlesQ.push_back(primary_particle_info->GetCharge());
+            
+            TLorentzVector p4;
+            G4double energy = GetTotalEnergy(primary_particle_info->GetMomentumMC().x(),primary_particle_info->GetMomentumMC().y(), primary_particle_info->GetMomentumMC().z(), primary_particle_info->GetMass());
+            p4.SetPx(primary_particle_info->GetMomentumMC().x()/1000);
+            p4.SetPy(primary_particle_info->GetMomentumMC().y()/1000);
+            p4.SetPz(primary_particle_info->GetMomentumMC().z()/1000);
+            p4.SetE(energy/1000);
+            
+            ActsParticlesEta.push_back(p4.Eta());
+            ActsParticlesPhi.push_back(p4.Phi());
+            ActsParticlesPt.push_back(p4.Pt());
+            ActsParticlesP.push_back(p4.P());
+            ActsParticlesVertexPrimary.push_back(1); //? These variables need to be filled, but are unused by Acts 
+            ActsParticlesVertexSecondary.push_back(0); //? These variables need to be filled, but are unused by Acts 
+            ActsParticlesParticle.push_back(1); //? These variables need to be filled, but are unused by Acts 
+            ActsParticlesGeneration.push_back(0); //? These variables need to be filled, but are unused by Acts 
+            ActsParticlesSubParticle.push_back(0); //? These variables need to be filled, but are unused by Acts 
+            ActsParticlesELoss.push_back(0); //? These variables need to be filled, but are unused by Acts 
+            ActsParticlesPathInX0.push_back(0); //? These variables need to be filled, but are unused by Acts 
+            ActsParticlesPathInL0.push_back(0); //? These variables need to be filled, but are unused by Acts 
+            ActsParticlesNumberOfHits.push_back(0); //? These variables need to be filled, but are unused by Acts 
+            ActsParticlesOutcome.push_back(0); //? These variables need to be filled, but are unused by Acts 
+        }
+      }
+    }
+    acts_particles_tree->Fill();
+  }
 
   /// loop over the vertices, and then over primary particles,
   /// neutrino truth info from event generator.

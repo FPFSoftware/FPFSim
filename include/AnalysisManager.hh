@@ -49,6 +49,7 @@ class AnalysisManager {
     TTree*   evt;
     TTree*   trk;
     TTree*   acts_hits_tree;
+    TTree*   acts_particles_tree;
     std::string  fH5Filename;
     hep_hpc::hdf5::File fH5file;
 
@@ -210,6 +211,36 @@ class AnalysisManager {
     UInt_t ActsHitsLayerID;
     UInt_t ActsHitsApproachID;
     UInt_t ActsHitsSensitiveID;
+
+    // Acts Particle Information - need the truth info on the particles in order to do the truth tracking
+    std::vector<std::uint64_t> ActsParticlesParticleId;
+    std::vector<std::int32_t> ActsParticlesParticleType;
+    std::vector<std::uint32_t> ActsParticlesProcess;
+    std::vector<float> ActsParticlesVx;
+    std::vector<float> ActsParticlesVy;
+    std::vector<float> ActsParticlesVz;
+    std::vector<float> ActsParticlesVt;
+    std::vector<float> ActsParticlesPx;
+    std::vector<float> ActsParticlesPy;
+    std::vector<float> ActsParticlesPz;
+    std::vector<float> ActsParticlesM;
+    std::vector<float> ActsParticlesQ;
+    std::vector<float> ActsParticlesEta;
+    std::vector<float> ActsParticlesPhi;
+    std::vector<float> ActsParticlesPt;
+    std::vector<float> ActsParticlesP;
+    std::vector<std::uint32_t> ActsParticlesVertexPrimary;
+    std::vector<std::uint32_t> ActsParticlesVertexSecondary;
+    std::vector<std::uint32_t> ActsParticlesParticle;
+    
+    std::vector<std::uint32_t> ActsParticlesGeneration;
+    std::vector<std::uint32_t> ActsParticlesSubParticle;
+    std::vector<float> ActsParticlesELoss;
+    std::vector<float> ActsParticlesPathInX0;
+    std::vector<float> ActsParticlesPathInL0;
+    std::vector<std::int32_t> ActsParticlesNumberOfHits;
+    std::vector<std::uint32_t> ActsParticlesOutcome;
+  
 
   private:
     void FillPrimaryTruthTree(G4int sdId, std::string sdName);

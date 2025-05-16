@@ -1,6 +1,6 @@
 #include "PrimaryParticleInformation.hh"
 
-PrimaryParticleInformation::PrimaryParticleInformation(G4int aID, G4int aPDG, G4double aMass,
+PrimaryParticleInformation::PrimaryParticleInformation(G4int aID, G4int aPDG, G4double aMass, G4double aCharge,
     G4ThreeVector aMomentum, G4ThreeVector aVertex, 
     G4int aneuIdx, G4int aneuPDG, TLorentzVector aneuP4, TLorentzVector aneuX4,
     G4int aInttype, G4int aScatteringtype, G4double aW,
