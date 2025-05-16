@@ -244,7 +244,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   if (m_saveGdml) {
     G4GDMLParser fParser;
     G4cout << "Exporting geometry to " << m_fileGdml << G4endl;
-    fParser.Write(m_fileGdml, worldPV);
+    fParser.Write(m_fileGdml, worldPV, false);
   }
 
   return worldPV;
