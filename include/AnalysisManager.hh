@@ -205,7 +205,7 @@ class AnalysisManager {
     Float_t ActsHitsDeltaPy;
     Float_t ActsHitsDeltaPz;
     Float_t ActsHitsDeltaE;
-    UInt_t ActsHitsIndex;
+    Int_t ActsHitsIndex;
     UInt_t ActsHitsVolumeID;
     UInt_t ActsHitsBoundaryID;
     UInt_t ActsHitsLayerID;

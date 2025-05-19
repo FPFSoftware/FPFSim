@@ -175,7 +175,7 @@ void AnalysisManager::bookEvtTree() {
     acts_hits_tree->Branch("deltapy"                , &ActsHitsDeltaPy,     "deltapy/F");
     acts_hits_tree->Branch("deltapz"                , &ActsHitsDeltaPz,     "deltapz/F");
     acts_hits_tree->Branch("deltae"                 , &ActsHitsDeltaE,      "deltae/F");
-    acts_hits_tree->Branch("index"                  , &ActsHitsIndex,       "index/i");
+    acts_hits_tree->Branch("index"                  , &ActsHitsIndex,       "index/I");
     acts_hits_tree->Branch("volume_id"              , &ActsHitsVolumeID,    "volume_id/i");
     acts_hits_tree->Branch("boundary_id"            , &ActsHitsBoundaryID,  "boundary_id/i");
     acts_hits_tree->Branch("layer_id"               , &ActsHitsLayerID,     "layer_id/i");
@@ -183,7 +183,7 @@ void AnalysisManager::bookEvtTree() {
     acts_hits_tree->Branch("sensitive_id"           , &ActsHitsSensitiveID, "sensitive_id/i");
 
     //* Acts truth particle tree
-    acts_particles_tree = new TTree("particle", "ActsParticlesTree");
+    acts_particles_tree = new TTree("particles", "ActsParticlesTree");
     acts_particles_tree->Branch("event_id"               , &ActsHitsEventID,     "event_id/i");
     acts_particles_tree->Branch("particle_id"            , &ActsParticlesParticleId);
     acts_particles_tree->Branch("particle_type"          , &ActsParticlesParticleType);
@@ -431,18 +431,30 @@ void AnalysisManager::EndOfEvent(const G4Event* event) {
 
   if (m_saveActs)
   {
+    // Get the offsets to make the particle positionining easier
+    G4double hallSizeX  = 9.4 * m;
+    G4double hallSizeY  = 7.6 * m;
+    G4double hallSizeZ  = 64.6 * m;
+    G4ThreeVector FASER2Pos = GeometricalParameters::Get()->GetFASER2Position();
+    G4ThreeVector hallOffset( GeometricalParameters::Get()->GetHallOffsetX(), 
+                            GeometricalParameters::Get()->GetHallOffsetY(), 
+                            hallSizeZ/2 - GeometricalParameters::Get()->GetHallHeadDistance()); 
+    FASER2Pos -= hallOffset;
+
     //* Fill the Acts particle truth tree - yeah we already do this but we need to do it again for Acts
     for (G4int ivtx = 0; ivtx < event->GetNumberOfPrimaryVertex(); ++ivtx) {
       for (G4int ipp = 0; ipp < event->GetPrimaryVertex(ivtx)->GetNumberOfParticle(); ++ipp) {
         G4PrimaryParticle* primary_particle = event->GetPrimaryVertex(ivtx)->GetPrimary(ipp);
           if (primary_particle) {
             PrimaryParticleInformation* primary_particle_info = dynamic_cast<PrimaryParticleInformation*>(primary_particle->GetUserInformation());
-            ActsParticlesParticleId.push_back(primary_particle_info->GetPartID());
+            // ActsParticlesParticleId.push_back(primary_particle_info->GetPartID());
+            ActsParticlesParticleId.push_back(0);
             ActsParticlesParticleType.push_back(primary_particle_info->GetPDG());
             ActsParticlesProcess.push_back(0);
             ActsParticlesVx.push_back(primary_particle_info->GetVertexMC().x());
             ActsParticlesVy.push_back(primary_particle_info->GetVertexMC().y());
             ActsParticlesVz.push_back(primary_particle_info->GetVertexMC().z());
+            ActsParticlesVt.push_back(0);
             ActsParticlesPx.push_back(primary_particle_info->GetMomentumMC().x()/1000); //* divide by 1000 to convert MeV -> GeV
             ActsParticlesPy.push_back(primary_particle_info->GetMomentumMC().y()/1000);
             ActsParticlesPz.push_back(primary_particle_info->GetMomentumMC().z()/1000);
