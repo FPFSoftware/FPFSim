@@ -116,7 +116,7 @@ FASER2DetectorConstruction::FASER2DetectorConstruction()
   for (int i= 0; i<fNTrackingStations; ++i) { 
 
     std::string name = "F2UpstreamTrackerLayer_" + std::to_string(i+1);
-    auto trkLayerPhysical = new G4PVPlacement(0, G4ThreeVector(0,0,componentPosition), fTrackingStationsLogical, name+"Phys", fFASER2Assembly, false, 0);
+    auto trkLayerPhysical = new G4PVPlacement(0, G4ThreeVector(0,0,componentPosition), fTrackingStationsLogical, name+"Phys", fFASER2Assembly, false, i);
     
     if (i != fNTrackingStations-1)
     {
@@ -161,7 +161,7 @@ FASER2DetectorConstruction::FASER2DetectorConstruction()
   for (int i= 0; i<fNTrackingStations; ++i) { 
 
     std::string name = "F2DownstreamTrackerLayer_" + std::to_string(i+1);
-    auto trkLayerPhysical = new G4PVPlacement(0, G4ThreeVector(0,0,componentPosition), fTrackingStationsLogical, name+"Phys", fFASER2Assembly, false, 0);
+    auto trkLayerPhysical = new G4PVPlacement(0, G4ThreeVector(0,0,componentPosition), fTrackingStationsLogical, name+"Phys", fFASER2Assembly, false, i+fNTrackingStations);
 
     componentPosition += fScinThickness + fTrackingStationGap;
   }
