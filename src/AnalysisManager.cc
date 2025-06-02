@@ -17,6 +17,7 @@
 #include "reco/LinearFit.hh"
 #include "reco/ShowerLID.hh"
 #include "reco/CircleFit.hh"
+#include "reco/Barcode.hh"
 #include "FPFParticle.hh"
 #include "FPFNeutrino.hh"
 
@@ -448,7 +449,13 @@ void AnalysisManager::EndOfEvent(const G4Event* event) {
           if (primary_particle) {
             PrimaryParticleInformation* primary_particle_info = dynamic_cast<PrimaryParticleInformation*>(primary_particle->GetUserInformation());
             // ActsParticlesParticleId.push_back(primary_particle_info->GetPartID());
-            ActsParticlesParticleId.push_back(0);
+            auto particleId = ActsFatras::Barcode();
+            particleId.setVertexPrimary(0);
+            particleId.setVertexPrimary(1);
+            particleId.setGeneration(0);
+            particleId.setSubParticle(0);
+            particleId.setParticle(ipp);
+            ActsParticlesParticleId.push_back(particleId.value());
             ActsParticlesParticleType.push_back(primary_particle_info->GetPDG());
             ActsParticlesProcess.push_back(0);
             ActsParticlesVx.push_back(primary_particle_info->GetVertexMC().x());
@@ -744,9 +751,36 @@ void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
     {
       if (hit->GetCharge() == 0) continue; // skip neutral particles, they don't hit
 
+      /*
+      * A note on the ActsHitsGeometryID variable
+       This variable in Acts keeps track of an Acts::GeometryIdentifier. This is essentially a long unsigned int, the bits of which are used to
+       look up the the volume/layer/boundary/sensitive indices of a piece of geometry. In principle it should be possible to assign this variable
+       here in GEANT4 but I don't understand the Acts code well enough to do it without adding Acts as a dependancy to this codebase.
+       As a result I set `geometry_id` to zero and give the the resposibility of assigning this variable to the user during the reading of the `hits` tree.
+      */
+
       ActsHitsEventID = evtID;
       ActsHitsGeometryID = 0;
-      ActsHitsParticleID = hit->GetTrackID();
+      
+      int hitID = hit->GetTrackID();
+      int nPrimaries = ActsParticlesParticleId.size();
+
+      bool isPrimary = false;
+      if (hitID <= nPrimaries)
+      {
+        isPrimary = true;
+      }
+
+      std::cout << "Acts hit: " << hitID << " isPrimary: " << isPrimary << std::endl;
+
+      auto particleId = ActsFatras::Barcode();
+      particleId.setVertexPrimary(isPrimary);
+      particleId.setVertexSecondary(!isPrimary);
+      particleId.setGeneration(0);
+      particleId.setSubParticle(0);
+      particleId.setParticle(hit->GetTrackID() - 1); // The track ID is the primary particle index plus one
+      ActsHitsParticleID = particleId.value();
+
       ActsHitsX = hit->GetX();
       ActsHitsY = hit->GetY();
       ActsHitsZ = hit->GetZ();
@@ -760,7 +794,10 @@ void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
       ActsHitsDeltaPz = hit->GetDeltaPz();
       ActsHitsDeltaE = hit->GetDeltaE();
       ActsHitsIndex = hit->GetCopyNumSensor(); // index of layer: 0, 1, 2, ...
-      ActsHitsVolumeID = 0;
+
+      // These variables I'm not 100% sure about. I reverse engineered them by matching them to how they're set when writing the hits from the particle gun in Acts
+      // In principle with the right headers from Acts we could construct the geometry ID value here
+      ActsHitsVolumeID = 1;
       ActsHitsBoundaryID = 0;
       ActsHitsLayerID = (hit->GetCopyNumSensor()+1)*2; // Acts specfic layer ID, goes 2, 4, 6, ...
       ActsHitsApproachID = 0;
