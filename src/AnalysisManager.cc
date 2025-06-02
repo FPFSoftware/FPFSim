@@ -771,8 +771,6 @@ void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
         isPrimary = true;
       }
 
-      std::cout << "Acts hit: " << hitID << " isPrimary: " << isPrimary << std::endl;
-
       auto particleId = ActsFatras::Barcode();
       particleId.setVertexPrimary(isPrimary);
       particleId.setVertexSecondary(!isPrimary);
