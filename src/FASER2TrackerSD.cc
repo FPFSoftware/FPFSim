@@ -51,7 +51,14 @@ G4bool FASER2TrackerSD::ProcessHits(G4Step* aStep, G4TouchableHistory* ROhist){
 
   FASER2TrackerHit* tmpHit = new FASER2TrackerHit();
 
-  tmpHit->SetPosition(posHit[0]/mm, posHit[1]/mm, posHit[2]/mm); // in mm
+  G4TouchableHandle touchable = preStepPoint->GetTouchableHandle();
+  G4ThreeVector sensorCenterGlobal = touchable->GetTranslation();
+  G4double sensorCentreZ = sensorCenterGlobal.z();
+
+  // tmpHit->SetPosition(posHit[0]/mm, posHit[1]/mm, posHit[2]/mm); // in mm
+  // fix the hit z-position to be the centre of the sensor - this way every hit on the same sensor has the same z-pos
+
+  tmpHit->SetPosition(posHit[0]/mm, posHit[1]/mm, sensorCentreZ/mm); // in mm
   tmpHit->SetPDGID(pdgid);
   tmpHit->SetEnergy(energy/GeV);
   tmpHit->SetCharge(charge);
