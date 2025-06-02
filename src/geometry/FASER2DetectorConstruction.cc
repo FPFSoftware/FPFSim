@@ -174,7 +174,7 @@ FASER2DetectorConstruction::FASER2DetectorConstruction()
   //TODO: Calorimeter volumes are just dummy placeholder boxes - detailed simulation studies required!
   auto ECalBox = new G4Box("ECalBox", fMagnetWindowX/2.+fMagnetYokeThicknessX, fMagnetWindowY/2.+fMagnetYokeThicknessY, fEMCaloThickness/2.);
   auto HCalBox = new G4Box("HCalBox", fMagnetWindowX/2.+fMagnetYokeThicknessX, fMagnetWindowY/2.+fMagnetYokeThicknessY, fHadCaloThickness/2.);
-  auto IronWallBox = new G4Box("HCalBox", fMagnetWindowX/2.+fMagnetYokeThicknessX, fMagnetWindowY/2.+fMagnetYokeThicknessY, fIronWallThickness/2.);
+  auto IronWallBox = new G4Box("IronWallBox", fMagnetWindowX/2.+fMagnetYokeThicknessX, fMagnetWindowY/2.+fMagnetYokeThicknessY, fIronWallThickness/2.);
 
   fEMCalLogical = new G4LogicalVolume(ECalBox, (fillCaloAndWallVolumes) ? fMaterials->Material("Copper"): fMaterials->Material("Air"), "FASER2ECAlLogical");
   fHadCalLogical = new G4LogicalVolume(HCalBox, (fillCaloAndWallVolumes) ? fMaterials->Material("Iron"): fMaterials->Material("Air"), "FASER2HCAlLogical");
