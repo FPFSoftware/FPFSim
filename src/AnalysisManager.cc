@@ -9,6 +9,7 @@
 #include "AnalysisManager.hh"
 #include "geometry/GeometricalParameters.hh"
 #include "LArBoxSD.hh"
+#include "FASER2TrackerSD.hh"
 #include "LArBoxHit.hh"
 #include "PrimaryParticleInformation.hh"
 #include "reco/PCAAnalysis3D.hh"
@@ -16,6 +17,7 @@
 #include "reco/LinearFit.hh"
 #include "reco/ShowerLID.hh"
 #include "reco/CircleFit.hh"
+#include "reco/Barcode.hh"
 #include "FPFParticle.hh"
 #include "FPFNeutrino.hh"
 
@@ -156,6 +158,63 @@ void AnalysisManager::bookEvtTree() {
     evt->Branch("trkHitPFSL"              , &trkPFSL);        
   }
 
+  if (m_saveActs) {
+    //* Acts Hits Tree [i == unsigned int; F == float; l == Long unsigned 64 int] 
+    acts_hits_tree = new TTree("hits", "ActsHitsTree");
+    acts_hits_tree->Branch("event_id"               , &ActsHitsEventID,     "event_id/i");
+    acts_hits_tree->Branch("geometry_id"            , &ActsHitsGeometryID,  "geometryid/l");
+    acts_hits_tree->Branch("particle_id"            , &ActsHitsParticleID,  "particle_id/l");
+    acts_hits_tree->Branch("tx"                     , &ActsHitsX,           "tx/F");
+    acts_hits_tree->Branch("ty"                     , &ActsHitsY,           "ty/F");
+    acts_hits_tree->Branch("tz"                     , &ActsHitsZ,           "tz/F");
+    acts_hits_tree->Branch("tt"                     , &ActsHitsT,           "tt/F");
+    acts_hits_tree->Branch("tpx"                    , &ActsHitsPx,          "tpx/F");
+    acts_hits_tree->Branch("tpy"                    , &ActsHitsPy,          "tpy/F");
+    acts_hits_tree->Branch("tpz"                    , &ActsHitsPz,          "tpz/F");
+    acts_hits_tree->Branch("te"                     , &ActsHitsE,           "tpe/F");
+    acts_hits_tree->Branch("deltapx"                , &ActsHitsDeltaPx,     "deltapx/F");
+    acts_hits_tree->Branch("deltapy"                , &ActsHitsDeltaPy,     "deltapy/F");
+    acts_hits_tree->Branch("deltapz"                , &ActsHitsDeltaPz,     "deltapz/F");
+    acts_hits_tree->Branch("deltae"                 , &ActsHitsDeltaE,      "deltae/F");
+    acts_hits_tree->Branch("index"                  , &ActsHitsIndex,       "index/I");
+    acts_hits_tree->Branch("volume_id"              , &ActsHitsVolumeID,    "volume_id/i");
+    acts_hits_tree->Branch("boundary_id"            , &ActsHitsBoundaryID,  "boundary_id/i");
+    acts_hits_tree->Branch("layer_id"               , &ActsHitsLayerID,     "layer_id/i");
+    acts_hits_tree->Branch("approach_id"            , &ActsHitsApproachID,  "approach_id/i");
+    acts_hits_tree->Branch("sensitive_id"           , &ActsHitsSensitiveID, "sensitive_id/i");
+
+    //* Acts truth particle tree
+    acts_particles_tree = new TTree("particles", "ActsParticlesTree");
+    acts_particles_tree->Branch("event_id"               , &ActsHitsEventID,     "event_id/i");
+    acts_particles_tree->Branch("particle_id"            , &ActsParticlesParticleId);
+    acts_particles_tree->Branch("particle_type"          , &ActsParticlesParticleType);
+    acts_particles_tree->Branch("process"                , &ActsParticlesProcess);
+    acts_particles_tree->Branch("vx"                     , &ActsParticlesVx);
+    acts_particles_tree->Branch("vy"                     , &ActsParticlesVy);
+    acts_particles_tree->Branch("vz"                     , &ActsParticlesVz);
+    acts_particles_tree->Branch("vt"                     , &ActsParticlesVt);
+    acts_particles_tree->Branch("px"                     , &ActsParticlesPx);
+    acts_particles_tree->Branch("py"                     , &ActsParticlesPy);
+    acts_particles_tree->Branch("pz"                     , &ActsParticlesPz);
+    acts_particles_tree->Branch("m"                      , &ActsParticlesM);
+    acts_particles_tree->Branch("q"                      , &ActsParticlesQ);
+    acts_particles_tree->Branch("eta"                    , &ActsParticlesEta);
+    acts_particles_tree->Branch("phi"                    , &ActsParticlesPhi);
+    acts_particles_tree->Branch("pt"                     , &ActsParticlesPt);
+    acts_particles_tree->Branch("p"                      , &ActsParticlesP);
+    acts_particles_tree->Branch("vertex_primary"         , &ActsParticlesVertexPrimary);
+    acts_particles_tree->Branch("vertex_secondary"       , &ActsParticlesVertexSecondary);
+    acts_particles_tree->Branch("particle"               , &ActsParticlesParticle);
+    acts_particles_tree->Branch("generation"             , &ActsParticlesGeneration);
+    acts_particles_tree->Branch("sub_particle"           , &ActsParticlesSubParticle);
+    acts_particles_tree->Branch("e_loss"                 , &ActsParticlesELoss);
+    acts_particles_tree->Branch("total_x0"               , &ActsParticlesPathInX0);
+    acts_particles_tree->Branch("total_l0"               , &ActsParticlesPathInL0);
+    acts_particles_tree->Branch("number_of_hits"         , &ActsParticlesNumberOfHits);
+    acts_particles_tree->Branch("outcome"                , &ActsParticlesOutcome);
+  }
+
+
 }
 
 void AnalysisManager::bookTrkTree() {
@@ -203,6 +262,8 @@ void AnalysisManager::EndOfRun() {
   thefile->cd();
   evt->Write();
   if(m_saveTrack) trk->Write();
+  if (m_saveActs) acts_hits_tree->Write();
+  if (m_saveActs) acts_particles_tree->Write();
   thefile->Close();
   fH5file.close();
 }
@@ -315,11 +376,124 @@ void AnalysisManager::BeginOfEvent() {
   trackPointY.clear();  
   trackPointZ.clear();
 
+  ActsHitsEventID = 0;
+  ActsHitsGeometryID = 0;
+  ActsHitsParticleID = 0;
+  ActsHitsX = 0;
+  ActsHitsY = 0;
+  ActsHitsZ = 0;
+  ActsHitsT = 0;
+  ActsHitsPx = 0;
+  ActsHitsPy = 0;
+  ActsHitsPz = 0;
+  ActsHitsE = 0;
+  ActsHitsDeltaPx = 0;
+  ActsHitsDeltaPy = 0;
+  ActsHitsDeltaPz = 0;
+  ActsHitsDeltaE = 0;
+  ActsHitsIndex = 0;
+  ActsHitsVolumeID = 0;
+  ActsHitsBoundaryID = 0;
+  ActsHitsLayerID = 0;
+  ActsHitsApproachID = 0;
+  ActsHitsSensitiveID = 0;
+
+  ActsParticlesParticleId.clear();
+  ActsParticlesParticleType.clear();
+  ActsParticlesProcess.clear();
+  ActsParticlesVx.clear();
+  ActsParticlesVy.clear();
+  ActsParticlesVz.clear();
+  ActsParticlesVt.clear();
+  ActsParticlesPx.clear();
+  ActsParticlesPy.clear();
+  ActsParticlesPz.clear();
+  ActsParticlesM.clear();
+  ActsParticlesQ.clear();
+  ActsParticlesEta.clear();
+  ActsParticlesPhi.clear();
+  ActsParticlesPt.clear();
+  ActsParticlesP.clear();
+  ActsParticlesVertexPrimary.clear();
+  ActsParticlesVertexSecondary.clear();
+  ActsParticlesParticle.clear();
+  ActsParticlesGeneration.clear();
+  ActsParticlesSubParticle.clear();
+  ActsParticlesELoss.clear();
+  ActsParticlesPathInX0.clear();
+  ActsParticlesPathInL0.clear();
+  ActsParticlesNumberOfHits.clear();
+  ActsParticlesOutcome.clear();
 }
 
 void AnalysisManager::EndOfEvent(const G4Event* event) {
   /// evtID
   evtID = event->GetEventID();
+
+  if (m_saveActs)
+  {
+    // Get the offsets to make the particle positionining easier
+    G4double hallSizeX  = 9.4 * m;
+    G4double hallSizeY  = 7.6 * m;
+    G4double hallSizeZ  = 64.6 * m;
+    G4ThreeVector FASER2Pos = GeometricalParameters::Get()->GetFASER2Position();
+    G4ThreeVector hallOffset( GeometricalParameters::Get()->GetHallOffsetX(), 
+                            GeometricalParameters::Get()->GetHallOffsetY(), 
+                            hallSizeZ/2 - GeometricalParameters::Get()->GetHallHeadDistance()); 
+    FASER2Pos -= hallOffset;
+
+    //* Fill the Acts particle truth tree - yeah we already do this but we need to do it again for Acts
+    for (G4int ivtx = 0; ivtx < event->GetNumberOfPrimaryVertex(); ++ivtx) {
+      for (G4int ipp = 0; ipp < event->GetPrimaryVertex(ivtx)->GetNumberOfParticle(); ++ipp) {
+        G4PrimaryParticle* primary_particle = event->GetPrimaryVertex(ivtx)->GetPrimary(ipp);
+          if (primary_particle) {
+            PrimaryParticleInformation* primary_particle_info = dynamic_cast<PrimaryParticleInformation*>(primary_particle->GetUserInformation());
+            // ActsParticlesParticleId.push_back(primary_particle_info->GetPartID());
+            auto particleId = ActsFatras::Barcode();
+            particleId.setVertexPrimary(0);
+            particleId.setVertexPrimary(1);
+            particleId.setGeneration(0);
+            particleId.setSubParticle(0);
+            particleId.setParticle(ipp);
+            ActsParticlesParticleId.push_back(particleId.value());
+            ActsParticlesParticleType.push_back(primary_particle_info->GetPDG());
+            ActsParticlesProcess.push_back(0);
+            ActsParticlesVx.push_back(primary_particle_info->GetVertexMC().x());
+            ActsParticlesVy.push_back(primary_particle_info->GetVertexMC().y());
+            ActsParticlesVz.push_back(primary_particle_info->GetVertexMC().z());
+            ActsParticlesVt.push_back(0);
+            ActsParticlesPx.push_back(primary_particle_info->GetMomentumMC().x()/1000); //* divide by 1000 to convert MeV -> GeV
+            ActsParticlesPy.push_back(primary_particle_info->GetMomentumMC().y()/1000);
+            ActsParticlesPz.push_back(primary_particle_info->GetMomentumMC().z()/1000);
+            ActsParticlesM.push_back(primary_particle_info->GetMass()/1000);
+            ActsParticlesQ.push_back(primary_particle_info->GetCharge());
+            
+            TLorentzVector p4;
+            G4double energy = GetTotalEnergy(primary_particle_info->GetMomentumMC().x(),primary_particle_info->GetMomentumMC().y(), primary_particle_info->GetMomentumMC().z(), primary_particle_info->GetMass());
+            p4.SetPx(primary_particle_info->GetMomentumMC().x()/1000);
+            p4.SetPy(primary_particle_info->GetMomentumMC().y()/1000);
+            p4.SetPz(primary_particle_info->GetMomentumMC().z()/1000);
+            p4.SetE(energy/1000);
+            
+            ActsParticlesEta.push_back(p4.Eta());
+            ActsParticlesPhi.push_back(p4.Phi());
+            ActsParticlesPt.push_back(p4.Pt());
+            ActsParticlesP.push_back(p4.P());
+            ActsParticlesVertexPrimary.push_back(1); //? These variables need to be filled, but are unused by Acts 
+            ActsParticlesVertexSecondary.push_back(0); //? These variables need to be filled, but are unused by Acts 
+            ActsParticlesParticle.push_back(1); //? These variables need to be filled, but are unused by Acts 
+            ActsParticlesGeneration.push_back(0); //? These variables need to be filled, but are unused by Acts 
+            ActsParticlesSubParticle.push_back(0); //? These variables need to be filled, but are unused by Acts 
+            ActsParticlesELoss.push_back(0); //? These variables need to be filled, but are unused by Acts 
+            ActsParticlesPathInX0.push_back(0); //? These variables need to be filled, but are unused by Acts 
+            ActsParticlesPathInL0.push_back(0); //? These variables need to be filled, but are unused by Acts 
+            ActsParticlesNumberOfHits.push_back(0); //? These variables need to be filled, but are unused by Acts 
+            ActsParticlesOutcome.push_back(0); //? These variables need to be filled, but are unused by Acts 
+        }
+      }
+    }
+    acts_particles_tree->Fill();
+  }
 
   /// loop over the vertices, and then over primary particles,
   /// neutrino truth info from event generator.
@@ -567,6 +741,70 @@ void AnalysisManager::EndOfEvent(const G4Event* event) {
 
 void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName) 
 {
+
+  if (m_saveActs)
+  {
+    auto hitCollection = dynamic_cast<FASER2TrackerHitsCollection*>(hcofEvent->GetHC(sdId));
+    if (!hitCollection) return;
+    
+    for (auto hit: *hitCollection->GetVector()) 
+    {
+      if (hit->GetCharge() == 0) continue; // skip neutral particles, they don't hit
+
+      /*
+      * A note on the ActsHitsGeometryID variable
+       This variable in Acts keeps track of an Acts::GeometryIdentifier. This is essentially a long unsigned int, the bits of which are used to
+       look up the the volume/layer/boundary/sensitive indices of a piece of geometry. In principle it should be possible to assign this variable
+       here in GEANT4 but I don't understand the Acts code well enough to do it without adding Acts as a dependancy to this codebase.
+       As a result I set `geometry_id` to zero and give the the resposibility of assigning this variable to the user during the reading of the `hits` tree.
+      */
+
+      ActsHitsEventID = evtID;
+      ActsHitsGeometryID = 0;
+      
+      int hitID = hit->GetTrackID();
+      int nPrimaries = ActsParticlesParticleId.size();
+
+      bool isPrimary = false;
+      if (hitID <= nPrimaries)
+      {
+        isPrimary = true;
+      }
+
+      auto particleId = ActsFatras::Barcode();
+      particleId.setVertexPrimary(isPrimary);
+      particleId.setVertexSecondary(!isPrimary);
+      particleId.setGeneration(0);
+      particleId.setSubParticle(0);
+      particleId.setParticle(hit->GetTrackID() - 1); // The track ID is the primary particle index plus one
+      ActsHitsParticleID = particleId.value();
+
+      ActsHitsX = hit->GetX();
+      ActsHitsY = hit->GetY();
+      ActsHitsZ = hit->GetZ();
+      ActsHitsT = hit->GetT();
+      ActsHitsPx = hit->GetPx();
+      ActsHitsPy = hit->GetPy();
+      ActsHitsPz = hit->GetPz();
+      ActsHitsE = hit->GetEnergy();
+      ActsHitsDeltaPx = hit->GetDeltaPx();
+      ActsHitsDeltaPy = hit->GetDeltaPy();
+      ActsHitsDeltaPz = hit->GetDeltaPz();
+      ActsHitsDeltaE = hit->GetDeltaE();
+      ActsHitsIndex = hit->GetCopyNumSensor(); // index of layer: 0, 1, 2, ...
+
+      // These variables I'm not 100% sure about. I reverse engineered them by matching them to how they're set when writing the hits from the particle gun in Acts
+      // In principle with the right headers from Acts we could construct the geometry ID value here
+      ActsHitsVolumeID = 1;
+      ActsHitsBoundaryID = 0;
+      ActsHitsLayerID = (hit->GetCopyNumSensor()+1)*2; // Acts specfic layer ID, goes 2, 4, 6, ...
+      ActsHitsApproachID = 0;
+      ActsHitsSensitiveID = 1;
+      acts_hits_tree->Fill();
+    } // end of loop over hits
+  }
+
+
   // Get and cast hit collection with LArBoxHits
   LArBoxHitsCollection* hitCollection = dynamic_cast<LArBoxHitsCollection*>(hcofEvent->GetHC(sdId));
   if (hitCollection) {
