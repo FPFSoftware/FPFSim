@@ -36,6 +36,7 @@
 #include <G4UniformMagField.hh>
 #include <G4FieldManager.hh>
 #include <G4GDMLParser.hh>
+#include <G4SubtractionSolid.hh>
 
 using namespace std;
 
@@ -98,31 +99,29 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
 
 
-auto hallBox = new G4Box("hallBox", hallSizeX/2, hallSizeY/2, hallSizeZ/2);
+  auto hallBox = new G4Box("hallBox", hallSizeX/2, hallSizeY/2, hallSizeZ/2);
 
+  G4double sideOff = 3*m;
+  G4double frontOff = 10*m;
+  G4double backOff = 3*m;
 
-G4double sideOff = 3*m;
-G4double frontOff = 10*m;
-G4double backOff = 3*m;
+  G4double rockSizeX = hallSizeX + 2*sideOff;
+  G4double rockSizeY = hallSizeY + 2*sideOff;
+  G4double rockSizeZ = hallSizeZ + frontOff + backOff;
 
+  auto rockBox = new G4Box("rockBox",
+							rockSizeX/2,
+							rockSizeY/2,
+							rockSizeZ/2);
 
+  G4ThreeVector rockOffset( 0,0, (frontOff/2)-(backOff/2));
 
+  auto rockEnvelopeSolid = new G4SubtractionSolid("rockEnvelopeSolid", rockBox, hallBox, 0, rockOffset);
+  auto rockEnvelope = new G4LogicalVolume(rockEnvelopeSolid, LArBoxMaterials->Material("Rock"), "rockEnvelope");
 
-auto rockBox = new G4Box("rockBox",
-							(hallSizeX)/2+sideOff,
-							(hallSizeY)/2+sideOff,
-							(hallSizeZ)/2+frontOff+backOff);
+  auto rockEnvelopePV = new G4PVPlacement(nullptr, hallOffset-rockOffset, rockEnvelope, "rockEnvelopePV", worldLV, false, 0, fCheckOverlap);
 
-G4ThreeVector rockOffset( 0,0, 2*frontOff+backOff);
-
-
-auto rockEnvelope = new G4SubtractionSolid("rockEnvelope", rockBox, hallBox);
-auto rockDone = new G4LogicalVolume(rockEnvelope, LArBoxMaterials->Material("Rock"), "rockDone");
-
-
-auto modifiedWrld = new G4PVPlacement(nullptr, hallOffset, rockDone, "modifiedwrld", worldLV, false, 0, fCheckOverlap);
-
-   hallLV = new G4LogicalVolume(hallBox, LArBoxMaterials->Material("Air"), "hallLV");
+  hallLV = new G4LogicalVolume(hallBox, LArBoxMaterials->Material("Air"), "hallLV");
   auto hallPV = new G4PVPlacement(nullptr, hallOffset, hallLV, "hallPV", worldLV, false, 0, fCheckOverlap);
 
   //-----------------------------------
@@ -431,4 +430,4 @@ void DetectorConstruction::ConstructSDandField() {
   //// define new one
   //G4RunManager::GetRunManager()->DefineWorldVolume(Construct());
 //  G4RunManager::GetRunManager()->GeometryHasBeenModified();
-//}
+//} 
