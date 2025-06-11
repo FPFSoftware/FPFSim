@@ -12,6 +12,11 @@ GeometricalParameters::GeometricalParameters()
   fHallOffsetX = 1.44*m;
   fHallOffsetY = 2.21*m;
 
+  // rock envelope
+  fRockFrontThickness = 10*m;
+  fRockSideThickness = 3*m;
+  fRockBackThickness = 3*m;
+
   // FLArE TPC volume
   fFLArETPCMaterialOption = tpcMaterialOption::LiquidArgon;
   fFLArETPCConfigOption   = tpcConfigOption::ThreeBySeven;

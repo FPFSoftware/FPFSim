@@ -23,6 +23,13 @@ class GeometricalParameters  {
     G4double GetHallOffsetX() { return fHallOffsetX; }
     G4double GetHallOffsetY() { return fHallOffsetY; }
 
+    // rock envelope
+    G4bool GetEnableRockEnvelope() { return fEnableRockEnvelope; }
+    void SetEnableRockEnvelope(G4bool val) { fEnableRockEnvelope = val; }
+    G4double GetRockFrontThickness() { return fRockFrontThickness; }
+    G4double GetRockSideThickness() { return fRockSideThickness; }
+    G4double GetRockBackThickness() { return fRockBackThickness; }
+
     // FLArE TPC volume
     enum tpcMaterialOption { LiquidArgon, LiquidKrypton};
     tpcMaterialOption ConvertStringToTPCMaterialOption(G4String val);
@@ -222,6 +229,12 @@ class GeometricalParameters  {
     G4double fHallHeadDistance; ///<- distance between the entrance wall and the first detector
     G4double fHallOffsetX; // x offset of hall center from the LOS
     G4double fHallOffsetY; // x offset of hall center from the LOS
+
+    // rock envelope
+    G4bool fEnableRockEnvelope;
+    G4double fRockFrontThickness;
+    G4double fRockSideThickness;
+    G4double fRockBackThickness;
 
     // FLArE TPC volume
     tpcMaterialOption fFLArETPCMaterialOption;

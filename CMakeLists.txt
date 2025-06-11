@@ -90,14 +90,14 @@ endforeach()
 
 #----------------------------------------------------------------------------
 # generate dictionaries for the custom classes in the ROOT tree
-ROOT_GENERATE_DICTIONARY(DictOutput ${PROJECT_SOURCE_DIR}/include/FPFNeutrino.hh 
+ROOT_GENERATE_DICTIONARY(FPFClassesDict ${PROJECT_SOURCE_DIR}/include/FPFNeutrino.hh 
                                     ${PROJECT_SOURCE_DIR}/include/FPFParticle.hh 
 				    LINKDEF ${PROJECT_SOURCE_DIR}/include/LinkDef.h)
 
 # create a shared library that includes the dictionary
 add_library(FPFClasses SHARED ${PROJECT_SOURCE_DIR}/src/FPFNeutrino.cc
                               ${PROJECT_SOURCE_DIR}/src/FPFParticle.cc
-                              DictOutput.cxx)
+                              FPFClassesDict.cxx)
 
 # include directories for headers
 target_include_directories(FPFClasses PUBLIC ${PROJECT_SOURCE_DIR}/include)
@@ -121,4 +121,4 @@ target_link_libraries(FPFSim
 #
 install(TARGETS FPFSim DESTINATION ${PROJECT_SOURCE_DIR}/bin)
 install(TARGETS FPFClasses DESTINATION ${PROJECT_SOURCE_DIR}/lib)
-install(FILES ${PROJECT_SOURCE_DIR}/build/libDictOutput_rdict.pcm DESTINATION ${PROJECT_SOURCE_DIR}/lib)
+install(FILES ${PROJECT_SOURCE_DIR}/build/libFPFClassesDict_rdict.pcm DESTINATION ${PROJECT_SOURCE_DIR}/lib)

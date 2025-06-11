@@ -39,6 +39,7 @@ class DetectorConstructionMessenger: public G4UImessenger {
     G4UIcmdWithABool* detGdmlSaveCmd;
     G4UIcmdWithAString* detGdmlFileCmd;
     G4UIcmdWithABool* detCheckOverlapCmd;
+    G4UIcmdWithABool* detEnableRockCmd;
     G4UIcmdWithABool* detAddFLArECmd;
     G4UIcmdWithABool* detAddFORMOSACmd;
     G4UIcmdWithABool* detAddFASERnu2Cmd;

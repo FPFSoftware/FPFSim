@@ -32,6 +32,12 @@ DetectorConstructionMessenger::DetectorConstructionMessenger(DetectorConstructio
     detCheckOverlapCmd = new G4UIcmdWithABool("/det/checkOverlap", this);
     detCheckOverlapCmd->SetParameterName("checkOverlap", true);
     detCheckOverlapCmd->SetDefaultValue(false);
+
+    // enable rock envelope
+    detEnableRockCmd = new G4UIcmdWithABool("/det/enableRock", this);
+    detEnableRockCmd->SetParameterName("enableRock", true);
+    detEnableRockCmd->SetDefaultValue(false);
+
     // add FLARE volume
     detAddFLArECmd = new G4UIcmdWithABool("/det/addFLArE", this);
     detAddFLArECmd->SetParameterName("Add FLArE detector", true);
@@ -223,6 +229,7 @@ DetectorConstructionMessenger::~DetectorConstructionMessenger() {
   delete detGdmlSaveCmd;
   delete detGdmlFileCmd;
   delete detCheckOverlapCmd;
+  delete detEnableRockCmd;
   delete detAddFLArECmd;
   delete detAddFORMOSACmd;
   delete detAddFASER2Cmd;
@@ -295,6 +302,10 @@ void DetectorConstructionMessenger::SetNewValue(G4UIcommand* command, G4String n
   else if (command == detAddFORMOSACmd) det->AddFORMOSA(detAddFORMOSACmd->GetNewBoolValue(newValues));
   else if (command == detAddFASERnu2Cmd) det->AddFASERnu2(detAddFASERnu2Cmd->GetNewBoolValue(newValues));
   else if (command == detAddFASER2Cmd) det->AddFASER2(detAddFASER2Cmd->GetNewBoolValue(newValues));
+  else if (command == detEnableRockCmd){
+    det->EnableRockEnvelope(detEnableRockCmd->GetNewBoolValue(newValues));
+    GeometricalParameters::Get()->SetEnableRockEnvelope(detEnableRockCmd->GetNewBoolValue(newValues));
+  } 
   
   // FLARE COMMANDS
   else if (command == flarePosCmd)

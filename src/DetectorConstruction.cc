@@ -49,7 +49,8 @@ G4ThreadLocal G4FieldManager* DetectorConstruction::babyMINDFieldMgr = 0;
 
 DetectorConstruction::DetectorConstruction()
   : G4VUserDetectorConstruction(),
-    m_addFLArE(true), m_addFORMOSA(true), m_addFASERnu2(true), m_addFASER2(true), m_useBabyMIND(false)
+    m_addFLArE(true), m_addFORMOSA(true), m_addFASERnu2(true), m_addFASER2(true),
+    m_useBabyMIND(false), m_enableRockEnvelope(false)
 {
   DefineMaterial();
   messenger = new DetectorConstructionMessenger(this);
@@ -97,32 +98,34 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
                             GeometricalParameters::Get()->GetHallOffsetY(),
                             hallSizeZ/2 - GeometricalParameters::Get()->GetHallHeadDistance());
 
-
-
   auto hallBox = new G4Box("hallBox", hallSizeX/2, hallSizeY/2, hallSizeZ/2);
-
-  G4double sideOff = 3*m;
-  G4double frontOff = 10*m;
-  G4double backOff = 3*m;
-
-  G4double rockSizeX = hallSizeX + 2*sideOff;
-  G4double rockSizeY = hallSizeY + 2*sideOff;
-  G4double rockSizeZ = hallSizeZ + frontOff + backOff;
-
-  auto rockBox = new G4Box("rockBox",
-							rockSizeX/2,
-							rockSizeY/2,
-							rockSizeZ/2);
-
-  G4ThreeVector rockOffset( 0,0, (frontOff/2)-(backOff/2));
-
-  auto rockEnvelopeSolid = new G4SubtractionSolid("rockEnvelopeSolid", rockBox, hallBox, 0, rockOffset);
-  auto rockEnvelope = new G4LogicalVolume(rockEnvelopeSolid, LArBoxMaterials->Material("Rock"), "rockEnvelope");
-
-  auto rockEnvelopePV = new G4PVPlacement(nullptr, hallOffset-rockOffset, rockEnvelope, "rockEnvelopePV", worldLV, false, 0, fCheckOverlap);
-
   hallLV = new G4LogicalVolume(hallBox, LArBoxMaterials->Material("Air"), "hallLV");
   auto hallPV = new G4PVPlacement(nullptr, hallOffset, hallLV, "hallPV", worldLV, false, 0, fCheckOverlap);
+
+  //----------------------------------
+  // Rock envelope
+
+  if(m_enableRockEnvelope){
+
+    G4double rockSizeX = hallSizeX + 2*GeometricalParameters::Get()->GetRockSideThickness();
+    G4double rockSizeY = hallSizeY + 2*GeometricalParameters::Get()->GetRockSideThickness();
+    G4double rockSizeZ = hallSizeZ + GeometricalParameters::Get()->GetRockFrontThickness()
+                                   + GeometricalParameters::Get()->GetRockBackThickness();
+    G4ThreeVector rockOffset( 0, 0, (GeometricalParameters::Get()->GetRockFrontThickness()/2)-(GeometricalParameters::Get()->GetRockBackThickness()/2));
+
+    auto rockBox = new G4Box("rockBox",rockSizeX/2,rockSizeY/2,rockSizeZ/2);
+    auto rockEnvelopeSolid = new G4SubtractionSolid("rockEnvelopeSolid", rockBox, hallBox, 0, rockOffset);
+    auto rockEnvelope = new G4LogicalVolume(rockEnvelopeSolid, LArBoxMaterials->Material("Rock"), "rockEnvelope");
+    auto rockEnvelopePV = new G4PVPlacement(nullptr, hallOffset-rockOffset, rockEnvelope, "rockEnvelopePV", worldLV, false, 0, fCheckOverlap);
+
+    G4cout << "Placing rock envelope: upstream " << GeometricalParameters::Get()->GetRockFrontThickness()
+           << " downstream " << GeometricalParameters::Get()->GetRockBackThickness()
+           << " side " << GeometricalParameters::Get()->GetRockSideThickness() << G4endl;
+
+    G4VisAttributes* rockVis = new G4VisAttributes(G4Colour(167./255, 168./255, 189./255));
+    rockVis->SetVisibility(true);
+    rockEnvelope->SetVisAttributes(rockVis);       
+  }
 
   //-----------------------------------
   // FLArE TPC volume
