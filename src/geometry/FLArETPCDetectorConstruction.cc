@@ -110,20 +110,29 @@ void FLArETPCDetectorConstruction::BuildFLArETPC()
       = new G4Box("TPCModuleBox", TPCModuleWidth/2, TPCModuleHeight/2, TPCModuleLength/2);
     fFLArETPCLog = new G4LogicalVolume(TPCModuleSolid, detectorMaterial, "TPCModuleLog");
 
-	for (int numYBoxes = 1 ; numYBoxes <  (fLArSizeY/dimBox) ; numYBoxes++) {
-		for (int numXBoxes = 1 ; numXBoxes <  (fLArSizeX/dimBox) ; numXBoxes++) {
-			for (int numZBoxes = 1 ; numZBoxes <  (fLArSizeZ/dimBox) ; numZBoxes++) {
-				 auto miniBox  = new G4Box("miniBox", numXBoxes*(fLArSizeX/dimBox),
-								numYBoxes*(fLArSizeY/dimBox),
-								numZBoxes*(fLArSizeZ/dimBox));
-				auto TPCLayerLogical  = new G4LogicalVolume(miniBox, detectorMaterial, "TPCLayerLogical");
 
+ 	 auto miniBox  = new G4Box("miniBox", (fLArSizeX/dimBox),
+								(fLArSizeY/dimBox),
+								(fLArSizeZ/dimBox));
+	auto miniBoxLog  = new G4LogicalVolume(miniBox, detectorMaterial, "miniBoxLog");
+
+
+	for (int currBoxLenY =  (fLArSizeY/dimBox)  ; currBoxLenY < flArSizeY ; currBoxLenY+= (fLArSizeY/dimBox) ) {
+		for (int currBoxLenX =  (fLArSizeX/dimBox)  ; currBoxLenX < flArSizeX ; currBoxLenX+= (fLArSizeX/dimBox) ) {
+			for (int currBoxLenZ =  (fLArSizeZ/dimBox)  ; currBoxLenZ < flArSizeZ ; currBoxLenZ+= (fLArSizeZ/dimBox) ) {
+
+				G4PVPlacement(0,
+					G4ThreeVector( , , ),
+					miniBoxLog ,
+					"miniPlaced", fFLArETPCAssembly,false,0)
+
+			//	TPCLayerLogical->SetVisAttributes(lArBoxVis);
+			//TPCLayerLogical->SetUserLimits(new G4UserLimits(0.5*mm));
 
 			}
 		}
 	}
-
-   // new G4PVReplica("TPCModulePhysical", fFLArETPCLog, TPCLayerLogical, kXAxis, 3, TPCModuleWidth);
+  // new G4PVReplica("TPCModulePhysical", fFLArETPCLog, TPCLayerLogical, kXAxis, 3, TPCModuleWidth);
    // new G4PVReplica("TPC", TPCLayerLogical, lArBoxLog, kZAxis, 7, TPCLayerLength);
     G4VisAttributes* TPCModuleVis = new G4VisAttributes(G4Colour(86./255, 152./255, 195./255));
     TPCModuleVis->SetVisibility(true);
@@ -132,7 +141,8 @@ void FLArETPCDetectorConstruction::BuildFLArETPC()
     TPCLayerLogical->SetVisAttributes(lArBoxVis);
     fFLArETPCLog->SetVisAttributes(TPCModuleVis);
     fFLArETPCLog->SetUserLimits(new G4UserLimits(0.5*mm));
-  }
+
+     }
 }
 
 void FLArETPCDetectorConstruction::BuildCryostatInsulation()
