@@ -168,7 +168,9 @@ void BackgroundGenerator::GeneratePrimaries(G4Event* anEvent)
       // then extract the direction (directional cosines) from second histogram
       // TODO: you should actually be using a 5D histo for full correlations?
      
-      double z = -1.*GeometricalParameters::Get()->GetHallHeadDistance(); //entry wall z in mm
+      double z = (GeometricalParameters::Get()->GetEnableRockEnvelope()) ? 
+                  -1.*(GeometricalParameters::Get()->GetHallHeadDistance()+GeometricalParameters::Get()->GetRockFrontThickness())
+                  : -1.*GeometricalParameters::Get()->GetHallHeadDistance(); //entry wall z in mm
       double t = 0.; // TODO: imprint the bunch-crossing timing structure?
       double x, y, E;
       fhxyE->GetRandom3(x, y, E); //pos in cm, E in GeV
