@@ -125,9 +125,9 @@ void FLArETPCDetectorConstruction::BuildFLArETPC()
 
 	if ((fmod(boxSizeZ,two) != 0 ) || (fmod(boxSizeY,two) != 0) || (fmod(boxSizeX,two) != 0 ))  {isError = true;}
 
-	G4double startEndZ = (fLArSizeZ/dimBox)/2  - 0.5*dimBox;
-	G4double startEndY = (fLArSizeY/dimBox)/2  - 0.5*dimBox;
-	G4double startEndX = (fLArSizeX/dimBox)/2  - 0.5*dimBox;
+	G4double startEndZ = ((fLArSizeZ/dimBox)/2  - 0.5)*dimBox;
+	G4double startEndY = ((fLArSizeY/dimBox)/2  - 0.5)*dimBox;
+	G4double startEndX = ((fLArSizeX/dimBox)/2 -0.5)*dimBox;
 
 
 
@@ -139,7 +139,7 @@ void FLArETPCDetectorConstruction::BuildFLArETPC()
 					G4ThreeVector(currPosX, currPosY, currPosZ),
 					miniBoxLog ,
 					"miniPlaced", lArBoxLog,false,0);
-			std::cout<<"PLS"<<std::endl;
+			//std::cout<<"PLS"<<startEndX<<std::endl;
 			//	TPCLayerLogical->SetVisAttributes(lArBoxVis);
 			//TPCLayerLogical->SetUserLimits(new G4UserLimits(0.5*mm));
 		//	 G4VisAttributes* rockVis = new G4VisAttributes(G4Colour(167./255, 168./255, 189./255));
