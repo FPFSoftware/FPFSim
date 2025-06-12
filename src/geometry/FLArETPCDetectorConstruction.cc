@@ -93,7 +93,7 @@ void FLArETPCDetectorConstruction::BuildFLArETPC()
     lArBoxLog->SetVisAttributes(lArBoxVis);
 
 
-	G4double dimBox = 30 ;
+	G4double dimBox = 30 ; //the size of the mini boxes' length, width, & height
 
     G4double TPCLayerWidth   = fLArSizeX;
     G4double TPCLayerHeight  = fLArSizeY;
@@ -117,18 +117,34 @@ void FLArETPCDetectorConstruction::BuildFLArETPC()
 	auto miniBoxLog  = new G4LogicalVolume(miniBox, detectorMaterial, "miniBoxLog");
 
 
-	for (int currBoxLenY =  (fLArSizeY/dimBox)  ; currBoxLenY < flArSizeY ; currBoxLenY+= (fLArSizeY/dimBox) ) {
-		for (int currBoxLenX =  (fLArSizeX/dimBox)  ; currBoxLenX < flArSizeX ; currBoxLenX+= (fLArSizeX/dimBox) ) {
-			for (int currBoxLenZ =  (fLArSizeZ/dimBox)  ; currBoxLenZ < flArSizeZ ; currBoxLenZ+= (fLArSizeZ/dimBox) ) {
+	G4double boxSizeZ = (fLArSizeZ/dimBox);
+	G4double boxSizeY = (fLArSizeY/dimBox);
+	G4double boxSizeX = (fLArSizeX/dimBox);
+	G4double two = 2;
+	bool isError = false;
 
-				G4PVPlacement(0,
-					G4ThreeVector( , , ),
+	if ((fmod(boxSizeZ,two) != 0 ) || (fmod(boxSizeY,two) != 0) || (fmod(boxSizeX,two) != 0 ))  {isError = true;}
+
+	G4double startEndZ = (fLArSizeZ/dimBox)/2  - 0.5*dimBox;
+	G4double startEndY = (fLArSizeY/dimBox)/2  - 0.5*dimBox;
+	G4double startEndX = (fLArSizeX/dimBox)/2  - 0.5*dimBox;
+
+
+
+	for (int currPosY =  -startEndY ; currPosY < startEndY ; currPosY+= (fLArSizeY/dimBox) ) {
+		for (int currPosX =  -startEndX ; currPosX < startEndX ; currPosX+= (fLArSizeX/dimBox) ) {
+			for (int currPosZ =  -startEndZ; currPosZ < startEndZ ; currPosZ+= (fLArSizeZ/dimBox) ) {
+
+			new	G4PVPlacement(0,
+					G4ThreeVector(currPosX, currPosY, currPosZ),
 					miniBoxLog ,
-					"miniPlaced", fFLArETPCAssembly,false,0)
+					"miniPlaced", lArBoxLog,false,0);
 
 			//	TPCLayerLogical->SetVisAttributes(lArBoxVis);
 			//TPCLayerLogical->SetUserLimits(new G4UserLimits(0.5*mm));
-
+		//	 G4VisAttributes* rockVis = new G4VisAttributes(G4Colour(167./255, 168./255, 189./255));
+   		//	 rockVis->SetVisibility(true);
+    	//	 rockEnvelope->SetVisAttributes(rockVis);
 			}
 		}
 	}
