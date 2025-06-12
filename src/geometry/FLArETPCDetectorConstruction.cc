@@ -131,15 +131,15 @@ void FLArETPCDetectorConstruction::BuildFLArETPC()
 
 
 
-	for (int currPosY =  -startEndY ; currPosY < startEndY ; currPosY+= (fLArSizeY/dimBox) ) {
-		for (int currPosX =  -startEndX ; currPosX < startEndX ; currPosX+= (fLArSizeX/dimBox) ) {
-			for (int currPosZ =  -startEndZ; currPosZ < startEndZ ; currPosZ+= (fLArSizeZ/dimBox) ) {
+	for (int currPosY =  -startEndY ; currPosY < startEndY ; currPosY+= (dimBox) ) {
+		for (int currPosX =  -startEndX ; currPosX < startEndX ; currPosX+= (dimBox) ) {
+			for (int currPosZ =  -startEndZ; currPosZ < startEndZ ; currPosZ+= (dimBox) ) {
 
 			new	G4PVPlacement(0,
 					G4ThreeVector(currPosX, currPosY, currPosZ),
 					miniBoxLog ,
 					"miniPlaced", lArBoxLog,false,0);
-
+			std::cout<<"PLS"<<std::endl;
 			//	TPCLayerLogical->SetVisAttributes(lArBoxVis);
 			//TPCLayerLogical->SetUserLimits(new G4UserLimits(0.5*mm));
 		//	 G4VisAttributes* rockVis = new G4VisAttributes(G4Colour(167./255, 168./255, 189./255));
