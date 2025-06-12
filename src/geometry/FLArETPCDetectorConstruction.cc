@@ -93,7 +93,9 @@ void FLArETPCDetectorConstruction::BuildFLArETPC()
     lArBoxLog->SetVisAttributes(lArBoxVis);
 
 
-	G4double dimBox = 100 ; //the size of the mini boxes' length, width, & height
+	G4double dimBoxZ = 350 ; //the size of the mini boxes' z side
+	G4double dimBoxXY = 300; // the size of the mini boxes' x and y sides
+
 
     G4double TPCLayerWidth   = fLArSizeX;
     G4double TPCLayerHeight  = fLArSizeY;
@@ -108,49 +110,31 @@ void FLArETPCDetectorConstruction::BuildFLArETPC()
       = new G4LogicalVolume(TPCLayerSolid, detectorMaterial, "TPCLayerLogical");
     auto TPCModuleSolid
       = new G4Box("TPCModuleBox", TPCModuleWidth/2, TPCModuleHeight/2, TPCModuleLength/2);
-    fFLArETPCLog = new G4LogicalVolume(TPCModuleSolid, detectorMaterial, "TPCModuleLog");
+    //fFLArETPCLog = new G4LogicalVolume(TPCModuleSolid, detectorMaterial, "TPCModuleLog"); //old TPC
 
 
- 	 auto miniBox  = new G4Box("miniBox", (dimBox/2),
-								(dimBox/2),
-								(dimBox/2));
+ 	 auto miniBox  = new G4Box("miniBox", (dimBoxXY/2),
+								(dimBoxXY/2),
+								(dimBoxZ/2));
 	fFLArETPCLog  = new G4LogicalVolume(miniBox, detectorMaterial, "miniBoxLog");
 
+	//adding the boxes
+	G4double startEndZ = (fLArSizeZ)/2  - 0.5*dimBoxZ;
+	G4double startEndY = (fLArSizeY)/2  - 0.5*dimBoxXY;
+	G4double startEndX = (fLArSizeX)/2 - 0.5*dimBoxXY;
 
-	G4double boxSizeZ = (fLArSizeZ/dimBox);
-	G4double boxSizeY = (fLArSizeY/dimBox);
-	G4double boxSizeX = (fLArSizeX/dimBox);
-	G4double two = 2;
-	bool isError = false;
+    int count = 0;
 
-	/* if ((fmod(boxSizeZ,two) != 0 ) || (fmod(boxSizeY,two) != 0) || (fmod(boxSizeX,two) != 0 ))  {isError = true;} */
-
-	int startEndZ = int((fLArSizeZ/dimBox)/2  - 0.5);
-	int startEndY = int((fLArSizeY/dimBox)/2  - 0.5);
-	int startEndX = int((fLArSizeX/dimBox)/2 -0.5);
-
-   int count = 0;
-	/* new	G4PVPlacement(0, */
-	/* 				G4ThreeVector( 0, 0, 0), */
-	/* 				fFLArETPCLog , */
-	/* 				"miniPlaced", lArBoxLog, false,0); */
-
-	for (int boxNumX =  -startEndX; boxNumX < startEndX; boxNumX++ ) {
-		for (int boxNumY =  -startEndY ; boxNumY < startEndY; boxNumY++) {
-			for (int boxNumZ =  -startEndZ; boxNumZ < startEndZ ; boxNumZ++ ) {
+	for (int boxNumX =  0; boxNumX < (fLArSizeX/dimBoxXY); boxNumX++ ) {
+		for (int boxNumY =  0 ; boxNumY < (fLArSizeY/dimBoxXY); boxNumY++) {
+			for (int boxNumZ = 0 ; boxNumZ < (fLArSizeZ/dimBoxZ); boxNumZ++ ) {
 
 			new	G4PVPlacement(0,
-					G4ThreeVector( boxNumX*dimBox, boxNumY*dimBox, boxNumZ*dimBox),
-					fFLArETPCLog ,
-					"miniPlaced", lArBoxLog, false,count);
+					G4ThreeVector(  boxNumX*dimBoxXY-startEndX,
+									boxNumY*dimBoxXY-startEndY,
+									boxNumZ*dimBoxZ-startEndZ),
+					fFLArETPCLog, "miniPlaced", lArBoxLog, false, count);
 			count++;
-
-			std::cout<<"PLS"<<boxNumX<<"x"<<boxNumY<<"y"<<boxNumZ<<"z"<<std::endl;
-			//	TPCLayerLogical->SetVisAttributes(lArBoxVis);
-			//TPCLayerLogical->SetUserLimits(new G4UserLimits(0.5*mm));
-		//	 G4VisAttributes* rockVis = new G4VisAttributes(G4Colour(167./255, 168./255, 189./255));
-   		//	 rockVis->SetVisibility(true);
-    	//	 rockEnvelope->SetVisAttributes(rockVis);
 			}
 		}
 	}
