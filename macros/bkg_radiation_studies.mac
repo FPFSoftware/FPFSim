@@ -1,0 +1,24 @@
+# define detector material before run initialization
+/control/execute macros/geometry_options/FLArE_only_BabyMIND.mac
+
+/run/initialize
+/random/setSeeds 324199 420475
+
+# define genie input options
+/gen/select background
+/gen/bkg/backgroundInput ../backgrounds/background_input.root
+/gen/bkg/backgroundWindow 187.5 us
+
+# define output options
+/histo/save3DEvd false
+/histo/save2DEvd false
+/histo/saveHit false
+/histo/addDiffusion false
+/histo/fileName test_flare_score.root
+
+# store and save trajectories for EVD
+/tracking/storeTrajectory 0
+/histo/saveTrack false
+
+# shoot background equivalent to 1 "spill"
+/run/beamOn 1

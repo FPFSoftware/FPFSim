@@ -32,7 +32,10 @@ class LArBoxHit : public G4VHit {
     void SetStepLength(G4double steplength) { fStepLength = steplength; }
     void SetEdep(G4double edep) { fEdep = edep; }
     void SetEdepPosition(G4ThreeVector& edepPos) { fEdepPosition = edepPos; }
-    void SetVolume(G4String volumeName) { fVolumeName = volumeName; }
+    void SetPreVolume(G4String volumeName) { fPreVolumeName = volumeName; }
+    void SetCopyNumPreVolume(G4int copyNumber) { fCopyNumPreVol = copyNumber; }
+    void SetPostVolume(G4String volumeName) { fPostVolumeName = volumeName; }
+    void SetCopyNumPostVolume(G4int copyNumber) { fCopyNumPostVol = copyNumber; }
     void SetStepStatus(G4int stepstatus) { fStepStatus = stepstatus; }
     void SetTrackIsFromPrimaryPizero(G4int i) { fTrackIsFromPrimaryPizero = i; }
     void SetTrackIsFromFSLPizero(G4int i) { fTrackIsFromFSLPizero = i; }
@@ -56,7 +59,10 @@ class LArBoxHit : public G4VHit {
     G4double GetStepLength() const { return fStepLength; }
     G4double GetEdep() const { return fEdep; }
     G4ThreeVector GetEdepPosition() const { return fEdepPosition; }
-    G4String GetVolume() const { return fVolumeName; }
+    G4String GetPostVolume() const { return fPostVolumeName; }
+    G4int GetCopyNumPostVolume() const { return fCopyNumPostVol; }
+    G4String GetPreVolume() const { return fPreVolumeName; }
+    G4int GetCopyNumPreVolume() const { return fCopyNumPreVol; }
     G4int GetStepStatus() const { return fStepStatus; }
     G4int GetIsTrackFromPrimaryPizero() const { return fTrackIsFromPrimaryPizero; }
     G4int GetIsTrackFromFSLPizero() const { return fTrackIsFromFSLPizero; }
@@ -80,7 +86,10 @@ class LArBoxHit : public G4VHit {
     G4double fStepLength;
     G4double fEdep;
     G4ThreeVector fEdepPosition;
-    G4String fVolumeName;
+    G4String fPreVolumeName;
+    G4int fCopyNumPreVol;
+    G4String fPostVolumeName;
+    G4int fCopyNumPostVol;
     G4int fStepStatus;
     G4bool fHitFromFSL;
     G4int fTrackIsFromPrimaryPizero;

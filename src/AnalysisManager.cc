@@ -173,6 +173,33 @@ void AnalysisManager::bookTrkTree() {
 
 }
 
+void AnalysisManager::bookRadTree(){
+
+    rad = new TTree("flare_score", "score info for FLArE");
+
+    rad->Branch("evtID", &evtID, "evtID/I");
+    rad->Branch("trackID", &trackID, "trackID/I");                     
+    rad->Branch("parentID", &parentID, "parentID/I");                     
+    rad->Branch("PDG", &PDG, "PDG/I"); 
+    rad->Branch("initKinE", &initKinE, "initKinE/D");
+    rad->Branch("numSteps", &numSteps, "numSteps/I"); 
+    rad->Branch("stepID", &stepID, "stepID/I"); 
+    rad->Branch("stepLength", &stepLength, "stepLength/D");
+    rad->Branch("stepEDep", &stepEDep, "stepEDep/D");
+    rad->Branch("preX", &preX, "preX/D");
+    rad->Branch("preY", &preY, "preY/D");
+    rad->Branch("preZ", &preZ, "preZ/D");
+    rad->Branch("preName", &preName, "preName/s");
+    rad->Branch("preID", &preID, "preID/I");
+    rad->Branch("postX", &postX, "postX/D");
+    rad->Branch("postY", &postY, "postY/D");
+    rad->Branch("postZ", &postZ, "postZ/D");
+    rad->Branch("postName", &postName, "postName/s");
+    rad->Branch("postID", &postID, "postID/I");
+
+}
+
+
 void AnalysisManager::BeginOfRun() {
   
   G4cout<<"TTree is booked and the run has been started"<<G4endl;
@@ -182,6 +209,7 @@ void AnalysisManager::BeginOfRun() {
   thefile = new TFile(m_filename.c_str(), "RECREATE");
   bookEvtTree();
   if(m_saveTrack) bookTrkTree();
+  bookRadTree();
 
   fH5Filename = m_filename;
   if(fH5Filename.find(".root") != std::string::npos) {
@@ -203,6 +231,7 @@ void AnalysisManager::EndOfRun() {
   thefile->cd();
   evt->Write();
   if(m_saveTrack) trk->Write();
+  rad->Write();
   thefile->Close();
   fH5file.close();
 }
@@ -287,6 +316,25 @@ void AnalysisManager::BeginOfEvent() {
   tracksFromFSPizeroSecondary.clear();
   tracksFromFSLDecayPizeroSecondary.clear();
   fPrimIdxFSL = -1;
+
+  trackID = -1;                     
+  parentID = -1;     
+  PDG = -1;
+  initKinE = -999;
+  numSteps = 0;
+  stepID = -1;
+  preX = -999;
+  preY = -999;
+  preZ = -999;
+  postX = -999;
+  postY = -999;
+  postZ = -999;
+  stepLength = -999;
+  stepEDep = -999;
+  preID = -1;
+  postID = -1;
+  preName = "";
+  postName = "";
 
   magzpos.clear();
   trkxc.clear(); 
@@ -533,19 +581,19 @@ void AnalysisManager::EndOfEvent(const G4Event* event) {
         trackTID = trajectory->GetTrackID();
         trackPID = trajectory->GetParentID();
         trackPDG = trajectory->GetPDGEncoding();
-	trackKinE = trajectory->GetInitialKineticEnergy();
+	      trackKinE = trajectory->GetInitialKineticEnergy();
         trackNPoints = trajectory->GetPointEntries();
         count_tracks++;
-	for (size_t j = 0; j < trackNPoints; ++j) {
+	    for (size_t j = 0; j < trackNPoints; ++j) {
           G4ThreeVector pos = trajectory->GetPoint(j)->GetPosition();
-	  trackPointX.push_back( pos.x() );
-	  trackPointY.push_back( pos.y() );
-	  trackPointZ.push_back( pos.z() );
+          trackPointX.push_back( pos.x() );
+          trackPointY.push_back( pos.y() );
+          trackPointZ.push_back( pos.z() );
         }
         trk->Fill();
-	trackPointX.clear();
-	trackPointY.clear();
-	trackPointZ.clear();
+        trackPointX.clear();
+        trackPointY.clear();
+        trackPointZ.clear();
       }
     } else G4cout << "No tracks found: did you enable their storage with '/tracking/storeTrajectory 1'?" << G4endl;
     G4cout << "---> Done!" << G4endl;
@@ -594,6 +642,32 @@ void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
           HitPosPositionZ[nHits-1] = post_z;
           HitEdep[nHits-1] = hit->GetEdep();
         }
+      }
+
+      // rad tree filling
+      if (sdName == "lArBoxSD/lar_box") {
+
+        trackID = hit->GetTID();                     
+        parentID = hit->GetPID();     
+        PDG = hit->GetParticle();
+        initKinE = hit->GetInitKinEnergy();
+        //int numSteps;
+        stepID = hit->GetStepNo();
+        preX = pre_x;
+        preY = pre_y;
+        preZ = pre_z;
+        postX = post_x;
+        postY = post_y;
+        postZ = post_z;
+        stepLength = hit->GetStepLength();
+        stepEDep =  hit->GetEdep();
+        preID = hit->GetCopyNumPreVolume();
+        postID = hit->GetCopyNumPostVolume();
+        preName = hit->GetPreVolume();
+        postName = hit->GetPostVolume();
+
+        rad->Fill();
+
       }
 
       // energy deposition in different volumes of the detector

@@ -62,7 +62,10 @@ G4bool LArBoxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* R0hist) {
   // extra info
   G4double edep      = aStep->GetTotalEnergyDeposit();
   G4ThreeVector pos  = 0.5*(PreStepPosition + PostStepPosition);
-  G4String PosVolume = PostStep->GetPhysicalVolume()->GetName();
+  G4String PreVolume = PreStep->GetPhysicalVolume()->GetName();
+  G4int copyNumPre = PreStep->GetTouchableHandle()->GetCopyNumber();
+  G4String PostVolume = PostStep->GetPhysicalVolume()->GetName();
+  G4int copyNumPost = PostStep->GetTouchableHandle()->GetCopyNumber();
   G4int StepStatus   = PostStep->GetStepStatus();
 
   TrackInformation* aTrackInfo = (TrackInformation*)(aTrack->GetUserInformation());
@@ -92,7 +95,10 @@ G4bool LArBoxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* R0hist) {
   hit->SetCreatorProcess(CreatorProcess);
   hit->SetProcessName(ProcessName);
   hit->SetStepLength(StepLength);
-  hit->SetVolume(PosVolume);
+  hit->SetPreVolume(PreVolume);
+  hit->SetCopyNumPreVolume(copyNumPre);
+  hit->SetPostVolume(PostVolume);
+  hit->SetCopyNumPostVolume(copyNumPost);
   hit->SetStepStatus(StepStatus);
   hit->SetTrackIsFromPrimaryPizero(trackIsFromPrimaryPizero);
   hit->SetTrackIsFromFSLPizero(trackIsFromFSLPizero);
