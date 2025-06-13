@@ -203,7 +203,8 @@ void AnalysisManager::bookRadTrees(){
     rad = new TTree("flare_scores", "score info for FLArE");
     rad->Branch("evtID", &evtID, "evtID/I");
     rad->Branch("trackID", &trackID, "trackID/I");                     
-    rad->Branch("parentID", &parentID, "parentID/I");                     
+    rad->Branch("parentID", &parentID, "parentID/I");
+    rad->Branch("PDG", &PDG, "PDG/I");                    
     rad->Branch("initKinE", &initKinE, "initKinE/D");
     rad->Branch("stepID", &stepID, "stepID/I"); 
     rad->Branch("stepLength", &stepLength, "stepLength/D");
