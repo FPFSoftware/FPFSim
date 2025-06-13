@@ -52,7 +52,8 @@ class DetectorConstructionMessenger: public G4UImessenger {
     G4UIcmdWithAString* flareGeomCmd;
     G4UIcmdWithADoubleAndUnit* flareFieldCmd;
     G4UIcmdWithABool* flareUseBabyMINDCmd;
-    
+    G4UIcmdWithABool* flareUseNativeG4ScorerCmd;
+
     // ------------------------------------
     // Detector /det/babymind/ commands
     G4UIcmdWithADoubleAndUnit* babymindMagnetPlateThickCmd;

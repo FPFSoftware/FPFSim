@@ -84,7 +84,7 @@ void FLArETPCDetectorConstruction::BuildFLArETPC()
     lArBoxVis->SetForceWireframe(true);
     lArBoxVis->SetForceAuxEdgeVisible(true);
     fFLArETPCLog->SetVisAttributes(lArBoxVis);
-    fFLArETPCLog->SetUserLimits(new G4UserLimits(0.5*mm));
+    //fFLArETPCLog->SetUserLimits(new G4UserLimits(0.5*mm));
   } else if (fDetGeomOption == GeometricalParameters::tpcConfigOption::ThreeBySeven) {
     G4cout << "TPC module configuration: 3x7" << G4endl;
     lArBoxLog = new G4LogicalVolume(lArBox, detectorMaterial, "TPCModuleLogical");
@@ -93,9 +93,10 @@ void FLArETPCDetectorConstruction::BuildFLArETPC()
     lArBoxLog->SetVisAttributes(lArBoxVis);
 
 
-	G4double dimBoxZ = 350 ; //the size of the mini boxes' z side
-	G4double dimBoxXY = 300; // the size of the mini boxes' x and y sides
+	G4double dimBoxZ = 350*mm; //the size of the mini boxes' z side
+	G4double dimBoxXY = 300*mm; // the size of the mini boxes' x and y sides
 
+    GeometricalParameters::Get()->SetScoreHalfSizes(G4ThreeVector(dimBoxXY,dimBoxXY,dimBoxZ));
 
     G4double TPCLayerWidth   = fLArSizeX;
     G4double TPCLayerHeight  = fLArSizeY;
@@ -129,11 +130,16 @@ void FLArETPCDetectorConstruction::BuildFLArETPC()
 		for (int boxNumY =  0 ; boxNumY < (fLArSizeY/dimBoxXY); boxNumY++) {
 			for (int boxNumZ = 0 ; boxNumZ < (fLArSizeZ/dimBoxZ); boxNumZ++ ) {
 
+
+      G4ThreeVector pos(boxNumX*dimBoxXY-startEndX, boxNumY*dimBoxXY-startEndY, boxNumZ*dimBoxZ-startEndZ);
 			new	G4PVPlacement(0,
-					G4ThreeVector(  boxNumX*dimBoxXY-startEndX,
-									boxNumY*dimBoxXY-startEndY,
-									boxNumZ*dimBoxZ-startEndZ),
-					fFLArETPCLog, "miniPlaced", lArBoxLog, false, count);
+					              pos,
+					              fFLArETPCLog,
+                        "miniPlaced",
+                        lArBoxLog,
+                        false,
+                        count);
+      GeometricalParameters::Get()->AddScoreVolume(count,pos);
 			count++;
 			}
 		}
@@ -146,7 +152,7 @@ void FLArETPCDetectorConstruction::BuildFLArETPC()
     TPCModuleVis->SetForceAuxEdgeVisible(true);
     TPCLayerLogical->SetVisAttributes(lArBoxVis);
     fFLArETPCLog->SetVisAttributes(TPCModuleVis);
-    fFLArETPCLog->SetUserLimits(new G4UserLimits(0.5*mm));
+    //fFLArETPCLog->SetUserLimits(new G4UserLimits(0.5*mm));
 
      }
 }

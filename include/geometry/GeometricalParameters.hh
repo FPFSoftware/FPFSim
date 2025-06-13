@@ -2,6 +2,7 @@
 #define GeometricalParameters_hh
 
 #include <set>
+#include <map>
 
 #include "G4String.hh"
 #include "G4ThreeVector.hh"
@@ -221,6 +222,11 @@ class GeometricalParameters  {
     void AddSD2List(int idx, std::string val) { fSDNamelist.insert(std::make_pair(idx, val)); }
     std::set<std::pair<int, std::string> > GetSDNamelist() { return fSDNamelist; }
 
+    void AddScoreVolume(int cpyNum, G4ThreeVector v) { fScoreVolumes.insert(std::make_pair(cpyNum,v)); }
+    std::map<int,G4ThreeVector> GetScoreVolumes() { return fScoreVolumes; }
+    void SetScoreHalfSizes(G4ThreeVector v) { fScoreHalfSizes = v;}
+    G4ThreeVector GetScoreHalfSizes() { return fScoreHalfSizes; }
+
   private:
     //the singleton
     static GeometricalParameters *me;
@@ -340,6 +346,8 @@ class GeometricalParameters  {
 
     // Sensitive detectors
     std::set<std::pair<int, std::string> > fSDNamelist;
+    std::map<int,G4ThreeVector> fScoreVolumes;
+    G4ThreeVector fScoreHalfSizes;
 };
 
 #endif 

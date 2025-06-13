@@ -22,21 +22,17 @@
 #include <G4ThreeVector.hh>
 #include <G4PhysicalConstants.hh>
 #include <G4SystemOfUnits.hh>
-#include <G4OpticalSurface.hh>
-#include <G4LogicalBorderSurface.hh>
-#include <G4LogicalSkinSurface.hh>
 #include <G4SDManager.hh>
 #include <G4RunManager.hh>
 #include <G4GeometryManager.hh>
-#include <G4PhysicalVolumeStore.hh>
-#include <G4LogicalVolumeStore.hh>
-#include <G4SolidStore.hh>
-#include <G4UserLimits.hh>
 #include <G4GlobalMagFieldMessenger.hh>
 #include <G4UniformMagField.hh>
 #include <G4FieldManager.hh>
 #include <G4GDMLParser.hh>
 #include <G4SubtractionSolid.hh>
+#include <G4MultiFunctionalDetector.hh>
+#include <G4PSTrackLength.hh>
+#include <G4SDParticleFilter.hh> 
 
 using namespace std;
 
@@ -290,6 +286,51 @@ void DetectorConstruction::ConstructSDandField() {
     sdManager->AddNewDetector(TPCModuleSD);
     GeometricalParameters::Get()->AddSD2List(SDIdx, "lArBoxSD/lar_box");
     SDIdx++;
+    
+    if (m_useNativeG4Scorer){
+    G4MultiFunctionalDetector* mfd = new G4MultiFunctionalDetector("lArBoxMFD");
+
+    auto muplusScorer = new G4PSTrackLength("MuPlusTrackLength");
+    auto muplusFilter = new G4SDParticleFilter("MuPlusFilter");
+    muplusFilter->add("mu+");
+    muplusScorer->SetFilter(muplusFilter);
+    muplusScorer->SetUnit("mm");
+
+    auto muminusScorer = new G4PSTrackLength("MuMinusTrackLength");
+    auto muminusFilter = new G4SDParticleFilter("MuMinusFilter");
+    muminusFilter->add("mu-");
+    muminusScorer->SetFilter(muminusFilter);
+    muminusScorer->SetUnit("mm");
+
+    auto neutronScorer = new G4PSTrackLength("NeutronTrackLength");
+    auto neutronFilter = new G4SDParticleFilter("NeutronFilter");
+    neutronFilter->add("neutron");
+    neutronScorer->SetFilter(neutronFilter);
+    neutronScorer->SetUnit("mm");
+
+    auto gammaScorer = new G4PSTrackLength("GammaTrackLength");
+    auto gammaFilter = new G4SDParticleFilter("GammaFilter");
+    gammaFilter->add("gamma");
+    gammaScorer->SetFilter(gammaFilter);
+    gammaScorer->SetUnit("mm");
+
+    mfd->RegisterPrimitive(muplusScorer);
+    mfd->RegisterPrimitive(muminusScorer);
+    mfd->RegisterPrimitive(neutronScorer);
+    mfd->RegisterPrimitive(gammaScorer);
+
+    TPCModuleLogical->SetSensitiveDetector(mfd);
+    sdManager->AddNewDetector(mfd);
+
+    GeometricalParameters::Get()->AddSD2List(SDIdx, "lArBoxMFD/MuPlusTrackLength");
+    SDIdx++;
+    GeometricalParameters::Get()->AddSD2List(SDIdx, "lArBoxMFD/MuMinusTrackLength");
+    SDIdx++;
+    GeometricalParameters::Get()->AddSD2List(SDIdx, "lArBoxMFD/NeutronTrackLength");
+    SDIdx++;
+    GeometricalParameters::Get()->AddSD2List(SDIdx, "lArBoxMFD/GammaTrackLength");
+    SDIdx++;
+    }
 
     if (m_useBabyMIND) {
 

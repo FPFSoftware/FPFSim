@@ -37,6 +37,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
     void AddFASER2(G4bool i) { m_addFASER2 = i; }
     void UseBabyMIND(G4bool i) { m_useBabyMIND = i; }
     void EnableRockEnvelope(G4bool i) { m_enableRockEnvelope = i; }
+    void UseNativeG4Scorer(G4bool i) {m_useNativeG4Scorer = i; }
     void UpdateGeometry();
 
   private:
@@ -56,6 +57,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
     G4bool m_addFASERnu2;
     G4bool m_addFASER2;
     G4bool m_enableRockEnvelope;
+    G4bool m_useNativeG4Scorer;
 
     // FLArE
     G4LogicalVolume* TPCModuleLogical;

@@ -21,7 +21,7 @@ class AnalysisManager {
     static AnalysisManager* GetInstance();
     void bookEvtTree();
     void bookTrkTree();
-    void bookRadTree();
+    void bookRadTrees();
     void BeginOfRun();
     void EndOfRun();
     void BeginOfEvent();
@@ -49,6 +49,8 @@ class AnalysisManager {
     TTree*   evt;
     TTree*   trk;
     TTree*   rad;
+    TDirectory* fDir;
+    std::map<int,TTree*> radTrees;
     std::string  fH5Filename;
     hep_hpc::hdf5::File fH5file;
 
@@ -190,17 +192,19 @@ class AnalysisManager {
     // rad information (plenty of duplicates...)
     int trackID;                     
     int parentID;     
-    int PDG;
     double initKinE;
-    int numSteps;
     int stepID;
     double preX, preY, preZ;
     double postX, postY, postZ;
     double stepLength;
     double stepEDep;
     int preID, postID;
-    std::string preName, postName;
 
+    int PDG;
+    int copyNum;
+    double sumLength;
+    double xvol, yvol, zvol;
+    double dx, dy, dz;
 
   private:
     void FillPrimaryTruthTree(G4int sdId, std::string sdName);

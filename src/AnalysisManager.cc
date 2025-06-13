@@ -25,6 +25,7 @@
 #include <Randomize.hh>
 #include <G4Poisson.hh>
 #include <G4Trajectory.hh>
+#include <G4PhysicalVolumeStore.hh>
 
 #include <TFile.h>
 #include <TTree.h>
@@ -173,28 +174,47 @@ void AnalysisManager::bookTrkTree() {
 
 }
 
-void AnalysisManager::bookRadTree(){
+void AnalysisManager::bookRadTrees(){
 
-    rad = new TTree("flare_score", "score info for FLArE");
+  fDir = thefile->mkdir("scores");
 
+  for (auto sdname : SDNamelist){
+
+    std::string match = "lArBoxMFD/";
+    if( sdname.second.find(match) == std::string::npos ) continue;
+
+    std::string name = sdname.second;
+    name.erase( name.find(match), match.length());
+
+    auto t = new TTree(name.c_str(), "score info for FLArE");
+    t->Branch("evtID", &evtID, "evtID/I");
+    t->Branch("PDG", &PDG, "PDG/I"); 
+    t->Branch("copyNum", &copyNum, "copyNum/I");
+    t->Branch("sumLength", &sumLength, "sumLength/D");
+    t->Branch("xVol", &xvol, "xVol/D");
+    t->Branch("yVol", &yvol, "yVol/D");
+    t->Branch("zVol", &zvol, "zVol/D");
+    t->Branch("dx", &dx, "dx/D");
+    t->Branch("dy", &dy, "dy/D");
+    t->Branch("dz", &dz, "dz/D");
+    radTrees[sdname.first] = t;
+  }
+    
+    rad = new TTree("flare_scores", "score info for FLArE");
     rad->Branch("evtID", &evtID, "evtID/I");
     rad->Branch("trackID", &trackID, "trackID/I");                     
     rad->Branch("parentID", &parentID, "parentID/I");                     
-    rad->Branch("PDG", &PDG, "PDG/I"); 
     rad->Branch("initKinE", &initKinE, "initKinE/D");
-    rad->Branch("numSteps", &numSteps, "numSteps/I"); 
     rad->Branch("stepID", &stepID, "stepID/I"); 
     rad->Branch("stepLength", &stepLength, "stepLength/D");
     rad->Branch("stepEDep", &stepEDep, "stepEDep/D");
     rad->Branch("preX", &preX, "preX/D");
     rad->Branch("preY", &preY, "preY/D");
     rad->Branch("preZ", &preZ, "preZ/D");
-    rad->Branch("preName", &preName, "preName/s");
     rad->Branch("preID", &preID, "preID/I");
     rad->Branch("postX", &postX, "postX/D");
     rad->Branch("postY", &postY, "postY/D");
     rad->Branch("postZ", &postZ, "postZ/D");
-    rad->Branch("postName", &postName, "postName/s");
     rad->Branch("postID", &postID, "postID/I");
 
 }
@@ -209,7 +229,6 @@ void AnalysisManager::BeginOfRun() {
   thefile = new TFile(m_filename.c_str(), "RECREATE");
   bookEvtTree();
   if(m_saveTrack) bookTrkTree();
-  bookRadTree();
 
   fH5Filename = m_filename;
   if(fH5Filename.find(".root") != std::string::npos) {
@@ -225,6 +244,9 @@ void AnalysisManager::BeginOfRun() {
   G4cout<<"Number of SDs : "<<NumberOfSDs<<G4endl;
   for (auto sdname : SDNamelist) 
     G4cout<<sdname.first<<" "<<sdname.second<<G4endl;
+
+  bookRadTrees();
+
 }
 
 void AnalysisManager::EndOfRun() {
@@ -232,6 +254,13 @@ void AnalysisManager::EndOfRun() {
   evt->Write();
   if(m_saveTrack) trk->Write();
   rad->Write();
+
+  thefile->cd(fDir->GetName());
+  for(auto t : radTrees){
+    t.second->Write();
+  }
+  thefile->cd();
+
   thefile->Close();
   fH5file.close();
 }
@@ -317,11 +346,11 @@ void AnalysisManager::BeginOfEvent() {
   tracksFromFSLDecayPizeroSecondary.clear();
   fPrimIdxFSL = -1;
 
+  
   trackID = -1;                     
   parentID = -1;     
   PDG = -1;
   initKinE = -999;
-  numSteps = 0;
   stepID = -1;
   preX = -999;
   preY = -999;
@@ -333,8 +362,6 @@ void AnalysisManager::BeginOfEvent() {
   stepEDep = -999;
   preID = -1;
   postID = -1;
-  preName = "";
-  postName = "";
 
   magzpos.clear();
   trkxc.clear(); 
@@ -615,6 +642,37 @@ void AnalysisManager::EndOfEvent(const G4Event* event) {
 
 void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName) 
 {
+
+  std::string match = "lArBoxMFD";
+  if( sdName.find(match) != std::string::npos )
+  {
+    auto scoremap = static_cast<G4THitsMap<G4double>*>(hcofEvent->GetHC(sdId));
+    auto volumes = GeometricalParameters::Get()->GetScoreVolumes();
+    auto dims = GeometricalParameters::Get()->GetScoreHalfSizes();
+    
+    if( sdName.find("MuPlus") != std::string::npos ) PDG = -13;
+    else if( sdName.find("MuMinus") != std::string::npos ) PDG = 13;
+    else if( sdName.find("Gamma") != std::string::npos ) PDG = 22;
+    else if( sdName.find("Neutron") != std::string::npos ) PDG = 2112;
+    else PDG = -1;
+
+    for (auto &score : *scoremap) 
+    {  
+      copyNum = score.first;
+      sumLength = *(score.second);
+
+      xvol = volumes.at(copyNum).x();
+      yvol = volumes.at(copyNum).y();
+      zvol = volumes.at(copyNum).z();
+
+      dx = dims.x();
+      dy = dims.y();
+      dz = dims.z();
+
+      radTrees[sdId]->Fill();
+    }
+  }
+
   // Get and cast hit collection with LArBoxHits
   LArBoxHitsCollection* hitCollection = dynamic_cast<LArBoxHitsCollection*>(hcofEvent->GetHC(sdId));
   if (hitCollection) {
@@ -646,28 +704,24 @@ void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
 
       // rad tree filling
       if (sdName == "lArBoxSD/lar_box") {
-
-        trackID = hit->GetTID();                     
-        parentID = hit->GetPID();     
         PDG = hit->GetParticle();
-        initKinE = hit->GetInitKinEnergy();
-        //int numSteps;
-        stepID = hit->GetStepNo();
-        preX = pre_x;
-        preY = pre_y;
-        preZ = pre_z;
-        postX = post_x;
-        postY = post_y;
-        postZ = post_z;
-        stepLength = hit->GetStepLength();
-        stepEDep =  hit->GetEdep();
-        preID = hit->GetCopyNumPreVolume();
-        postID = hit->GetCopyNumPostVolume();
-        preName = hit->GetPreVolume();
-        postName = hit->GetPostVolume();
-
-        rad->Fill();
-
+        if(PDG == -13 || PDG == 13 || PDG == 2112 || PDG == 22){
+          trackID = hit->GetTID();                     
+          parentID = hit->GetPID();     
+          initKinE = hit->GetInitKinEnergy();
+          stepID = hit->GetStepNo();
+          preX = pre_x;
+          preY = pre_y;
+          preZ = pre_z;
+          postX = post_x;
+          postY = post_y;
+          postZ = post_z;
+          stepLength = hit->GetStepLength();
+          stepEDep =  hit->GetEdep();
+          preID = hit->GetCopyNumPreVolume();
+          postID = hit->GetCopyNumPostVolume();
+          rad->Fill();
+        }
       }
 
       // energy deposition in different volumes of the detector

@@ -79,6 +79,10 @@ DetectorConstructionMessenger::DetectorConstructionMessenger(DetectorConstructio
     flareUseBabyMINDCmd = new G4UIcmdWithABool("/det/flare/useBabyMIND", this);
     flareUseBabyMINDCmd->SetParameterName("Use BabyMIND detector", true);
     flareUseBabyMINDCmd->SetDefaultValue(false);
+
+    flareUseNativeG4ScorerCmd = new G4UIcmdWithABool("/det/flare/useNativeG4Scorer", this);
+    flareUseNativeG4ScorerCmd ->SetParameterName("useNativeG4Scorer", true);
+    flareUseNativeG4ScorerCmd ->SetDefaultValue(false);
     
     // -------------------------
     // BABYMIND COMMANDS
@@ -240,6 +244,7 @@ DetectorConstructionMessenger::~DetectorConstructionMessenger() {
   delete flareGeomCmd;
   delete flareFieldCmd;
   delete flareUseBabyMINDCmd;
+  delete flareUseNativeG4ScorerCmd;
     
   delete babymindMagnetPlateThickCmd;
   delete babymindMagnetPlateSizeXCmd;
@@ -319,7 +324,8 @@ void DetectorConstructionMessenger::SetNewValue(G4UIcommand* command, G4String n
   else if (command == flareUseBabyMINDCmd){
     det->UseBabyMIND(flareUseBabyMINDCmd->GetNewBoolValue(newValues));
     GeometricalParameters::Get()->SetUseBabyMIND(flareUseBabyMINDCmd->GetNewBoolValue(newValues));
-  }
+  } else if (command == flareUseNativeG4ScorerCmd)
+    det->UseNativeG4Scorer(flareUseNativeG4ScorerCmd->GetNewBoolValue(newValues));
 
   //BABYMIND COMMANDS
   else if (command == babymindMagnetPlateThickCmd)
