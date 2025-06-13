@@ -118,14 +118,14 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     auto rockEnvelope = new G4LogicalVolume(rockEnvelopeSolid, LArBoxMaterials->Material("Rock"), "rockEnvelope");
     auto rockEnvelopePV = new G4PVPlacement(nullptr, hallOffset-rockOffset, rockEnvelope, "rockEnvelopePV", worldLV, false, 0, fCheckOverlap);
 
-    G4cout << "Placing rock envelope: upstream " << GeometricalParameters::Get()->GetRockFrontThickness()
-           << " downstream " << GeometricalParameters::Get()->GetRockBackThickness()
+    G4cout << "Rock envelope enabled: upstream " << GeometricalParameters::Get()->GetRockFrontThickness() << ","
+           << " downstream " << GeometricalParameters::Get()->GetRockBackThickness() << ","
            << " side " << GeometricalParameters::Get()->GetRockSideThickness() << G4endl;
 
     G4VisAttributes* rockVis = new G4VisAttributes(G4Colour(167./255, 168./255, 189./255));
     rockVis->SetVisibility(true);
     rockEnvelope->SetVisAttributes(rockVis);       
-  }
+  } else G4cout << "Rock envelope disabled" << G4endl;
 
   //-----------------------------------
   // FLArE TPC volume
