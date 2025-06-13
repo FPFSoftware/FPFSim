@@ -110,7 +110,7 @@ int BackgroundGenerator::ExtractBackgroundParticles() const
   // use it to extract a realization...
   int Nparticles = 0;
   if(lambda < 100) Nparticles = int(G4Poisson(lambda) + 0.5);
-  else Nparticles = int(G4RandGauss::shoot(Nparticles, TMath::Sqrt(Nparticles))+0.5);
+  else Nparticles = int(G4RandGauss::shoot(lambda, TMath::Sqrt(lambda)+0.5);
 
   return Nparticles;
 }
