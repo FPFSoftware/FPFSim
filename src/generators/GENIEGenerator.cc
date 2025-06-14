@@ -19,6 +19,7 @@
 GENIEGenerator::GENIEGenerator()
 {
   fGeneratorName = "genie";
+  fEvtStartIdx = 0;
   fMessenger = new GENIEGeneratorMessenger(this);
 
   fGSTFile = nullptr;

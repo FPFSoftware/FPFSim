@@ -10,6 +10,7 @@ class BackgroundGenerator;
 class G4UIdirectory;
 class G4UIcmdWithAString;
 class G4UIcmdWithADoubleAndUnit;
+class G4UIcmdWithAnInteger;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -27,6 +28,7 @@ class BackgroundGeneratorMessenger: public G4UImessenger
     G4UIdirectory* fBkgGeneratorDir;
     G4UIcmdWithAString* fBkgInputFileCmd;
     G4UIcmdWithADoubleAndUnit* fBkgTimeWindowCmd;
+    G4UIcmdWithAnInteger* fEventOffsetCmd;
 
 };
 

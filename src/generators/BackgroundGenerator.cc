@@ -21,12 +21,14 @@
 BackgroundGenerator::BackgroundGenerator()
 {
   fGeneratorName = "background";
+  fEvtOffset = 0;
   fMessenger = new BackgroundGeneratorMessenger(this);
   fGPS = new G4GeneralParticleSource();
 
   fBkgFile = nullptr;
   fhxyE = nullptr;
   fhdir = nullptr;
+  fEventCounter = 0;
   fBkgTimeWindow = TPC_driftTime_s*s;
 }
 
@@ -137,7 +139,8 @@ void BackgroundGenerator::GeneratePrimaries(G4Event* anEvent)
   // complete line from PrimaryGeneratorAction...
   G4cout << ") : Background Generator ===oooOOOooo===" << G4endl;
 
-  int evtID = anEvent->GetEventID();
+  G4int evtID = fEvtOffset+fEventCounter;
+  anEvent->SetEventID(evtID);
   G4cout << "oooOOOooo Event # " << evtID << " oooOOOooo" << G4endl;
   G4cout << "GeneratePrimaries from source " << fBkgFilename << G4endl;
 
@@ -194,5 +197,6 @@ void BackgroundGenerator::GeneratePrimaries(G4Event* anEvent)
 
     G4cout << "*** " << name << " background done!" << G4endl;
   }
+  fEventCounter++;
 }
 

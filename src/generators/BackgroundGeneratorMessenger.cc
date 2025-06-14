@@ -5,6 +5,7 @@
 #include "G4UIcommand.hh"
 #include "G4UIcmdWithAString.hh"
 #include "G4UIcmdWithADoubleAndUnit.hh"
+#include "G4UIcmdWithAnInteger.hh"
 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -24,6 +25,10 @@ BackgroundGeneratorMessenger::BackgroundGeneratorMessenger(BackgroundGenerator* 
   fBkgTimeWindowCmd->SetUnitCategory("Time");
   fBkgTimeWindowCmd->SetUnitCandidates("s us ms ns");
 
+  fEventOffsetCmd = new G4UIcmdWithAnInteger("/gen/bkg/eventOffset", this);
+  fEventOffsetCmd->SetGuidance("set the event numbering offset");
+  fEventOffsetCmd->SetDefaultValue((G4int)0);
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -33,6 +38,7 @@ BackgroundGeneratorMessenger::~BackgroundGeneratorMessenger()
   delete fBkgInputFileCmd;
   delete fBkgTimeWindowCmd;
   delete fBkgGeneratorDir;
+  delete fEventOffsetCmd;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -41,6 +47,7 @@ void BackgroundGeneratorMessenger::SetNewValue(G4UIcommand* command, G4String ne
 {
   if (command == fBkgInputFileCmd) fBkgAction->SetBkgFilename(newValues);
   else if (command == fBkgTimeWindowCmd) fBkgAction->SetBkgTimeWindow(fBkgTimeWindowCmd->ConvertToDimensionedDouble(newValues));
+  else if (command == fEventOffsetCmd) fBkgAction->SetEventOffset(fEventOffsetCmd->GetNewIntValue(newValues));
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

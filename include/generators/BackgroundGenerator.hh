@@ -26,6 +26,7 @@ class BackgroundGenerator : public GeneratorBase
     // setter methods for messenger
     void SetBkgFilename(G4String val) { fBkgFilename = val; }
     void SetBkgTimeWindow(G4double val) { fBkgTimeWindow = val;}
+    void SetEventOffset(G4double val) { fEvtOffset = val; }
 
   private:
     
@@ -34,6 +35,9 @@ class BackgroundGenerator : public GeneratorBase
     G4String fBkgFilename;
     G4double fBkgTimeWindow;
     TFile* fBkgFile;
+
+    G4int fEventCounter;
+    G4int fEvtOffset;
     
     std::map<std::string, TH3D*> fhxyElist;
     std::map<std::string, TH3D*> fhdirlist;
