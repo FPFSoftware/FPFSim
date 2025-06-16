@@ -5,6 +5,8 @@
 #include "G4VSensitiveDetector.hh"
 #include "G4RunManager.hh"
 #include "G4AnalysisManager.hh"
+#include "G4ThreeVector.hh"
+#include  "G4LorentzVector.hh"
 
 typedef G4THitsCollection<FASER2TrackerHit> FASER2TrackerHitsCollection;
 

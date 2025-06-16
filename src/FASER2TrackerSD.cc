@@ -39,6 +39,13 @@ G4bool FASER2TrackerSD::ProcessHits(G4Step* aStep, G4TouchableHistory* ROhist){
   G4ThreeVector posHit = preStepPoint->GetPosition();
   G4int pdgid = track->GetParticleDefinition()->GetPDGEncoding();
   G4double energy = track->GetDynamicParticle()->Get4Momentum().e();
+
+  if (energy/MeV < 2)
+  {
+    G4cout << "Hit energy too low: " << energy/MeV << " MeV, skipping hit." << G4endl;
+    return 0;
+  }
+
   G4double px = track->GetDynamicParticle()->Get4Momentum().px();
   G4double py = track->GetDynamicParticle()->Get4Momentum().py();
   G4double pz = track->GetDynamicParticle()->Get4Momentum().pz();
@@ -74,7 +81,17 @@ G4bool FASER2TrackerSD::ProcessHits(G4Step* aStep, G4TouchableHistory* ROhist){
   tmpHit->SetParentID(track->GetParentID());
   tmpHit->SetCopyNumSensor(sensor_id);
   tmpHit->SetT(time/ns);
-  fTmpHits.push_back(tmpHit);
+  tmpHit->SetTrackVertex(track->GetVertexPosition()/mm);
+  tmpHit->SetTrackP4(track->GetDynamicParticle()->Get4Momentum()/GeV);
+  if (track->GetParentID() == 0) {
+    tmpHit->SetIsPrimaryTrack(1);
+    tmpHit->SetIsSecondaryTrack(0);
+  }
+  else {
+    tmpHit->SetIsPrimaryTrack(0);
+    tmpHit->SetIsSecondaryTrack(1);
+  }
+  fTmpHits.push_back(tmpHit); 
   
   return 0;
 }

@@ -430,71 +430,6 @@ void AnalysisManager::EndOfEvent(const G4Event* event) {
   /// evtID
   evtID = event->GetEventID();
 
-  if (m_saveActs)
-  {
-    // Get the offsets to make the particle positionining easier
-    G4double hallSizeX  = 9.4 * m;
-    G4double hallSizeY  = 7.6 * m;
-    G4double hallSizeZ  = 64.6 * m;
-    G4ThreeVector FASER2Pos = GeometricalParameters::Get()->GetFASER2Position();
-    G4ThreeVector hallOffset( GeometricalParameters::Get()->GetHallOffsetX(), 
-                            GeometricalParameters::Get()->GetHallOffsetY(), 
-                            hallSizeZ/2 - GeometricalParameters::Get()->GetHallHeadDistance()); 
-    FASER2Pos -= hallOffset;
-
-    //* Fill the Acts particle truth tree - yeah we already do this but we need to do it again for Acts
-    for (G4int ivtx = 0; ivtx < event->GetNumberOfPrimaryVertex(); ++ivtx) {
-      for (G4int ipp = 0; ipp < event->GetPrimaryVertex(ivtx)->GetNumberOfParticle(); ++ipp) {
-        G4PrimaryParticle* primary_particle = event->GetPrimaryVertex(ivtx)->GetPrimary(ipp);
-          if (primary_particle) {
-            PrimaryParticleInformation* primary_particle_info = dynamic_cast<PrimaryParticleInformation*>(primary_particle->GetUserInformation());
-            // ActsParticlesParticleId.push_back(primary_particle_info->GetPartID());
-            auto particleId = ActsFatras::Barcode();
-            particleId.setVertexPrimary(0);
-            particleId.setVertexPrimary(1);
-            particleId.setGeneration(0);
-            particleId.setSubParticle(0);
-            particleId.setParticle(ipp);
-            ActsParticlesParticleId.push_back(particleId.value());
-            ActsParticlesParticleType.push_back(primary_particle_info->GetPDG());
-            ActsParticlesProcess.push_back(0);
-            ActsParticlesVx.push_back(primary_particle_info->GetVertexMC().x());
-            ActsParticlesVy.push_back(primary_particle_info->GetVertexMC().y());
-            ActsParticlesVz.push_back(primary_particle_info->GetVertexMC().z());
-            ActsParticlesVt.push_back(0);
-            ActsParticlesPx.push_back(primary_particle_info->GetMomentumMC().x()/1000); //* divide by 1000 to convert MeV -> GeV
-            ActsParticlesPy.push_back(primary_particle_info->GetMomentumMC().y()/1000);
-            ActsParticlesPz.push_back(primary_particle_info->GetMomentumMC().z()/1000);
-            ActsParticlesM.push_back(primary_particle_info->GetMass()/1000);
-            ActsParticlesQ.push_back(primary_particle_info->GetCharge());
-            
-            TLorentzVector p4;
-            G4double energy = GetTotalEnergy(primary_particle_info->GetMomentumMC().x(),primary_particle_info->GetMomentumMC().y(), primary_particle_info->GetMomentumMC().z(), primary_particle_info->GetMass());
-            p4.SetPx(primary_particle_info->GetMomentumMC().x()/1000);
-            p4.SetPy(primary_particle_info->GetMomentumMC().y()/1000);
-            p4.SetPz(primary_particle_info->GetMomentumMC().z()/1000);
-            p4.SetE(energy/1000);
-            
-            ActsParticlesEta.push_back(p4.Eta());
-            ActsParticlesPhi.push_back(p4.Phi());
-            ActsParticlesPt.push_back(p4.Pt());
-            ActsParticlesP.push_back(p4.P());
-            ActsParticlesVertexPrimary.push_back(1); //? These variables need to be filled, but are unused by Acts 
-            ActsParticlesVertexSecondary.push_back(0); //? These variables need to be filled, but are unused by Acts 
-            ActsParticlesParticle.push_back(1); //? These variables need to be filled, but are unused by Acts 
-            ActsParticlesGeneration.push_back(0); //? These variables need to be filled, but are unused by Acts 
-            ActsParticlesSubParticle.push_back(0); //? These variables need to be filled, but are unused by Acts 
-            ActsParticlesELoss.push_back(0); //? These variables need to be filled, but are unused by Acts 
-            ActsParticlesPathInX0.push_back(0); //? These variables need to be filled, but are unused by Acts 
-            ActsParticlesPathInL0.push_back(0); //? These variables need to be filled, but are unused by Acts 
-            ActsParticlesNumberOfHits.push_back(0); //? These variables need to be filled, but are unused by Acts 
-            ActsParticlesOutcome.push_back(0); //? These variables need to be filled, but are unused by Acts 
-        }
-      }
-    }
-    acts_particles_tree->Fill();
-  }
-
   /// loop over the vertices, and then over primary particles,
   /// neutrino truth info from event generator.
   for (G4int ivtx = 0; ivtx < event->GetNumberOfPrimaryVertex(); ++ivtx) {
@@ -746,7 +681,7 @@ void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
   {
     auto hitCollection = dynamic_cast<FASER2TrackerHitsCollection*>(hcofEvent->GetHC(sdId));
     if (!hitCollection) return;
-    
+    std::map<G4int, G4int> sub_part_map{};
     for (auto hit: *hitCollection->GetVector()) 
     {
       if (hit->GetCharge() == 0) continue; // skip neutral particles, they don't hit
@@ -772,11 +707,15 @@ void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
       }
 
       auto particleId = ActsFatras::Barcode();
-      particleId.setVertexPrimary(isPrimary);
-      particleId.setVertexSecondary(!isPrimary);
-      particleId.setGeneration(0);
-      particleId.setSubParticle(0);
+      particleId.setVertexPrimary(1);
+      particleId.setVertexSecondary(0);
       particleId.setParticle(hit->GetTrackID() - 1); // The track ID is the primary particle index plus one
+      particleId.setGeneration(hit->GetParentID());
+
+      sub_part_map.try_emplace(hit->GetTrackID()-1, sub_part_map.size());
+      
+      // This is a fudge - assumes that that the secondary particles are always sub-particles of the primary particle
+      particleId.setSubParticle(hit->GetParentID() == 0 ? 0 : sub_part_map[hit->GetTrackID()-1]);
       ActsHitsParticleID = particleId.value();
 
       ActsHitsX = hit->GetX();
@@ -801,7 +740,45 @@ void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
       ActsHitsApproachID = 0;
       ActsHitsSensitiveID = 1;
       acts_hits_tree->Fill();
+
+      // Now fill the Acts particles tree
+      bool isDuplicate = false;
+      for (const auto& id : ActsParticlesParticleId) {
+        if (id == particleId.value()) {
+          isDuplicate = true;
+        }
+      }
+      if (isDuplicate) continue; // Skip this particle if it's already been added
+      
+      ActsParticlesParticleId.push_back(particleId.value());
+      ActsParticlesParticleType.push_back(hit->GetPDGID());
+      ActsParticlesProcess.push_back(0);
+      ActsParticlesVx.push_back(hit->GetTrackVertex().x());
+      ActsParticlesVy.push_back(hit->GetTrackVertex().y());
+      ActsParticlesVz.push_back(hit->GetTrackVertex().z());
+      ActsParticlesVt.push_back(0);
+      ActsParticlesPx.push_back(hit->GetTrackP4().px());
+      ActsParticlesPy.push_back(hit->GetTrackP4().py());
+      ActsParticlesPz.push_back(hit->GetTrackP4().pz());
+      ActsParticlesM.push_back(hit->GetTrackP4().m());
+      ActsParticlesQ.push_back(hit->GetCharge());
+      
+      ActsParticlesEta.push_back(hit->GetTrackP4().eta());
+      ActsParticlesPhi.push_back(hit->GetTrackP4().phi());
+      ActsParticlesPt.push_back(pow(pow(hit->GetTrackP4().px(), 2) + pow(hit->GetTrackP4().py(), 2), 0.5));
+      ActsParticlesP.push_back(pow(pow(hit->GetTrackP4().px(), 2) + pow(hit->GetTrackP4().py(), 2) + pow(hit->GetTrackP4().pz(), 2), 0.5));
+      ActsParticlesVertexPrimary.push_back(hit->GetIsPrimaryTrack()); //? These variables need to be filled, but are unused by Acts 
+      ActsParticlesVertexSecondary.push_back(hit->GetIsSecondaryTrack()); //? These variables need to be filled, but are unused by Acts 
+      ActsParticlesParticle.push_back(1); //? These variables need to be filled, but are unused by Acts 
+      ActsParticlesGeneration.push_back(0); //? These variables need to be filled, but are unused by Acts 
+      ActsParticlesSubParticle.push_back(0); //? These variables need to be filled, but are unused by Acts 
+      ActsParticlesELoss.push_back(0); //? These variables need to be filled, but are unused by Acts 
+      ActsParticlesPathInX0.push_back(0); //? These variables need to be filled, but are unused by Acts 
+      ActsParticlesPathInL0.push_back(0); //? These variables need to be filled, but are unused by Acts 
+      ActsParticlesNumberOfHits.push_back(0); //? These variables need to be filled, but are unused by Acts 
+      ActsParticlesOutcome.push_back(0); //? These variables need to be filled, but are unused by Acts 
     } // end of loop over hits
+    acts_particles_tree->Fill();
   }
 
 

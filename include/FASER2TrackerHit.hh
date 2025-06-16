@@ -5,7 +5,8 @@
 #include "G4VHit.hh"
 #include "G4Types.hh"
 #include <vector>
-
+#include "G4ThreeVector.hh"
+#include  "G4LorentzVector.hh"
 
 class FASER2TrackerHit : public G4VHit {
 public:
@@ -113,6 +114,16 @@ public:
   /// Get copy number of the sensor
   inline G4int GetCopyNumSensor() const { return fCopyNumSensor; }
 
+  inline G4ThreeVector GetTrackVertex() const {return fTrackVertex;};
+  inline G4LorentzVector GetTrackP4() const {return fTrackP4;};
+  inline G4int GetIsPrimaryTrack() const { return fIsPrimaryTrack; }
+  inline G4int GetIsSecondaryTrack() const { return fIsSecondaryTrack; }
+
+  inline void SetTrackVertex(const G4ThreeVector& vertex) { fTrackVertex = vertex; }
+  inline void SetTrackP4(const G4LorentzVector& p4) { fTrackP4 = p4; }
+  inline void SetIsPrimaryTrack(G4int isPrimary) { fIsPrimaryTrack = isPrimary; }
+  inline void SetIsSecondaryTrack(G4int isSecondary) { fIsSecondaryTrack = isSecondary; }
+
 
 private:
   /// Position along x axis
@@ -148,6 +159,10 @@ private:
   // Copy number of the sensor
   G4int fCopyNumSensor = -1;
 
+  G4ThreeVector fTrackVertex{-999., -999., -999.};
+  G4LorentzVector fTrackP4{0,0,0,0};
+  G4int fIsPrimaryTrack = 0; // 1 if primary track, 0 otherwise
+  G4int fIsSecondaryTrack = 0; // 1 if secondary track, 0 otherwise
 
 };
 
