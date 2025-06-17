@@ -26,7 +26,7 @@ PixelMap3D::~PixelMap3D()
   fBinX.clear();
   fBinY.clear();
   fBinZ.clear();
-  for (G4int iPrim= 0; iPrim< fNPrim; ++iPrim) {
+  for (G4int iPrim= 0; iPrim< fNPrim+1; ++iPrim) {
     delete hitClusterZX[iPrim];
     delete hitClusterZY[iPrim];
     delete vtxHitClusterZX[iPrim];
@@ -292,6 +292,8 @@ void PixelMap3D::Process3DPM(File &h5file, FPFNeutrino nu, G4bool save3D)
     }
     if (save3D) pm_data.insert(fEvtID, i, x[3], x[0], x[1], x[2]);
   }
+  delete[] x;
+  delete[] bins;
 }
 
 void PixelMap3D::Write2DPMToFile(TFile* thefile)
