@@ -19,7 +19,7 @@ public:
   void Initialize(G4HCofThisEvent *HCE);
   /// Temporary map of hits is stored in hit collection, to be retrieved
   /// for analysis by the event action
-  void EndOfEvent(G4HCofThisEvent *HCE);
+  // void EndOfEvent(G4HCofThisEvent *HCE);
 
   G4bool ProcessHits(G4Step*, G4TouchableHistory*);
 
