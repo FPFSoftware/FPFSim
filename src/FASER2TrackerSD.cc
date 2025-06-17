@@ -22,10 +22,11 @@ void FASER2TrackerSD::Initialize(G4HCofThisEvent *HCE) {
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void FASER2TrackerSD::EndOfEvent(G4HCofThisEvent *) {
-  for (auto it = fTmpHits.begin(); it != fTmpHits.end(); ++it)
-    fHitCollection->insert(*it);
-}
+// void FASER2TrackerSD::EndOfEvent(G4HCofThisEvent *) {
+//   for (auto it = fTmpHits.begin(); it != fTmpHits.end(); ++it) fHitCollection->insert(*it);
+
+//   fTmpHits.clear();
+// }
 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -91,7 +92,8 @@ G4bool FASER2TrackerSD::ProcessHits(G4Step* aStep, G4TouchableHistory* ROhist){
     tmpHit->SetIsPrimaryTrack(0);
     tmpHit->SetIsSecondaryTrack(1);
   }
-  fTmpHits.push_back(tmpHit); 
+  // fTmpHits.push_back(tmpHit); 
+  fHitCollection->insert(tmpHit);
   
   return 0;
 }
