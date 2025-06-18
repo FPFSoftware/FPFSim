@@ -24,7 +24,7 @@ class FASER2DetectorConstruction {
     G4LogicalVolume* GetTrackingStation(){ return fTrackingLogical;}
     G4LogicalVolume* GetVetoStations(){ return fVetoScinLogical;}
     G4LogicalVolume* GetMuonStations(){ return fMuonDetLogical;}
-    std::vector<G4LogicalVolume*> GetTrackingStations(){ return fTrackingStationsLogical;}
+    G4LogicalVolume* GetTrackingStations(){ return fTrackingStationsLogical;}
 
   private:
     
@@ -42,7 +42,7 @@ class FASER2DetectorConstruction {
     G4LogicalVolume* fVetoScinLogical;
     G4LogicalVolume* fVetoShieldLogical;
     G4LogicalVolume* fDecayVolumeLogical;
-    std::vector<G4LogicalVolume*> fTrackingStationsLogical;
+    G4LogicalVolume* fTrackingStationsLogical;
     G4AssemblyVolume* fTrackingStation;
     G4LogicalVolume* fEMCalLogical;
     G4LogicalVolume* fHadCalLogical;
