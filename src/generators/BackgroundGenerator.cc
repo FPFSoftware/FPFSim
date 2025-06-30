@@ -104,7 +104,7 @@ int BackgroundGenerator::ExtractBackgroundParticles() const
   // now convert from s-1 to the requested time window
   // this way we get the expected background particles in the time window
   double windows_per_sec = 1./(fBkgTimeWindow/s); // number of windows in a second
-  int lambda = summed_bins/windows_per_sec; 
+  double lambda = summed_bins/windows_per_sec; 
 
   // now this value is the expectation of a Poisson distribution (or Gaussian)
   // use it to extract a realization...
