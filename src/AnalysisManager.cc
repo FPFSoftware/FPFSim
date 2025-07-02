@@ -257,7 +257,7 @@ void AnalysisManager::BeginOfRun() {
   thefile = new TFile(m_filename.c_str(), "RECREATE");
   bookEvtTree();
   if(m_saveTrack) bookTrkTree();
-
+  bookPrimTree();
   fH5Filename = m_filename;
   if(fH5Filename.find(".root") != std::string::npos) {
     const size_t pos = fH5Filename.find(".root");
