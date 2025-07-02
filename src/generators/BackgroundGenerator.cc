@@ -104,13 +104,13 @@ int BackgroundGenerator::ExtractBackgroundParticles() const
   // now convert from s-1 to the requested time window
   // this way we get the expected background particles in the time window
   double windows_per_sec = 1./(fBkgTimeWindow/s); // number of windows in a second
-  int lambda = summed_bins/windows_per_sec; 
+  double lambda = summed_bins/windows_per_sec; 
 
   // now this value is the expectation of a Poisson distribution (or Gaussian)
   // use it to extract a realization...
   int Nparticles = 0;
   if(lambda < 100) Nparticles = int(G4Poisson(lambda) + 0.5);
-  else Nparticles = int(G4RandGauss::shoot(Nparticles, TMath::Sqrt(Nparticles))+0.5);
+  else Nparticles = int(G4RandGauss::shoot(lambda, TMath::Sqrt(lambda)+0.5));
 
   return Nparticles;
 }
@@ -168,7 +168,9 @@ void BackgroundGenerator::GeneratePrimaries(G4Event* anEvent)
       // then extract the direction (directional cosines) from second histogram
       // TODO: you should actually be using a 5D histo for full correlations?
      
-      double z = -1.*GeometricalParameters::Get()->GetHallHeadDistance(); //entry wall z in mm
+      double z = (GeometricalParameters::Get()->GetEnableRockEnvelope()) ? 
+                  -1.*(GeometricalParameters::Get()->GetHallHeadDistance()+GeometricalParameters::Get()->GetRockFrontThickness())
+                  : -1.*GeometricalParameters::Get()->GetHallHeadDistance(); //entry wall z in mm
       double t = 0.; // TODO: imprint the bunch-crossing timing structure?
       double x, y, E;
       fhxyE->GetRandom3(x, y, E); //pos in cm, E in GeV
