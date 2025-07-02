@@ -21,6 +21,7 @@ class AnalysisManager {
     static AnalysisManager* GetInstance();
     void bookEvtTree();
     void bookTrkTree();
+    void bookPrimTree();
     void BeginOfRun();
     void EndOfRun();
     void BeginOfEvent();
@@ -47,6 +48,7 @@ class AnalysisManager {
     std::string  m_filename;
     TTree*   evt;
     TTree*   trk;
+    TTree*   prim;
     std::string  fH5Filename;
     hep_hpc::hdf5::File fH5file;
 
@@ -65,7 +67,7 @@ class AnalysisManager {
     G4int    nuScatteringType;  ///<- scattering type: QE, DIS, RES, MEC, et. al.
     G4double nuW;               ///<- invariant hadronic mass
     G4int    nuFSLPDG;          ///<- Final state lepton PDG code (for genie neutrino interaction)
-    G4double nuFSLPx;           ///<- Final state lepton Px 
+    G4double nuFSLPx;           ///<- Final state lepton Px
     G4double nuFSLPy;           ///<- Final state lepton Py
     G4double nuFSLPz;           ///<- Final state lepton Pz
     G4double nuFSLE;            ///<- Final state lepton total energy (GeV)
@@ -73,7 +75,7 @@ class AnalysisManager {
     G4int    nTestNPrimaryTrack;
     G4int    countPrimaryParticle;
     G4int    nPrimaryVertex;
-    G4int    nPrimaryParticle;  ///<- number of primary particle 
+    G4int    nPrimaryParticle;  ///<- number of primary particle
                                 ///<- (in case of genie neutrino interaction, number of stable particle in the final state)
                                 ///<- (in case of the FSL decay, decay products counted as primary particle)
                                 ///<- (in case of the final state pizero, decay products counted as primary particle)
@@ -157,14 +159,14 @@ class AnalysisManager {
     std::vector<double> hitZFSL;
     std::vector<double> hitYFSL;
     std::vector<double> hitPFSL;
-   
+
     // Circular fit in FASER magnet(s)
     G4int Nmagnets; // size of output vectors
     std::vector<double> magzpos;
     G4int trkNhits; // hits in tracking stations
     std::vector<double> trkxc; //circle fit results
     std::vector<double> trkzc;
-    std::vector<double> trkrc; 
+    std::vector<double> trkrc;
     std::vector<double> trkmIn; // entering track fit
     std::vector<double> trkqIn;
     std::vector<double> trkmOut; // exiting track fit
@@ -176,14 +178,41 @@ class AnalysisManager {
     std::vector<double> trkPFSL;
 
     // track information
-    int trackTID;                     
-    int trackPID;     
+    int trackTID;
+    int trackPID;
     int trackPDG;
     double trackKinE;
-    int trackNPoints;  
-    std::vector<double> trackPointX;  
-    std::vector<double> trackPointY;  
+    int trackNPoints;
+    std::vector<double> trackPointX;
+    std::vector<double> trackPointY;
     std::vector<double> trackPointZ;
+
+	//FRAN added
+	//primaries information
+	UInt_t primEvtID;
+	UInt_t primVtxID;
+	UInt_t primParticleID;
+
+	int primTID;
+	UInt_t primPDG;
+
+	float_t primM;
+	float_t primQ;
+	float_t primEta;
+	float_t primPhi;
+	float_t primPt;
+	float_t primP;
+
+	float_t primVx;
+	float_t primVy;
+	float_t primVz;
+	float_t primVt;
+
+	float_t primPx;
+	float_t primPy;
+	float_t primPz;
+
+
 
   private:
     void FillPrimaryTruthTree(G4int sdId, std::string sdName);

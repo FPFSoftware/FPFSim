@@ -24,7 +24,7 @@ class PrimaryParticleInformation : public G4VUserPrimaryParticleInformation {
     /// @param scattering type of the neutrino interaction if it is from GENIE
     /// @param fsl PDG of the neutrino interaction if it is from GENIE
     /// @param fsl P4 of the neutrino interaction if it is from GENIE
-    PrimaryParticleInformation(G4int aID, G4int aPDG, G4double aMass,
+    PrimaryParticleInformation(G4int aID, G4int aPDG, G4double aMass, G4double aCharge, G4int trkID,
         G4ThreeVector aMomentum, G4ThreeVector aVertex,
         G4int aneuIdx, G4int aneuPDG, TLorentzVector aneuP4, TLorentzVector aneuX4,
         G4int aInttype, G4int aScatteringtype, G4double aW,
@@ -37,6 +37,17 @@ class PrimaryParticleInformation : public G4VUserPrimaryParticleInformation {
 
     /// Get the particle PDG code
     inline G4int GetPDG() const { return fPDG; };
+
+
+	//FRAN added
+    /// Get the particle charge
+    inline G4int GetCharge() const { return fCharge; };
+
+    /// Get the particle trackID
+    inline G4int GetTrackID() const { return fTrackID; };
+
+	//end FRAN added
+
 
     /// Get the particle mass in MeV
     inline G4double GetMass() const { return fMass; };
@@ -60,7 +71,7 @@ class PrimaryParticleInformation : public G4VUserPrimaryParticleInformation {
 
     /// Prints the information about the particle.
     virtual void Print() const;
-    
+
   private:
 
     /// A particle unique ID.
@@ -68,7 +79,7 @@ class PrimaryParticleInformation : public G4VUserPrimaryParticleInformation {
 
     /// A particle type (PDG code).
     G4int fPDG;
-    
+
     /// A particle mass
     G4double fMass;
 
@@ -95,7 +106,7 @@ class PrimaryParticleInformation : public G4VUserPrimaryParticleInformation {
 
     /// Scattering type of the neutrino interaction if it is from GENIE
     G4int fScatteringType;
-    
+
     /// invariant hadronic mass
     G4double fW;
 
@@ -107,6 +118,14 @@ class PrimaryParticleInformation : public G4VUserPrimaryParticleInformation {
 
     /// fsl X4 of the neutrino interaction if it is from GENIE
     TLorentzVector fFSLX4;
+
+
+	//FRAN added below
+    /// particle's charge
+    G4double fCharge;
+
+    /// particle's trackID
+    G4double fTrackID;
 };
 
 #endif
