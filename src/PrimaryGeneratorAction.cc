@@ -97,7 +97,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
       if (primary_particle) {
         primary_particle->SetUserInformation(new PrimaryParticleInformation(
               count_particles, primary_particle->GetPDGcode(), primary_particle->GetMass(),
-			  primary_particle->GetCharge(), primary_particle->GetTrackID(),
+			  primary_particle->GetCharge(),
               primary_particle->GetMomentum(), anEvent->GetPrimaryVertex(ivtx)->GetPosition(),
               neuidx, neupdg, neup4, neux4, int_type, scattering_type, w,
               fslpdg, fslp4));

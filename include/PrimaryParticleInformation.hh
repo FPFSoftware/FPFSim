@@ -24,7 +24,7 @@ class PrimaryParticleInformation : public G4VUserPrimaryParticleInformation {
     /// @param scattering type of the neutrino interaction if it is from GENIE
     /// @param fsl PDG of the neutrino interaction if it is from GENIE
     /// @param fsl P4 of the neutrino interaction if it is from GENIE
-    PrimaryParticleInformation(G4int aID, G4int aPDG, G4double aMass, G4double aCharge, G4int trkID,
+    PrimaryParticleInformation(G4int aID, G4int aPDG, G4double aMass, G4double aCharge,
         G4ThreeVector aMomentum, G4ThreeVector aVertex,
         G4int aneuIdx, G4int aneuPDG, TLorentzVector aneuP4, TLorentzVector aneuX4,
         G4int aInttype, G4int aScatteringtype, G4double aW,
@@ -39,15 +39,8 @@ class PrimaryParticleInformation : public G4VUserPrimaryParticleInformation {
     inline G4int GetPDG() const { return fPDG; };
 
 
-	//FRAN added
     /// Get the particle charge
-    inline G4int GetCharge() const { return fCharge; };
-
-    /// Get the particle trackID
-    inline G4int GetTrackID() const { return fTrackID; };
-
-	//end FRAN added
-
+    inline G4double GetCharge() const { return fCharge; };
 
     /// Get the particle mass in MeV
     inline G4double GetMass() const { return fMass; };
@@ -124,8 +117,6 @@ class PrimaryParticleInformation : public G4VUserPrimaryParticleInformation {
     /// particle's charge
     G4double fCharge;
 
-    /// particle's trackID
-    G4double fTrackID;
 };
 
 #endif

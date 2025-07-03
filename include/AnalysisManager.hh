@@ -193,7 +193,7 @@ class AnalysisManager {
 	UInt_t primVtxID;
 	UInt_t primParticleID;
 
-	int primTID;
+	UInt_t primTrackID;
 	UInt_t primPDG;
 
 	float_t primM;

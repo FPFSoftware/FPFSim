@@ -1,4 +1,4 @@
-// 
+//
 // ********************************************************************
 // * License and Disclaimer                                           *
 // *                                                                  *
@@ -47,13 +47,13 @@
 
   factoryCmd = new G4UIcmdWithAString("/histo/fileName", this);
   factoryCmd->SetGuidance("set name for the histograms file");
-  factoryCmd->AvailableForStates(G4State_PreInit,G4State_Idle); 
+  factoryCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
   saveHitCmd = new G4UIcmdWithABool("/histo/saveHit", this);
   saveHitCmd->SetGuidance("whether save the information of all hits");
   saveHitCmd->SetParameterName("saveHit", true);
   saveHitCmd->SetDefaultValue(false);
-  
+
   saveTrackCmd = new G4UIcmdWithABool("/histo/saveTrack", this);
   saveTrackCmd->SetGuidance("whether save the information of all tracks");
   saveTrackCmd->SetParameterName("saveTrack", true);
@@ -73,7 +73,7 @@
   circleFitCmd->SetGuidance("perform circular fit");
   circleFitCmd->SetParameterName("circleFit", true);
   circleFitCmd->SetDefaultValue(false);
-  
+
   addDiffusionCmd = new G4UIcmdWithAString("/histo/addDiffusion", this);
   addDiffusionCmd->SetGuidance("add toy diffusion effect");
   addDiffusionCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
