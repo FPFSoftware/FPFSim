@@ -187,7 +187,6 @@ class AnalysisManager {
     std::vector<double> trackPointY;
     std::vector<double> trackPointZ;
 
-	//FRAN added
 	//primaries information
 	UInt_t primEvtID;
 	UInt_t primVtxID;
@@ -212,6 +211,8 @@ class AnalysisManager {
 	float_t primPy;
 	float_t primPz;
 
+	float_t primE;
+	float_t primKE;
 
 
   private:

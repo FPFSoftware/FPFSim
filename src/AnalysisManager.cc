@@ -201,7 +201,8 @@ void AnalysisManager::bookPrimTree() {
   prim->Branch("primPy" 					, &primPy				, "primPy/F");
   prim->Branch("primPz" 					, &primPz				, "primPz/F");
 
-
+  prim->Branch("primE"						, &primE				, "primE/F"); //initial total energy
+  prim->Branch("primKE"						, &primKE				, "primKE/F"); //initial kinetic energy
 
 }
 
@@ -408,7 +409,10 @@ void AnalysisManager::BeginOfEvent() {
   primPx = 0;
   primPy = 0;
   primPz = 0;
-  //add kinetic energy and parentID later?
+
+  primE = 0;
+  primKE = 0;
+  //add parentID later?
 
 
 }
@@ -464,13 +468,15 @@ void AnalysisManager::EndOfEvent(const G4Event* event) {
 		p4.SetPx(p_x);
 		p4.SetPy(p_y);
 		p4.SetPz(p_z);
-		p4.SetE(energy/1000);
+		p4.SetE(energy);
 
 		primEta = p4.Eta();
 		primPhi = p4.Phi();
 		primPt = p4.Pt();
 		primP = p4.P();
 
+		primE = energy;
+		primKE = (primP**2)/(2*primM);
 
 	  	prim->Fill();
 

@@ -113,7 +113,6 @@ class PrimaryParticleInformation : public G4VUserPrimaryParticleInformation {
     TLorentzVector fFSLX4;
 
 
-	//FRAN added below
     /// particle's charge
     G4double fCharge;
 
