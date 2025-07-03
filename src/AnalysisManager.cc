@@ -175,22 +175,15 @@ void AnalysisManager::bookTrkTree() {
 }
 
 
-
-
-
-
-
-
-//part FRAN added
 void AnalysisManager::bookPrimTree() {
 
 
-  prim = new TTree("primaries_particles", "primPTreeInfo");
+  prim = new TTree("primaries", "primPTreeInfo");
   prim->Branch("primEvtID"					, &primEvtID 			, "primEvtID/I");
   prim->Branch("primVtxID" 					, &primVtxID 			, "primVtxID/I");
   prim->Branch("primPDG" 					, &primPDG				, "primPDG/I");
-  prim->Branch("primParticleID" 			, &primParticleID		, "primPDG/I");
-  prim->Branch("primTrackID " 				, &primTID 				, "primTrackID /i");
+  prim->Branch("primParticleID" 			, &primParticleID		, "primParticleID/I");
+  prim->Branch("primTrackID" 				, &primTrackID 			, "primTrackID/I");
 
   prim->Branch("primM" 						, &primM				, "primM/F");
   prim->Branch("primQ" 						, &primQ				, "primQ/F");
@@ -245,7 +238,7 @@ void AnalysisManager::bookPrimTree() {
 /* } */
 
 
-//end Fran added
+
 
 
 void AnalysisManager::BeginOfRun() {
@@ -256,8 +249,9 @@ void AnalysisManager::BeginOfRun() {
   }
   thefile = new TFile(m_filename.c_str(), "RECREATE");
   bookEvtTree();
-  if(m_saveTrack) bookTrkTree();
   bookPrimTree();
+  if(m_saveTrack) bookTrkTree();
+
   fH5Filename = m_filename;
   if(fH5Filename.find(".root") != std::string::npos) {
     const size_t pos = fH5Filename.find(".root");
@@ -392,15 +386,11 @@ void AnalysisManager::BeginOfEvent() {
   trackPointZ.clear();
 
 
-  //FRAN added
+
   primEvtID = 0;
   primVtxID = 0;
   primParticleID = 0;
-  primTID = 0; //track id
-
-  //parentID = 0;//for each particle
-  //process.clear();
-
+  primTrackID = 0;
   primPDG = 0;
 
   primM = 0;
@@ -418,8 +408,8 @@ void AnalysisManager::BeginOfEvent() {
   primPx = 0;
   primPy = 0;
   primPz = 0;
-  //add kinetic energy
-  //end FRAN ADDED
+  //add kinetic energy and parentID later?
+
 
 }
 
@@ -442,8 +432,6 @@ void AnalysisManager::EndOfEvent(const G4Event* event) {
           dynamic_cast<PrimaryParticleInformation*>(primary_particle->GetUserInformation());
         primary_particle_info->Print();
 
-		G4cout <<"HERE"<<ivtx<<G4endl;
-		//begin FRAN added
 		auto particleId = ActsFatras::Barcode();
 		particleId.setVertexPrimary(0);
 		particleId.setVertexPrimary(1);
@@ -451,28 +439,25 @@ void AnalysisManager::EndOfEvent(const G4Event* event) {
 		particleId.setSubParticle(0);
 		particleId.setParticle(ipp);
 		primParticleID = particleId.value();
-		G4cout<<"passed1"<<G4endl;
-		primTID = primary_particle_info->GetTrackID();
+
+		primTrackID = primary_particle_info->GetPartID(); //confirm matches track's id later?
+
 		primPDG = primary_particle_info->GetPDG();
-		G4cout<<"passed2"<<G4endl;
 
 		primVx = primary_particle_info->GetVertexMC().x();
 		primVy = primary_particle_info->GetVertexMC().y();
 		primVz = primary_particle_info->GetVertexMC().z();
 		primVt = 0;
-		G4cout<<"passed3"<<G4endl;
 
 		float_t p_x = primary_particle_info->GetMomentumMC().x()/1000;
 		float_t p_y = primary_particle_info->GetMomentumMC().y()/1000;
 		float_t p_z = primary_particle_info->GetMomentumMC().z()/1000;
-		G4cout<<"passed4"<<G4endl;
 
 		primPx = p_x; //div by 1000 for MeV->GeV
 		primPy = p_y;
 		primPz = p_z;
 		primM = primary_particle_info->GetMass()/1000;
 		primQ = primary_particle_info->GetCharge();
-		G4cout<<"passed5"<<G4endl;
 
 		TLorentzVector p4;
 		G4double energy = GetTotalEnergy(p_x,p_y,p_z,primary_particle_info->GetMass());
@@ -480,19 +465,15 @@ void AnalysisManager::EndOfEvent(const G4Event* event) {
 		p4.SetPy(p_y);
 		p4.SetPz(p_z);
 		p4.SetE(energy/1000);
-		G4cout<<"passed6"<<G4endl;
-
 
 		primEta = p4.Eta();
 		primPhi = p4.Phi();
 		primPt = p4.Pt();
 		primP = p4.P();
-		G4cout<<"passed7"<<G4endl;
-		G4cout<<"passed8"<<G4endl;
+
+
 	  	prim->Fill();
-		G4cout<<"passed9"<<G4endl;
-		//parentID = 0;
-		//end FRAN added
+
 
 
 
@@ -733,7 +714,6 @@ void AnalysisManager::EndOfEvent(const G4Event* event) {
 
 void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
 {
-  //FRAN added
   /* auto hitCollection = dynamic_cast<FLArETrackerHitsCollection*>(hcofEvent->GetHC(sdId)); */
   /* if (!hitCollection) return; */
   /* for (auto hit: *hitCollection->GetVector()) */
@@ -779,8 +759,6 @@ void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
 	/* ActsSensitiveID = 1; */
 	/* acts_hits_tree->Fill(); */
   /* } */
-
-  /* //end Fran added */
 
 
   // Get and cast hit collection with LArBoxHits
