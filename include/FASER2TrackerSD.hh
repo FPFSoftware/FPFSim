@@ -5,6 +5,8 @@
 #include "G4VSensitiveDetector.hh"
 #include "G4RunManager.hh"
 #include "G4AnalysisManager.hh"
+#include "G4ThreeVector.hh"
+#include  "G4LorentzVector.hh"
 
 typedef G4THitsCollection<FASER2TrackerHit> FASER2TrackerHitsCollection;
 
@@ -17,7 +19,7 @@ public:
   void Initialize(G4HCofThisEvent *HCE);
   /// Temporary map of hits is stored in hit collection, to be retrieved
   /// for analysis by the event action
-  void EndOfEvent(G4HCofThisEvent *HCE);
+  // void EndOfEvent(G4HCofThisEvent *HCE);
 
   G4bool ProcessHits(G4Step*, G4TouchableHistory*);
 

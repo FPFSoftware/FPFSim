@@ -430,71 +430,6 @@ void AnalysisManager::EndOfEvent(const G4Event* event) {
   /// evtID
   evtID = event->GetEventID();
 
-  if (m_saveActs)
-  {
-    // Get the offsets to make the particle positionining easier
-    G4double hallSizeX  = 9.4 * m;
-    G4double hallSizeY  = 7.6 * m;
-    G4double hallSizeZ  = 64.6 * m;
-    G4ThreeVector FASER2Pos = GeometricalParameters::Get()->GetFASER2Position();
-    G4ThreeVector hallOffset( GeometricalParameters::Get()->GetHallOffsetX(), 
-                            GeometricalParameters::Get()->GetHallOffsetY(), 
-                            hallSizeZ/2 - GeometricalParameters::Get()->GetHallHeadDistance()); 
-    FASER2Pos -= hallOffset;
-
-    //* Fill the Acts particle truth tree - yeah we already do this but we need to do it again for Acts
-    for (G4int ivtx = 0; ivtx < event->GetNumberOfPrimaryVertex(); ++ivtx) {
-      for (G4int ipp = 0; ipp < event->GetPrimaryVertex(ivtx)->GetNumberOfParticle(); ++ipp) {
-        G4PrimaryParticle* primary_particle = event->GetPrimaryVertex(ivtx)->GetPrimary(ipp);
-          if (primary_particle) {
-            PrimaryParticleInformation* primary_particle_info = dynamic_cast<PrimaryParticleInformation*>(primary_particle->GetUserInformation());
-            // ActsParticlesParticleId.push_back(primary_particle_info->GetPartID());
-            auto particleId = ActsFatras::Barcode();
-            particleId.setVertexPrimary(0);
-            particleId.setVertexPrimary(1);
-            particleId.setGeneration(0);
-            particleId.setSubParticle(0);
-            particleId.setParticle(ipp);
-            ActsParticlesParticleId.push_back(particleId.value());
-            ActsParticlesParticleType.push_back(primary_particle_info->GetPDG());
-            ActsParticlesProcess.push_back(0);
-            ActsParticlesVx.push_back(primary_particle_info->GetVertexMC().x());
-            ActsParticlesVy.push_back(primary_particle_info->GetVertexMC().y());
-            ActsParticlesVz.push_back(primary_particle_info->GetVertexMC().z());
-            ActsParticlesVt.push_back(0);
-            ActsParticlesPx.push_back(primary_particle_info->GetMomentumMC().x()/1000); //* divide by 1000 to convert MeV -> GeV
-            ActsParticlesPy.push_back(primary_particle_info->GetMomentumMC().y()/1000);
-            ActsParticlesPz.push_back(primary_particle_info->GetMomentumMC().z()/1000);
-            ActsParticlesM.push_back(primary_particle_info->GetMass()/1000);
-            ActsParticlesQ.push_back(primary_particle_info->GetCharge());
-            
-            TLorentzVector p4;
-            G4double energy = GetTotalEnergy(primary_particle_info->GetMomentumMC().x(),primary_particle_info->GetMomentumMC().y(), primary_particle_info->GetMomentumMC().z(), primary_particle_info->GetMass());
-            p4.SetPx(primary_particle_info->GetMomentumMC().x()/1000);
-            p4.SetPy(primary_particle_info->GetMomentumMC().y()/1000);
-            p4.SetPz(primary_particle_info->GetMomentumMC().z()/1000);
-            p4.SetE(energy/1000);
-            
-            ActsParticlesEta.push_back(p4.Eta());
-            ActsParticlesPhi.push_back(p4.Phi());
-            ActsParticlesPt.push_back(p4.Pt());
-            ActsParticlesP.push_back(p4.P());
-            ActsParticlesVertexPrimary.push_back(1); //? These variables need to be filled, but are unused by Acts 
-            ActsParticlesVertexSecondary.push_back(0); //? These variables need to be filled, but are unused by Acts 
-            ActsParticlesParticle.push_back(1); //? These variables need to be filled, but are unused by Acts 
-            ActsParticlesGeneration.push_back(0); //? These variables need to be filled, but are unused by Acts 
-            ActsParticlesSubParticle.push_back(0); //? These variables need to be filled, but are unused by Acts 
-            ActsParticlesELoss.push_back(0); //? These variables need to be filled, but are unused by Acts 
-            ActsParticlesPathInX0.push_back(0); //? These variables need to be filled, but are unused by Acts 
-            ActsParticlesPathInL0.push_back(0); //? These variables need to be filled, but are unused by Acts 
-            ActsParticlesNumberOfHits.push_back(0); //? These variables need to be filled, but are unused by Acts 
-            ActsParticlesOutcome.push_back(0); //? These variables need to be filled, but are unused by Acts 
-        }
-      }
-    }
-    acts_particles_tree->Fill();
-  }
-
   /// loop over the vertices, and then over primary particles,
   /// neutrino truth info from event generator.
   for (G4int ivtx = 0; ivtx < event->GetNumberOfPrimaryVertex(); ++ivtx) {
@@ -589,7 +524,7 @@ void AnalysisManager::EndOfEvent(const G4Event* event) {
   std::cout<<"number of primary particles : "<<nPrimaryParticle
     <<" , in which number of particles from fsl : "<<nFromFSLParticles<<std::endl;
   //std::cout<<"Test nTestNPrimaryTrack : "<<nTestNPrimaryTrack<<std::endl;
-
+  // return;
   //- cluster all tracks to primary particles
   //- mark the index of the final state lepton from the neutrino interaction
   trackClusters.resize(nPrimaryParticle);
@@ -621,81 +556,87 @@ void AnalysisManager::EndOfEvent(const G4Event* event) {
     }
   }
 
-  const Double_t res_tpc[3] = {1, 5, 5}; // mm
-  if (neutrino.NuPDG()!=0) {
-    pm3D = new PixelMap3D(evtID, nPrimaryParticle, neutrino.NuPDG(), res_tpc);
-  } else {
-    pm3D = new PixelMap3D(evtID, nPrimaryParticle, primaries[0].PDG(), res_tpc);
-  }
-  // boundary in global coord.
-  pm3D->SetPMBoundary(GeometricalParameters::Get()->GetFLArEPosition()/mm -
-                        GeometricalParameters::Get()->GetTPCSizeXYZ()/mm/2,
-                        GeometricalParameters::Get()->GetFLArEPosition()/mm +
-                        GeometricalParameters::Get()->GetTPCSizeXYZ()/mm/2);
-  pm3D->InitializePM();
+  if (GeometricalParameters::Get()->GetAddFLArE())
+  {
+    G4cout << "Adding FLArE pixel map..." << G4endl;
+    const Double_t res_tpc[3] = {1, 5, 5}; // mm
+    if (neutrino.NuPDG()!=0) {
+      pm3D = new PixelMap3D(evtID, nPrimaryParticle, neutrino.NuPDG(), res_tpc);
+    } else {
+      pm3D = new PixelMap3D(evtID, nPrimaryParticle, primaries[0].PDG(), res_tpc);
+    }
+    // boundary in global coord.
+    pm3D->SetPMBoundary(GeometricalParameters::Get()->GetFLArEPosition()/mm -
+                          GeometricalParameters::Get()->GetTPCSizeXYZ()/mm/2,
+                          GeometricalParameters::Get()->GetFLArEPosition()/mm +
+                          GeometricalParameters::Get()->GetTPCSizeXYZ()/mm/2);
+    pm3D->InitializePM();
 
-  /// FillTrueEdep must run after FillPrimaryTruthTree, 
-  /// otherwise tracksFromFSL and tracksFromFSLSecondary are invalid
-  /// Pixel map is also filled here
-  for (auto sdname : SDNamelist) {
-    FillTrueEdep(sdname.first, sdname.second);
-  }
-
-  if (m_save2DEvd) pm3D->Write2DPMToFile(thefile);
-
-  pm3D->Process3DPM(fH5file, neutrino, m_save3DEvd);
-  sparseFractionMem = pm3D->GetSparseFractionMem();
-  sparseFractionBins = pm3D->GetSparseFractionBins();
-
-  if (m_circularFit){
-    
-    circNhits = hitXFSL.size();
-    trkNhits = trkXFSL.size();
-    
-    // apply circular fitting to FLArE hadCath/muonFinder
-    if ( circNhits > 0 ){
-      circularfitter::CircleFit* circFit = new circularfitter::CircleFit(hitXFSL,hitZFSL);
-      circularfitter::LineFit* lineFit = new circularfitter::LineFit(hitZFSL,hitYFSL);
-      xc = circFit->GetXc();
-      zc = circFit->GetZc();
-      rc = circFit->GetR();
-      p0 = lineFit->GetP0();
-      p1 = lineFit->GetP1();
-      cosDip = lineFit->GetCosDip();
+    /// FillTrueEdep must run after FillPrimaryTruthTree, 
+    /// otherwise tracksFromFSL and tracksFromFSLSecondary are invalid
+    /// Pixel map is also filled here
+    for (auto sdname : SDNamelist) {
+      FillTrueEdep(sdname.first, sdname.second);
     }
 
-    // apply circular fitting for FASER2 spectrometer magnet
-    if( trkNhits > 0 ){
-      
-      Nmagnets = (GeometricalParameters::Get()->GetFASER2MagnetOption() == GeometricalParameters::magnetOption::SAMURAI) ? 1 :
-                  GeometricalParameters::Get()->GetNFASER2Magnets();
-      G4cout << "Number of FASER2 magnets: " << Nmagnets << G4endl;
+    if (m_save2DEvd) pm3D->Write2DPMToFile(thefile);
 
-      circularfitter::CircleExtractor* circExtract = new circularfitter::CircleExtractor(trkXFSL,trkYFSL,trkZFSL);
-      magzpos = circExtract->GetMagnetZs();
-      trkxc = circExtract->GetXc();
-      trkzc = circExtract->GetZc();
-      trkrc = circExtract->GetR();
+    pm3D->Process3DPM(fH5file, neutrino, m_save3DEvd);
+    sparseFractionMem = pm3D->GetSparseFractionMem();
+    sparseFractionBins = pm3D->GetSparseFractionBins();
+
+    if (m_circularFit){
       
-      std::vector<circularfitter::line> pre  = circExtract->GetPreLine();
-      std::vector<circularfitter::line> post = circExtract->GetPostLine();
-      for(int i=0; i<Nmagnets; i++){
-        //G4cout << "circle: " << trkzc[i] << " " << trkxc[i] << " " << trkrc[i] << G4endl;
-        trkqIn.push_back( pre[i].q );
-        trkmIn.push_back( pre[i].m );
-        trkqOut.push_back( post[i].q );
-        trkmOut.push_back( post[i].m );
+      circNhits = hitXFSL.size();
+      trkNhits = trkXFSL.size();
+      
+      // apply circular fitting to FLArE hadCath/muonFinder
+      if ( circNhits > 0 ){
+        circularfitter::CircleFit* circFit = new circularfitter::CircleFit(hitXFSL,hitZFSL);
+        circularfitter::LineFit* lineFit = new circularfitter::LineFit(hitZFSL,hitYFSL);
+        xc = circFit->GetXc();
+        zc = circFit->GetZc();
+        rc = circFit->GetR();
+        p0 = lineFit->GetP0();
+        p1 = lineFit->GetP1();
+        cosDip = lineFit->GetCosDip();
       }
 
-      circularfitter::LineFit* lineFit2 = new circularfitter::LineFit(trkZFSL,trkYFSL);
-      trkp0 = lineFit2->GetP0();
-      trkp1 = lineFit2->GetP1();
-      trkcosDip = lineFit2->GetCosDip();
+      // apply circular fitting for FASER2 spectrometer magnet
+      if( trkNhits > 0 ){
+        
+        Nmagnets = (GeometricalParameters::Get()->GetFASER2MagnetOption() == GeometricalParameters::magnetOption::SAMURAI) ? 1 :
+                    GeometricalParameters::Get()->GetNFASER2Magnets();
+        G4cout << "Number of FASER2 magnets: " << Nmagnets << G4endl;
+
+        circularfitter::CircleExtractor* circExtract = new circularfitter::CircleExtractor(trkXFSL,trkYFSL,trkZFSL);
+        magzpos = circExtract->GetMagnetZs();
+        trkxc = circExtract->GetXc();
+        trkzc = circExtract->GetZc();
+        trkrc = circExtract->GetR();
+        
+        std::vector<circularfitter::line> pre  = circExtract->GetPreLine();
+        std::vector<circularfitter::line> post = circExtract->GetPostLine();
+        for(int i=0; i<Nmagnets; i++){
+          //G4cout << "circle: " << trkzc[i] << " " << trkxc[i] << " " << trkrc[i] << G4endl;
+          trkqIn.push_back( pre[i].q );
+          trkmIn.push_back( pre[i].m );
+          trkqOut.push_back( post[i].q );
+          trkmOut.push_back( post[i].m );
+        }
+
+        circularfitter::LineFit* lineFit2 = new circularfitter::LineFit(trkZFSL,trkYFSL);
+        trkp0 = lineFit2->GetP0();
+        trkp1 = lineFit2->GetP1();
+        trkcosDip = lineFit2->GetCosDip();
+      }
     }
+    
+    // FillPseudoRecoVar must run after FillTrueEdep, otherwise some of the variables won't be filled
+    FillPseudoRecoVar();
+
+    delete pm3D;
   }
-  
-  // FillPseudoRecoVar must run after FillTrueEdep, otherwise some of the variables won't be filled
-  FillPseudoRecoVar();
 
   int count_tracks = 0;
   if(m_saveTrack){
@@ -735,8 +676,7 @@ void AnalysisManager::EndOfEvent(const G4Event* event) {
   }
   trackClusters.clear();
   trackClusters.shrink_to_fit();
-
-  delete pm3D;
+  
 }
 
 void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName) 
@@ -746,7 +686,7 @@ void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
   {
     auto hitCollection = dynamic_cast<FASER2TrackerHitsCollection*>(hcofEvent->GetHC(sdId));
     if (!hitCollection) return;
-    
+    std::map<G4int, G4int> sub_part_map{};
     for (auto hit: *hitCollection->GetVector()) 
     {
       if (hit->GetCharge() == 0) continue; // skip neutral particles, they don't hit
@@ -772,11 +712,15 @@ void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
       }
 
       auto particleId = ActsFatras::Barcode();
-      particleId.setVertexPrimary(isPrimary);
-      particleId.setVertexSecondary(!isPrimary);
-      particleId.setGeneration(0);
-      particleId.setSubParticle(0);
+      particleId.setVertexPrimary(1);
+      particleId.setVertexSecondary(0);
       particleId.setParticle(hit->GetTrackID() - 1); // The track ID is the primary particle index plus one
+      particleId.setGeneration(hit->GetParentID());
+
+      sub_part_map.try_emplace(hit->GetTrackID()-1, sub_part_map.size());
+      
+      // This is a fudge - assumes that that the secondary particles are always sub-particles of the primary particle
+      particleId.setSubParticle(hit->GetParentID() == 0 ? 0 : sub_part_map[hit->GetTrackID()-1]);
       ActsHitsParticleID = particleId.value();
 
       ActsHitsX = hit->GetX();
@@ -801,145 +745,183 @@ void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
       ActsHitsApproachID = 0;
       ActsHitsSensitiveID = 1;
       acts_hits_tree->Fill();
+
+      // Now fill the Acts particles tree
+      bool isDuplicate = false;
+      for (const auto& id : ActsParticlesParticleId) {
+        if (id == particleId.value()) {
+          isDuplicate = true;
+        }
+      }
+      if (isDuplicate) continue; // Skip this particle if it's already been added
+      
+      ActsParticlesParticleId.push_back(particleId.value());
+      ActsParticlesParticleType.push_back(hit->GetPDGID());
+      ActsParticlesProcess.push_back(0);
+      ActsParticlesVx.push_back(hit->GetTrackVertex().x());
+      ActsParticlesVy.push_back(hit->GetTrackVertex().y());
+      ActsParticlesVz.push_back(hit->GetTrackVertex().z());
+      ActsParticlesVt.push_back(0);
+      ActsParticlesPx.push_back(hit->GetTrackP4().px());
+      ActsParticlesPy.push_back(hit->GetTrackP4().py());
+      ActsParticlesPz.push_back(hit->GetTrackP4().pz());
+      ActsParticlesM.push_back(hit->GetTrackP4().m());
+      ActsParticlesQ.push_back(hit->GetCharge());
+      
+      ActsParticlesEta.push_back(hit->GetTrackP4().eta());
+      ActsParticlesPhi.push_back(hit->GetTrackP4().phi());
+      ActsParticlesPt.push_back(pow(pow(hit->GetTrackP4().px(), 2) + pow(hit->GetTrackP4().py(), 2), 0.5));
+      ActsParticlesP.push_back(pow(pow(hit->GetTrackP4().px(), 2) + pow(hit->GetTrackP4().py(), 2) + pow(hit->GetTrackP4().pz(), 2), 0.5));
+      ActsParticlesVertexPrimary.push_back(hit->GetIsPrimaryTrack()); //? These variables need to be filled, but are unused by Acts 
+      ActsParticlesVertexSecondary.push_back(hit->GetIsSecondaryTrack()); //? These variables need to be filled, but are unused by Acts 
+      ActsParticlesParticle.push_back(1); //? These variables need to be filled, but are unused by Acts 
+      ActsParticlesGeneration.push_back(0); //? These variables need to be filled, but are unused by Acts 
+      ActsParticlesSubParticle.push_back(0); //? These variables need to be filled, but are unused by Acts 
+      ActsParticlesELoss.push_back(0); //? These variables need to be filled, but are unused by Acts 
+      ActsParticlesPathInX0.push_back(0); //? These variables need to be filled, but are unused by Acts 
+      ActsParticlesPathInL0.push_back(0); //? These variables need to be filled, but are unused by Acts 
+      ActsParticlesNumberOfHits.push_back(0); //? These variables need to be filled, but are unused by Acts 
+      ActsParticlesOutcome.push_back(0); //? These variables need to be filled, but are unused by Acts 
     } // end of loop over hits
+    acts_particles_tree->Fill();
   }
 
 
   // Get and cast hit collection with LArBoxHits
-  LArBoxHitsCollection* hitCollection = dynamic_cast<LArBoxHitsCollection*>(hcofEvent->GetHC(sdId));
-  if (hitCollection) {
-    for (auto hit: *hitCollection->GetVector()) {
-      nHits++;
+  // LArBoxHitsCollection* hitCollection = dynamic_cast<LArBoxHitsCollection*>(hcofEvent->GetHC(sdId));
+  // if (hitCollection) {
+  //   for (auto hit: *hitCollection->GetVector()) {
+  //     nHits++;
 
-      double pre_x  = hit->GetPreStepPosition().x();
-      double pre_y  = hit->GetPreStepPosition().y();
-      double pre_z  = hit->GetPreStepPosition().z();
-      double post_x = hit->GetPostStepPosition().x();
-      double post_y = hit->GetPostStepPosition().y();
-      double post_z = hit->GetPostStepPosition().z();
+  //     double pre_x  = hit->GetPreStepPosition().x();
+  //     double pre_y  = hit->GetPreStepPosition().y();
+  //     double pre_z  = hit->GetPreStepPosition().z();
+  //     double post_x = hit->GetPostStepPosition().x();
+  //     double post_y = hit->GetPostStepPosition().y();
+  //     double post_z = hit->GetPostStepPosition().z();
       
-      if (m_saveHit) {
-        if (nHits<=40000000) {
-          HitTID[nHits-1] = hit->GetTID();
-          HitPID[nHits-1] = hit->GetPID();
-          HitPDG[nHits-1] = hit->GetParticle();
-          HitTrackStatus[nHits-1]  = hit->GetTrackStatus();
-          HitPrePositionX[nHits-1] = pre_x;
-          HitPrePositionY[nHits-1] = pre_y;
-          HitPrePositionZ[nHits-1] = pre_z;
-          HitPosPositionX[nHits-1] = post_x;
-          HitPosPositionY[nHits-1] = post_y;
-          HitPosPositionZ[nHits-1] = post_z;
-          HitEdep[nHits-1] = hit->GetEdep();
-        }
-      }
+  //     if (m_saveHit) {
+  //       if (nHits<=40000000) {
+  //         HitTID[nHits-1] = hit->GetTID();
+  //         HitPID[nHits-1] = hit->GetPID();
+  //         HitPDG[nHits-1] = hit->GetParticle();
+  //         HitTrackStatus[nHits-1]  = hit->GetTrackStatus();
+  //         HitPrePositionX[nHits-1] = pre_x;
+  //         HitPrePositionY[nHits-1] = pre_y;
+  //         HitPrePositionZ[nHits-1] = pre_z;
+  //         HitPosPositionX[nHits-1] = post_x;
+  //         HitPosPositionY[nHits-1] = post_y;
+  //         HitPosPositionZ[nHits-1] = post_z;
+  //         HitEdep[nHits-1] = hit->GetEdep();
+  //       }
+  //     }
 
-      // energy deposition in different volumes of the detector
-      if (sdName == "lArBoxSD/lar_box") 
-        edepInLAr += hit->GetEdep();
-      else if (sdName == "HadCalXSD/lar_box") 
-        edepInHadCalX += hit->GetEdep();
-      else if (sdName == "HadCalYSD/lar_box") 
-        edepInHadCalY += hit->GetEdep();
-      else if (sdName == "MuonFinderXSD/lar_box") 
-        edepInMuonFinderX += hit->GetEdep();
-      else if (sdName == "MuonFinderYSD/lar_box") 
-        edepInMuonFinderY += hit->GetEdep();
-      else if (sdName == "HadAbsorbSD/lar_box") 
-        edepInHadAborb += hit->GetEdep();
-      else if (sdName == "MuonFinderAbsorbSD/lar_box") 
-        edepInMuonFinderAbsorb += hit->GetEdep();
+  //     // energy deposition in different volumes of the detector
+  //     if (sdName == "lArBoxSD/lar_box") 
+  //       edepInLAr += hit->GetEdep();
+  //     else if (sdName == "HadCalXSD/lar_box") 
+  //       edepInHadCalX += hit->GetEdep();
+  //     else if (sdName == "HadCalYSD/lar_box") 
+  //       edepInHadCalY += hit->GetEdep();
+  //     else if (sdName == "MuonFinderXSD/lar_box") 
+  //       edepInMuonFinderX += hit->GetEdep();
+  //     else if (sdName == "MuonFinderYSD/lar_box") 
+  //       edepInMuonFinderY += hit->GetEdep();
+  //     else if (sdName == "HadAbsorbSD/lar_box") 
+  //       edepInHadAborb += hit->GetEdep();
+  //     else if (sdName == "MuonFinderAbsorbSD/lar_box") 
+  //       edepInMuonFinderAbsorb += hit->GetEdep();
 
-      // save FSL (only muons!) hits for circle fitting
-      // check that particle is a primary muon
-      if( TMath::Abs(hit->GetParticle())==13 && hit->GetPID() == 0 ){
-        double px = hit->GetInitMomentum().x();
-        double pz = hit->GetInitMomentum().z();
-        double p_perp = TMath::Sqrt(px*px+pz*pz);
-        // save hits in FLArE hadCather+muonFinder
-        if( (sdName == "HadCalXSD/lar_box") || (sdName == "HadCalYSD/lar_box") ||
-            (sdName == "MuonFinderXSD/lar_box") || (sdName == "MuonFinderYSD/lar_box") ||
-            (sdName == "HadAbsorbSD/lar_box") || (sdName == "MuonFinderAbsorbSD/lar_box") ||
-            (sdName == "BabyMINDHorBarSD/lar_box") || (sdName == "BabyMINDVerBarSD/lar_box")){
-          hitXFSL.push_back(post_x);
-          hitYFSL.push_back(post_y);
-          hitZFSL.push_back(post_z);
-          hitPFSL.push_back(p_perp);
-        }
-        else if ((sdName == "TrkHorScinSD/lar_box") || (sdName == "TrkVerScinSD/lar_box")){
-          trkXFSL.push_back(post_x);
-          trkYFSL.push_back(post_y);
-          trkZFSL.push_back(post_z);
-          trkPFSL.push_back(p_perp);
-        }
-      }
+  //     // save FSL (only muons!) hits for circle fitting
+  //     // check that particle is a primary muon
+  //     if( TMath::Abs(hit->GetParticle())==13 && hit->GetPID() == 0 ){
+  //       double px = hit->GetInitMomentum().x();
+  //       double pz = hit->GetInitMomentum().z();
+  //       double p_perp = TMath::Sqrt(px*px+pz*pz);
+  //       // save hits in FLArE hadCather+muonFinder
+  //       if( (sdName == "HadCalXSD/lar_box") || (sdName == "HadCalYSD/lar_box") ||
+  //           (sdName == "MuonFinderXSD/lar_box") || (sdName == "MuonFinderYSD/lar_box") ||
+  //           (sdName == "HadAbsorbSD/lar_box") || (sdName == "MuonFinderAbsorbSD/lar_box") ||
+  //           (sdName == "BabyMINDHorBarSD/lar_box") || (sdName == "BabyMINDVerBarSD/lar_box")){
+  //         hitXFSL.push_back(post_x);
+  //         hitYFSL.push_back(post_y);
+  //         hitZFSL.push_back(post_z);
+  //         hitPFSL.push_back(p_perp);
+  //       }
+  //       else if ((sdName == "TrkHorScinSD/lar_box") || (sdName == "TrkVerScinSD/lar_box")){
+  //         trkXFSL.push_back(post_x);
+  //         trkYFSL.push_back(post_y);
+  //         trkZFSL.push_back(post_z);
+  //         trkPFSL.push_back(p_perp);
+  //       }
+  //     }
 
-      //allTracksPTPair.insert(std::make_pair(hit->GetPID(), hit->GetTID()));
+  //     //allTracksPTPair.insert(std::make_pair(hit->GetPID(), hit->GetTID()));
 
-      // stable final state particles in GENIE, primary particles in Geant4
-      if (hit->GetCreatorProcess()=="PrimaryParticle") { // i.e. PID==0
-        if ( std::find(primaryIDs.begin(), primaryIDs.end(), hit->GetTID()) == primaryIDs.end() ) { 
-          // the following line excludes final state lepton tau from the primary particle list
-          //if (abs(nuPDG)==16 && abs(nuFSLPDG)==15 && abs(hit->GetParticle()==15)) continue;
-          countPrimaryParticle++;
-	  primaryIDs.push_back(hit->GetTID());
-          primaries.push_back(FPFParticle(hit->GetParticle(), 
-                hit->GetPID(), hit->GetTID(), countPrimaryParticle-1, 1, hit->GetParticleMass(),
-                hit->GetTrackVertex().x(), hit->GetTrackVertex().y(), hit->GetTrackVertex().z(), 0, 
-                hit->GetInitMomentum().x(), hit->GetInitMomentum().y(), hit->GetInitMomentum().z(), 
-                GetTotalEnergy(hit->GetInitMomentum().x(), hit->GetInitMomentum().y(),
-                  hit->GetInitMomentum().z(), hit->GetParticleMass())));
-        }
-      }
-      // in case of the fsl decay, the decay products are counted as primary particles
-      // * tau- decay (dominant)
-      // * mu- decay
-      //if (hit->GetPID()==1 && hit->GetCreatorProcess()=="Decay") {
-      if (hit->GetIsTrackFromPrimaryLepton()) {
-        tracksFromFSLSecondary.insert(hit->GetTID());
-        if (std::find(primaryIDs.begin(), primaryIDs.end(), hit->GetTID()) == primaryIDs.end()) {
-          countPrimaryParticle++;
-	  primaryIDs.push_back(hit->GetTID());
-          primaries.push_back(FPFParticle(hit->GetParticle(), 
-                hit->GetPID(), hit->GetTID(), countPrimaryParticle-1, 2, hit->GetParticleMass(),
-                hit->GetTrackVertex().x(), hit->GetTrackVertex().y(), hit->GetTrackVertex().z(), 0, 
-                hit->GetInitMomentum().x(), hit->GetInitMomentum().y(), hit->GetInitMomentum().z(), 
-                GetTotalEnergy(hit->GetInitMomentum().x(), hit->GetInitMomentum().y(),
-                  hit->GetInitMomentum().z(), hit->GetParticleMass())));
-        }
-      }
-      // in case of pizero in the list of primary track
-      // its decay products are also counted as primary particles, mostly 2 gammas
-      if (hit->GetIsTrackFromPrimaryPizero()) {
-        tracksFromFSPizeroSecondary.insert(hit->GetTID());
-        if (std::find(primaryIDs.begin(), primaryIDs.end(), hit->GetTID()) == primaryIDs.end()) {
-          countPrimaryParticle++;
-	  primaryIDs.push_back(hit->GetTID());
-          primaries.push_back(FPFParticle(hit->GetParticle(), 
-                hit->GetPID(), hit->GetTID(), countPrimaryParticle-1, 3, hit->GetParticleMass(),
-                hit->GetTrackVertex().x(), hit->GetTrackVertex().y(), hit->GetTrackVertex().z(), 0, 
-                hit->GetInitMomentum().x(), hit->GetInitMomentum().y(), hit->GetInitMomentum().z(), 
-                GetTotalEnergy(hit->GetInitMomentum().x(), hit->GetInitMomentum().y(),
-                  hit->GetInitMomentum().z(), hit->GetParticleMass())));
-        }
-      }
-      // in case of tau decay pizero
-      // decay products of this pizero are also counted as primary particles, mostly 2 gammas
-      if (hit->GetIsTrackFromFSLPizero()) {
-        tracksFromFSLDecayPizeroSecondary.insert(hit->GetTID());
-        if (std::find(primaryIDs.begin(), primaryIDs.end(), hit->GetTID()) == primaryIDs.end()) {
-          countPrimaryParticle++;
-	  primaryIDs.push_back(hit->GetTID());
-          primaries.push_back(FPFParticle(hit->GetParticle(), 
-                hit->GetPID(), hit->GetTID(), countPrimaryParticle-1, 4, hit->GetParticleMass(),
-                hit->GetTrackVertex().x(), hit->GetTrackVertex().y(), hit->GetTrackVertex().z(), 0, 
-                hit->GetInitMomentum().x(), hit->GetInitMomentum().y(), hit->GetInitMomentum().z(), 
-                GetTotalEnergy(hit->GetInitMomentum().x(), hit->GetInitMomentum().y(),
-                  hit->GetInitMomentum().z(), hit->GetParticleMass())));
-        }
-      }
-    } // end of hit loop
-  }
+  //     // stable final state particles in GENIE, primary particles in Geant4
+  //     if (hit->GetCreatorProcess()=="PrimaryParticle") { // i.e. PID==0
+  //       if ( std::find(primaryIDs.begin(), primaryIDs.end(), hit->GetTID()) == primaryIDs.end() ) { 
+  //         // the following line excludes final state lepton tau from the primary particle list
+  //         //if (abs(nuPDG)==16 && abs(nuFSLPDG)==15 && abs(hit->GetParticle()==15)) continue;
+  //         countPrimaryParticle++;
+	//   primaryIDs.push_back(hit->GetTID());
+  //         primaries.push_back(FPFParticle(hit->GetParticle(), 
+  //               hit->GetPID(), hit->GetTID(), countPrimaryParticle-1, 1, hit->GetParticleMass(),
+  //               hit->GetTrackVertex().x(), hit->GetTrackVertex().y(), hit->GetTrackVertex().z(), 0, 
+  //               hit->GetInitMomentum().x(), hit->GetInitMomentum().y(), hit->GetInitMomentum().z(), 
+  //               GetTotalEnergy(hit->GetInitMomentum().x(), hit->GetInitMomentum().y(),
+  //                 hit->GetInitMomentum().z(), hit->GetParticleMass())));
+  //       }
+  //     }
+  //     // in case of the fsl decay, the decay products are counted as primary particles
+  //     // * tau- decay (dominant)
+  //     // * mu- decay
+  //     //if (hit->GetPID()==1 && hit->GetCreatorProcess()=="Decay") {
+  //     if (hit->GetIsTrackFromPrimaryLepton()) {
+  //       tracksFromFSLSecondary.insert(hit->GetTID());
+  //       if (std::find(primaryIDs.begin(), primaryIDs.end(), hit->GetTID()) == primaryIDs.end()) {
+  //         countPrimaryParticle++;
+	//   primaryIDs.push_back(hit->GetTID());
+  //         primaries.push_back(FPFParticle(hit->GetParticle(), 
+  //               hit->GetPID(), hit->GetTID(), countPrimaryParticle-1, 2, hit->GetParticleMass(),
+  //               hit->GetTrackVertex().x(), hit->GetTrackVertex().y(), hit->GetTrackVertex().z(), 0, 
+  //               hit->GetInitMomentum().x(), hit->GetInitMomentum().y(), hit->GetInitMomentum().z(), 
+  //               GetTotalEnergy(hit->GetInitMomentum().x(), hit->GetInitMomentum().y(),
+  //                 hit->GetInitMomentum().z(), hit->GetParticleMass())));
+  //       }
+  //     }
+  //     // in case of pizero in the list of primary track
+  //     // its decay products are also counted as primary particles, mostly 2 gammas
+  //     if (hit->GetIsTrackFromPrimaryPizero()) {
+  //       tracksFromFSPizeroSecondary.insert(hit->GetTID());
+  //       if (std::find(primaryIDs.begin(), primaryIDs.end(), hit->GetTID()) == primaryIDs.end()) {
+  //         countPrimaryParticle++;
+	//   primaryIDs.push_back(hit->GetTID());
+  //         primaries.push_back(FPFParticle(hit->GetParticle(), 
+  //               hit->GetPID(), hit->GetTID(), countPrimaryParticle-1, 3, hit->GetParticleMass(),
+  //               hit->GetTrackVertex().x(), hit->GetTrackVertex().y(), hit->GetTrackVertex().z(), 0, 
+  //               hit->GetInitMomentum().x(), hit->GetInitMomentum().y(), hit->GetInitMomentum().z(), 
+  //               GetTotalEnergy(hit->GetInitMomentum().x(), hit->GetInitMomentum().y(),
+  //                 hit->GetInitMomentum().z(), hit->GetParticleMass())));
+  //       }
+  //     }
+  //     // in case of tau decay pizero
+  //     // decay products of this pizero are also counted as primary particles, mostly 2 gammas
+  //     if (hit->GetIsTrackFromFSLPizero()) {
+  //       tracksFromFSLDecayPizeroSecondary.insert(hit->GetTID());
+  //       if (std::find(primaryIDs.begin(), primaryIDs.end(), hit->GetTID()) == primaryIDs.end()) {
+  //         countPrimaryParticle++;
+	//   primaryIDs.push_back(hit->GetTID());
+  //         primaries.push_back(FPFParticle(hit->GetParticle(), 
+  //               hit->GetPID(), hit->GetTID(), countPrimaryParticle-1, 4, hit->GetParticleMass(),
+  //               hit->GetTrackVertex().x(), hit->GetTrackVertex().y(), hit->GetTrackVertex().z(), 0, 
+  //               hit->GetInitMomentum().x(), hit->GetInitMomentum().y(), hit->GetInitMomentum().z(), 
+  //               GetTotalEnergy(hit->GetInitMomentum().x(), hit->GetInitMomentum().y(),
+  //                 hit->GetInitMomentum().z(), hit->GetParticleMass())));
+  //       }
+  //     }
+  //   } // end of hit loop
+  // }
 }
 
 void AnalysisManager::FillTrueEdep(G4int sdId, std::string sdName) 
