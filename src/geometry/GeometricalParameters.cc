@@ -12,8 +12,16 @@ GeometricalParameters::GeometricalParameters()
   fHallOffsetX = 1.44*m;
   fHallOffsetY = 2.21*m;
 
-  // FLArE TPC volume#
+  // FLArE TPC volume
   fAddFLArE = false; //default
+
+  // rock envelope
+  fEnableRockEnvelope = false;
+  fRockFrontThickness = 10*m;
+  fRockSideThickness = 3*m;
+  fRockBackThickness = 3*m;
+
+  // FLArE TPC volume
   fFLArETPCMaterialOption = tpcMaterialOption::LiquidArgon;
   fFLArETPCConfigOption   = tpcConfigOption::ThreeBySeven;
   fTPCSizeX = 1.8*m;  // optimized by energy containment  

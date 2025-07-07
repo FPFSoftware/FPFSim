@@ -37,6 +37,7 @@
 #include <G4UniformMagField.hh>
 #include <G4FieldManager.hh>
 #include <G4GDMLParser.hh>
+#include <G4SubtractionSolid.hh>
 
 using namespace std;
 
@@ -48,8 +49,9 @@ G4ThreadLocal BabyMINDMagneticField* DetectorConstruction::babyMINDField = 0;
 G4ThreadLocal G4FieldManager* DetectorConstruction::babyMINDFieldMgr = 0;
 
 DetectorConstruction::DetectorConstruction()
-  : G4VUserDetectorConstruction(), 
-    m_addFLArE(true), m_addFORMOSA(true), m_addFASERnu2(true), m_addFASER2(true), m_useBabyMIND(false)
+  : G4VUserDetectorConstruction(),
+    m_addFLArE(true), m_addFORMOSA(true), m_addFASERnu2(true), m_addFASER2(true),
+    m_useBabyMIND(false), m_enableRockEnvelope(false)
 {
   DefineMaterial();
   messenger = new DetectorConstructionMessenger(this);
@@ -58,7 +60,7 @@ DetectorConstruction::DetectorConstruction()
   fCheckOverlap = false;
 }
 
-DetectorConstruction::~DetectorConstruction() 
+DetectorConstruction::~DetectorConstruction()
 {
   delete messenger;
 }
@@ -67,7 +69,7 @@ void DetectorConstruction::DefineMaterial() {
   //-----------------------------
   // construction of materials
   //-----------------------------
-  
+
   LArBoxMaterials = DetectorConstructionMaterial::GetInstance();
 }
 
@@ -80,7 +82,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
                                    worldLV,
                                    "worldPV",
                                    nullptr,
-                                   false, 
+                                   false,
                                    0);
 
   // FPF long paper: https://dx.doi.org/10.1088/1361-6471/ac865e
@@ -88,18 +90,43 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4double hallSizeX  = 9.4 * m;
   G4double hallSizeY  = 7.6 * m;
   G4double hallSizeZ  = 64.6 * m;
-  
-  // this offset accounts for: 
-  // - distance between the entrance wall of the hall and the first detector, so the first detector 
+
+  // this offset accounts for:
+  // - distance between the entrance wall of the hall and the first detector, so the first detector
   //   starts at the center of the global coordinate
   // - position of the cavern center w.r.t. the line of sight, since it's not in the exact middle
-  G4ThreeVector hallOffset( GeometricalParameters::Get()->GetHallOffsetX(), 
-                            GeometricalParameters::Get()->GetHallOffsetY(), 
-                            hallSizeZ/2 - GeometricalParameters::Get()->GetHallHeadDistance()); 
-                                                           
+  G4ThreeVector hallOffset( GeometricalParameters::Get()->GetHallOffsetX(),
+                            GeometricalParameters::Get()->GetHallOffsetY(),
+                            hallSizeZ/2 - GeometricalParameters::Get()->GetHallHeadDistance());
+
   auto hallBox = new G4Box("hallBox", hallSizeX/2, hallSizeY/2, hallSizeZ/2);
   hallLV = new G4LogicalVolume(hallBox, LArBoxMaterials->Material("Air"), "hallLV");
   auto hallPV = new G4PVPlacement(nullptr, hallOffset, hallLV, "hallPV", worldLV, false, 0, fCheckOverlap);
+
+  //----------------------------------
+  // Rock envelope
+
+  if(m_enableRockEnvelope){
+
+    G4double rockSizeX = hallSizeX + 2*GeometricalParameters::Get()->GetRockSideThickness();
+    G4double rockSizeY = hallSizeY + 2*GeometricalParameters::Get()->GetRockSideThickness();
+    G4double rockSizeZ = hallSizeZ + GeometricalParameters::Get()->GetRockFrontThickness()
+                                   + GeometricalParameters::Get()->GetRockBackThickness();
+    G4ThreeVector rockOffset( 0, 0, (GeometricalParameters::Get()->GetRockFrontThickness()/2)-(GeometricalParameters::Get()->GetRockBackThickness()/2));
+
+    auto rockBox = new G4Box("rockBox",rockSizeX/2,rockSizeY/2,rockSizeZ/2);
+    auto rockEnvelopeSolid = new G4SubtractionSolid("rockEnvelopeSolid", rockBox, hallBox, 0, rockOffset);
+    auto rockEnvelope = new G4LogicalVolume(rockEnvelopeSolid, LArBoxMaterials->Material("Rock"), "rockEnvelope");
+    auto rockEnvelopePV = new G4PVPlacement(nullptr, hallOffset-rockOffset, rockEnvelope, "rockEnvelopePV", worldLV, false, 0, fCheckOverlap);
+
+    G4cout << "Rock envelope enabled: upstream " << GeometricalParameters::Get()->GetRockFrontThickness() << ","
+           << " downstream " << GeometricalParameters::Get()->GetRockBackThickness() << ","
+           << " side " << GeometricalParameters::Get()->GetRockSideThickness() << G4endl;
+
+    G4VisAttributes* rockVis = new G4VisAttributes(G4Colour(167./255, 168./255, 189./255));
+    rockVis->SetVisibility(true);
+    rockEnvelope->SetVisAttributes(rockVis);       
+  } else G4cout << "Rock envelope disabled" << G4endl;
 
   //-----------------------------------
   // FLArE TPC volume
@@ -114,43 +141,43 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     TPCModuleLogical = FLArETPCAssembler->GetFLArETPCVolume();
 
     // positioning
-    G4double lengthFLArE = 2*TPCInsulationThickness + lArSizeZ; 
+    G4double lengthFLArE = 2*TPCInsulationThickness + lArSizeZ;
     G4ThreeVector FLArEPos = GeometricalParameters::Get()->GetFLArEPosition();
     FLArEPos -= hallOffset;
     new G4PVPlacement(nullptr, FLArEPos, FLArETPCAssembly, "FLArETPCPhysical", hallLV, false, 0, fCheckOverlap);
 
     G4cout << "Length of FLArE     : " << lengthFLArE << G4endl;
     G4cout << "Center of FLArE TPC : " << FLArEPos+hallOffset << G4endl; // w.r.t the global coordinate
-  
+
     //-----------------------------------
     // FLArE HadCal/MuonCatcher or BabyMIND
 
     if( m_useBabyMIND ){   /// use BabyMIND
-  
+
       BabyMINDDetectorConstruction *BabyMINDAssembler = new BabyMINDDetectorConstruction();
       G4LogicalVolume *BabyMINDAssembly = BabyMINDAssembler->GetBabyMINDAssembly();
-  
+
       BabyMINDMagnetPlateLogical = BabyMINDAssembler->GetMagnetPlate();
       BabyMINDVerticalBar = BabyMINDAssembler->GetVerticalBar();
       BabyMINDHorizontalBar = BabyMINDAssembler->GetHorizontalBar();
-    
+
       G4double babyMINDLengthZ  = GeometricalParameters::Get()->GetBabyMINDTotalSizeZ();
       G4ThreeVector babyMINDPos = GeometricalParameters::Get()->GetFLArEPosition() +
                                   G4ThreeVector(0.,0.,lArSizeZ/2.+TPCInsulationThickness) +
                                   G4ThreeVector(0.,0.,babyMINDLengthZ/2.);
       babyMINDPos -= hallOffset;
       new G4PVPlacement(nullptr, babyMINDPos, BabyMINDAssembly, "BabyMINDPhysical", hallLV, false, 0, fCheckOverlap);
-      
+
       G4cout << "Length of BabyMIND : " << babyMINDLengthZ << G4endl;
       G4cout << "Center of BabyMIND : " << babyMINDPos+hallOffset << G4endl; // w.r.t the global coordinate
-    
+
     }
     else{  //legacy HadCal/MuonCatcher
-    
+
       FLArEHadCatcherMuonFinderConstruction *HadCatMuonFindAssembler = new FLArEHadCatcherMuonFinderConstruction();
       G4double HadCatcherLength       = GeometricalParameters::Get()->GetHadCalLength();
       G4double MuonFinderLength       = GeometricalParameters::Get()->GetMuonCatcherLength();
-    
+
       G4LogicalVolume* HadCatMuonFindAssembly = HadCatMuonFindAssembler->GetHadCatcherMuonFinderAssembly();
       HadCalXCellLogical          = HadCatMuonFindAssembler->GetHadCalXVolume();
       HadCalYCellLogical          = HadCatMuonFindAssembler->GetHadCalYVolume();
@@ -158,20 +185,20 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
       MuonFinderXCellLogical      = HadCatMuonFindAssembler->GetMuonCatcherXVolume();
       MuonFinderYCellLogical      = HadCatMuonFindAssembler->GetMuonCatcherYVolume();
       MuonFinderAbsorLayersLogical= HadCatMuonFindAssembler->GetMuonCatcherAbsorbVolume();
-      
+
       G4double HadCatMuonFindLengthZ  = HadCatcherLength + MuonFinderLength;
       G4ThreeVector HadCatMuonFindPos = GeometricalParameters::Get()->GetFLArEPosition() +
 	                                      G4ThreeVector(0.,0.,lArSizeZ/2.+TPCInsulationThickness) +
 				                                G4ThreeVector(0.,0.,HadCatMuonFindLengthZ/2.);
-    
+
       HadCatMuonFindPos -= hallOffset;
       new G4PVPlacement(nullptr, HadCatMuonFindPos, HadCatMuonFindAssembly, "HadCatMuonFindPhysical", hallLV, false, 0, fCheckOverlap);
-      
+
       G4cout << "Length of HadCatherMuonFinder : " << HadCatMuonFindLengthZ << G4endl;
       G4cout << "Center of HadCatherMuonFinder : " << HadCatMuonFindPos+hallOffset << G4endl; // w.r.t the global coordinate
     }
   }
-  
+
   //-----------------------------------
   // FORMOSA
 
@@ -190,7 +217,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     G4cout<<"Length of FORMOSA : "<<lengthFORMOSA<<G4endl;
     G4cout<<"Center of FORMOSA : "<<FORMOSAPos+hallOffset<<G4endl; // w.r.t the global coordinate
   }
-                         
+
   //-----------------------------------
   // FASERnu2 Emulsion Detector
 
@@ -200,7 +227,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     FASERnu2EmulsionLogical = FASERnu2Assembler->GetEmulsionFilm();
     FASERnu2VetoInterfaceLogical = FASERnu2Assembler->GetVetoInterfaceDetector();
     G4LogicalVolume* FASERnu2Assembly = FASERnu2Assembler->GetFASERnu2Assembly();
-    
+
     // positioning
     G4double lengthFASERnu2 = GeometricalParameters::Get()->GetFASERnu2TotalSizeZ();
     G4ThreeVector FASERnu2Pos = GeometricalParameters::Get()->GetFASERnu2Position();
@@ -234,7 +261,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     G4cout<<"Length of FASER2 Spectrometer : "<<lengthFASER2Assembly<<G4endl;
     G4cout<<"Center of FASER2 Spectrometer : "<<FASER2Pos+hallOffset<<G4endl; // w.r.t the global coordinate
   }
-  
+
   //-------------------------------------------------------------------
 
   // visualization
@@ -256,7 +283,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 }
 
 void DetectorConstruction::ConstructSDandField() {
-  
+
   G4SDManager* sdManager = G4SDManager::GetSDMpointer();
   sdManager->SetVerboseLevel(2);
   int SDIdx = 0;
@@ -268,15 +295,15 @@ void DetectorConstruction::ConstructSDandField() {
     sdManager->AddNewDetector(TPCModuleSD);
     GeometricalParameters::Get()->AddSD2List(SDIdx, "lArBoxSD/lar_box");
     SDIdx++;
-    
+
     if (m_useBabyMIND) {
-    
+
       LArBoxSD* BabyMINDHorBarSD = new LArBoxSD("BabyMINDHorBarSD");
       BabyMINDHorizontalBar->SetSensitiveDetector(BabyMINDHorBarSD);
       sdManager->AddNewDetector(BabyMINDHorBarSD);
       GeometricalParameters::Get()->AddSD2List(SDIdx, "BabyMINDHorBarSD/lar_box");
       SDIdx++;
-      
+
       LArBoxSD* BabyMINDVerBarSD = new LArBoxSD("BabyMINDVerBarSD");
       BabyMINDVerticalBar->SetSensitiveDetector(BabyMINDVerBarSD);
       sdManager->AddNewDetector(BabyMINDVerBarSD);
@@ -289,9 +316,9 @@ void DetectorConstruction::ConstructSDandField() {
       babyMINDFieldMgr->SetDetectorField(babyMINDField);
       babyMINDFieldMgr->CreateChordFinder(babyMINDField);
       BabyMINDMagnetPlateLogical->SetFieldManager(babyMINDFieldMgr, true);
-    
+
     } else {
-    
+
       LArBoxSD* HadCalXSD = new LArBoxSD("HadCalXSD");
       HadCalXCellLogical->SetSensitiveDetector(HadCalXSD);
       sdManager->AddNewDetector(HadCalXSD);
@@ -327,7 +354,7 @@ void DetectorConstruction::ConstructSDandField() {
       sdManager->AddNewDetector(MuonFinderAbsorbSD);
       GeometricalParameters::Get()->AddSD2List(SDIdx, "MuonFinderAbsorbSD/lar_box");
       SDIdx++;
-    
+
       // magnetic field for HadCatcher + MuonFinder
       G4ThreeVector fieldValue = G4ThreeVector(0,fFieldValue, 0);
       magField = new G4UniformMagField(fieldValue);
@@ -357,7 +384,7 @@ void DetectorConstruction::ConstructSDandField() {
     sdManager->AddNewDetector(EmulsionFilmSD);
     GeometricalParameters::Get()->AddSD2List(SDIdx, "FASERnu2EmulsionSD/lar_box");
     SDIdx++;
-    
+
     LArBoxSD* VetoInterfaceSD = new LArBoxSD("FASERnu2VetoInterfaceSD");
     FASERnu2VetoInterfaceLogical->SetSensitiveDetector(VetoInterfaceSD);
     sdManager->AddNewDetector(VetoInterfaceSD);
@@ -409,4 +436,4 @@ void DetectorConstruction::ConstructSDandField() {
   //// define new one
   //G4RunManager::GetRunManager()->DefineWorldVolume(Construct());
 //  G4RunManager::GetRunManager()->GeometryHasBeenModified();
-//}
+//} 

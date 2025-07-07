@@ -120,7 +120,8 @@ Older versions of FORESEE output events in the HepMC2 format. To run over HepMC2
 |/det/addFLArE          | option for adding the FLArE detector, run before `/run/initialize`                   |`true`|
 |/det/addFORMOSA        | option for adding the FORMOSA detector, run before `/run/initialize`                 |`true`|
 |/det/addFASERnu2       | option for adding the FASERnu2 detector, run before `/run/initialize`                |`true`|
-|/det/faser/addFASER2   | option for adding the FASER2 detector, run before `/run/initialize`                  |`true`|
+|/det/addFASER2         | option for adding the FASER2 detector, run before `/run/initialize`                  |`true`|
+|/det/enableRock        | enable the rock envelope around the hall, run before `/run/initialize`               |`false`|
 |/det/flare/addFLArEPos | position of the FLArE detector, run before `/run/initialize`                         |`0 0 4300 mm`|
 |/det/flare/material    | option for detector material, choose `LAr` or `LKr`, run before `/run/initialize`    |`LAr`|
 |/det/flare/module      | option for tpc module option, choose `single` or `3x7`, run before `/run/initialize` |`single`|
