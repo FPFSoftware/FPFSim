@@ -41,11 +41,11 @@ G4bool FASER2TrackerSD::ProcessHits(G4Step* aStep, G4TouchableHistory* ROhist){
   G4int pdgid = track->GetParticleDefinition()->GetPDGEncoding();
   G4double energy = track->GetDynamicParticle()->Get4Momentum().e();
 
-  if (energy/MeV < 2)
-  {
-    G4cout << "Hit energy too low: " << energy/MeV << " MeV, skipping hit." << G4endl;
-    return 0;
-  }
+  // if (energy/MeV < 2) //! I'm not actully sure about this
+  // {
+  //   G4cout << "Hit energy too low: " << energy/MeV << " MeV, skipping hit." << G4endl;
+  //   return 0;
+  // }
 
   G4double px = track->GetDynamicParticle()->Get4Momentum().px();
   G4double py = track->GetDynamicParticle()->Get4Momentum().py();
