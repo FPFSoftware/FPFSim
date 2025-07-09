@@ -113,7 +113,7 @@ G4double HepMCGenerator::GetStartOfDecayVolume()
     G4double VetoShieldThickness = GeometricalParameters::Get()->GetFASER2VetoShieldThickness();
     G4double vetoLength = 2*ScinThickness + VetoShieldThickness;
 
-    G4double decayVolStartZ = hallZOffset  + FASER2ZOffset - FASER2ZLength/2 + vetoLength;
+    G4double decayVolStartZ = FASER2ZOffset - FASER2ZLength/2 + vetoLength;
 
     return decayVolStartZ;
 }
