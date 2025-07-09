@@ -29,9 +29,6 @@ private:
   FASER2TrackerHitsCollection *fHitCollection = nullptr;
   /// ID of hit collection
   G4int fHCID = -1;
-  /// Temporary map of hits (ID: hit) collected within one event
-  std::vector<FASER2TrackerHit*> fTmpHits;
-
 };
 
 #endif

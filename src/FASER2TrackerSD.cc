@@ -16,8 +16,6 @@ void FASER2TrackerSD::Initialize(G4HCofThisEvent *HCE) {
   if (fHCID < 0)
     fHCID = GetCollectionID(0);
   HCE->AddHitsCollection(fHCID, fHitCollection);
-
-  fTmpHits.clear();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
