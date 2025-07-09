@@ -22,6 +22,7 @@ class AnalysisManager {
     void bookEvtTree();
     void bookTrkTree();
     void bookPrimTree();
+    void bookFLArEHitTree();
     void BeginOfRun();
     void EndOfRun();
     void BeginOfEvent();
@@ -49,6 +50,7 @@ class AnalysisManager {
     TTree*   evt;
     TTree*   trk;
     TTree*   prim;
+    TTree*   flarHit;
     std::string  fH5Filename;
     hep_hpc::hdf5::File fH5file;
 
@@ -141,6 +143,7 @@ class AnalysisManager {
     G4double HitEdep[40000000];
 
     G4bool m_saveHit;
+    G4bool m_saveFlare;
     G4bool m_saveTrack;
     G4bool m_save3DEvd;
     G4bool m_save2DEvd;
@@ -213,6 +216,31 @@ class AnalysisManager {
 
 	float_t primE;
 	float_t primKE;
+
+
+
+	UInt_t flareTrackID;
+	UInt_t flareParticleID;
+	UInt_t flareParentID;
+	UInt_t flarePDG;
+	UInt_t flareCopyNum;
+	UInt_t flareT;
+
+	double flareX;
+	double flareY;
+	double flareZ;
+
+	double flarePx;
+	double flarePy;
+	double flarePz;
+
+	double flareDeltaPx;
+	double flareDeltaPy;
+	double flareDeltaPz;
+
+	double flareEdep;
+
+
 
 
   private:

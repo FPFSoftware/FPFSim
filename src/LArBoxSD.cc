@@ -65,14 +65,22 @@ G4bool LArBoxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* R0hist) {
   G4String PosVolume = PostStep->GetPhysicalVolume()->GetName();
   G4int StepStatus   = PostStep->GetStepStatus();
 
+  G4int copyNum = aStep->GetPreStepPoint()->GetTouchableHandle()->GetCopyNumber();
+  G4ThreeVector delta_momentum = (PostStep->GetMomentum())-InitMomentum;
+
   TrackInformation* aTrackInfo = (TrackInformation*)(aTrack->GetUserInformation());
   G4int trackIsFromPrimaryPizero = 0;
   G4int trackIsFromFSLPizero = 0;
   G4int trackIsFromPrimaryLepton = 0;
+  G4int trackPDG = aTrack->GetParticleDefinition()->GetPDGEncoding();
+  G4double Time = aTrack->GetLocalTime();
   if (aTrackInfo) {
     trackIsFromPrimaryPizero = aTrackInfo->IsTrackFromPrimaryPizero();
     trackIsFromFSLPizero = aTrackInfo->IsTrackFromFSLPizero();
     trackIsFromPrimaryLepton = aTrackInfo->IsTrackFromPrimaryLepton();
+
+
+
   }
 
   // Fill hit information
@@ -85,6 +93,12 @@ G4bool LArBoxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* R0hist) {
   hit->SetPID(PID);
   hit->SetTID(TID);
   hit->SetStepNo(Stepno);
+
+  hit->SetCopyNum(copyNum);
+  hit->SetPDG(trackPDG);
+  hit->SetDeltaMom(delta_momentum);
+  hit->SetTime(Time);
+
   hit->SetPreStepPosition(PreStepPosition);
   hit->SetPostStepPosition(PostStepPosition);
   hit->SetInitMomentum(InitMomentum);

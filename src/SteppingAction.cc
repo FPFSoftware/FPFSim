@@ -15,30 +15,30 @@ SteppingAction::SteppingAction(RunAction* runAction)
 }
 
 void SteppingAction::UserSteppingAction(const G4Step* aStep) {
- 
+
   //TrackLiveDebugging(aStep);
-	
+
   G4Track* aTrack = aStep->GetTrack();
   G4ThreeVector post_pos = aStep->GetPostStepPoint()->GetPosition();
-  
+
   // if the track is out of the active volumes/area, kill this track
   G4VPhysicalVolume* volume = aStep->GetPostStepPoint()->GetTouchable()->GetVolume();
-  
+
   if( volume->GetName() == "worldPV" ) aTrack->SetTrackStatus(G4TrackStatus::fStopAndKill);
-  //else if( volume->GetName() == "hallPV" ){       
+  //else if( volume->GetName() == "hallPV" ){
   //  G4double endFLArE = GeometricalParameters::Get()->GetFLArEPosition()+
   //                      GeometricalParameters::Get()->GetTPCSizeZ()/2.;
-  //  G4double totYokeX = 4.5 * m; 
+  //  G4double totYokeX = 4.5 * m;
   //  G4double totYokeY = 3 *m;
 	//
   //  //if before end of FLArE, kill
-  //  if( post_pos.z() < endFLArE ) aTrack->SetTrackStatus(G4TrackStatus::fStopAndKill); 
-  //  
+  //  if( post_pos.z() < endFLArE ) aTrack->SetTrackStatus(G4TrackStatus::fStopAndKill);
+  //
   //  //if after enf of FLArE, kill if outside FASER magnet cross-section
   //  else if ( TMath::Abs(post_pos.x()) > totYokeX/2. || TMath::Abs(post_pos.y()) > totYokeY/2. )
   //    aTrack->SetTrackStatus(G4TrackStatus::fStopAndKill);
   //}
-  
+
   /*// if the track is out of the active volumes, kill this track
   G4VPhysicalVolume* volume = aStep->GetPostStepPoint()->GetTouchable()->GetVolume();
   std::string active_volumes[9] = {"lArBox",
@@ -63,11 +63,11 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep) {
         // for tracks in HadCatcher and MuonFinder absorber
         if (std::find(std::begin(active_logical), std::end(active_logical), mother_logical->GetName())
             ==std::end(active_logical)) {
-          aTrack->SetTrackStatus(G4TrackStatus::fStopAndKill); 
+          aTrack->SetTrackStatus(G4TrackStatus::fStopAndKill);
         }
       } else {
         // for tracks in world
-        aTrack->SetTrackStatus(G4TrackStatus::fStopAndKill); 
+        aTrack->SetTrackStatus(G4TrackStatus::fStopAndKill);
       }
     }
   }*/
@@ -87,12 +87,12 @@ void SteppingAction::TrackLiveDebugging(const G4Step* step){
   G4ThreeVector pre_mom = step->GetPreStepPoint()->GetMomentum();
   G4ThreeVector post_mom = step->GetPostStepPoint()->GetMomentum();
   G4double edep = step->GetTotalEnergyDeposit();
-	 
+
   int PDG = track->GetParticleDefinition()->GetPDGEncoding();
   G4String ParticleName = track->GetDynamicParticle()->GetParticleDefinition()->GetParticleName();
   int TID = track->GetTrackID();
   int SID = step->GetTrack()->GetCurrentStepNumber();
-  
+
   std::cout << "Track " << TID << " - " << "PDG " << PDG << " " << ParticleName << std::endl;
   std::cout << "stepping... " << SID << " edep" << edep << std::endl;
   std::cout << "(" << pre_pos.x() << "," << pre_pos.y() << "," << pre_pos.z() << ") in " << volume->GetName();
