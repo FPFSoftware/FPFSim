@@ -81,7 +81,7 @@
   saveActsCmd = new G4UIcmdWithABool("/histo/actsHits", this);
   saveActsCmd->SetGuidance("save hits in Acts format");
   saveActsCmd->SetParameterName("actsHits", true);
-  saveActsCmd->SetDefaultValue(false);
+  saveActsCmd->SetDefaultValue(true);
 
   //  histoCmd = new G4UIcmdWithAnInteger("/histo/setSeed",this);
   //  histoCmd->SetGuidance("Set random seed :");

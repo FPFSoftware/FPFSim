@@ -57,8 +57,8 @@ AnalysisManager::AnalysisManager() {
   m_saveTrack = false;
   m_save3DEvd = false;
   m_save2DEvd = false;
+  m_saveActs = true;
   m_circularFit = false;
-
   fH5Filename = "test.h5";
 }
 
@@ -158,6 +158,8 @@ void AnalysisManager::bookEvtTree() {
     evt->Branch("trkHitPFSL"              , &trkPFSL);        
   }
 
+  // Defaults to true if FASER2 is enabled. But give the option to disable output if required
+  m_saveActs = m_saveActs && GeometricalParameters::Get()->GetAddFASER2();
   if (m_saveActs) {
     //* Acts Hits Tree [i == unsigned int; F == float; l == Long unsigned 64 int] 
     acts_hits_tree = new TTree("hits", "ActsHitsTree");
@@ -704,12 +706,6 @@ void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
       
       int hitID = hit->GetTrackID();
       int nPrimaries = ActsParticlesParticleId.size();
-
-      bool isPrimary = false;
-      if (hitID <= nPrimaries)
-      {
-        isPrimary = true;
-      }
 
       auto particleId = ActsFatras::Barcode();
       particleId.setVertexPrimary(1);
