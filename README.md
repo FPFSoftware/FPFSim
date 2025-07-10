@@ -192,6 +192,7 @@ Older versions of FORESEE output events in the HepMC2 format. To run over HepMC2
 |/histo/save2DEvd    | if `true` save 2D spatial distribution of energy deposition, `false` in default|
 |/histo/circleFit    | if `true` run circle fitting and save information in output, `false` in default to save space|
 |/histo/addDiffusion | if `toy` diffuse energy, if `single` diffuse single electron, `false` in default without diffusion|
+|/histo/actsHits     | if `true` save the truth particle and hit information in a format that can be read by the FASER2 Acts tracking software, `true` by default if FASER2 is enabled|
 
 ## How to save an event display with high resolution using the DAWN Event Display
 

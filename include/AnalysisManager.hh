@@ -37,6 +37,7 @@ class AnalysisManager {
     void save3DEvd(G4bool val) { m_save3DEvd = val; }
     void save2DEvd(G4bool val) { m_save2DEvd = val; }
     void circleFit(G4bool val) { m_circularFit = val; }
+    void saveActs(G4bool val) { m_saveActs = val; }
     void addDiffusion(G4String val) { m_addDiffusion = val; }
 
   private:
@@ -47,6 +48,8 @@ class AnalysisManager {
     std::string  m_filename;
     TTree*   evt;
     TTree*   trk;
+    TTree*   acts_hits_tree;
+    TTree*   acts_particles_tree;
     std::string  fH5Filename;
     hep_hpc::hdf5::File fH5file;
 
@@ -143,6 +146,7 @@ class AnalysisManager {
     G4bool m_save3DEvd;
     G4bool m_save2DEvd;
     G4bool m_circularFit;
+    G4bool m_saveActs;
     TString m_addDiffusion;
 
     PixelMap3D* pm3D;
@@ -184,6 +188,59 @@ class AnalysisManager {
     std::vector<double> trackPointX;  
     std::vector<double> trackPointY;  
     std::vector<double> trackPointZ;
+
+    // Acts Hit Information - the types are set to match the types expected by Acts::RootSimHitReader
+    UInt_t ActsHitsEventID;
+    ULong64_t ActsHitsGeometryID;
+    ULong64_t ActsHitsParticleID;
+    Float_t ActsHitsX;
+    Float_t ActsHitsY;
+    Float_t ActsHitsZ;
+    Float_t ActsHitsT;
+    Float_t ActsHitsPx;
+    Float_t ActsHitsPy;
+    Float_t ActsHitsPz;
+    Float_t ActsHitsE;
+    Float_t ActsHitsDeltaPx;
+    Float_t ActsHitsDeltaPy;
+    Float_t ActsHitsDeltaPz;
+    Float_t ActsHitsDeltaE;
+    Int_t ActsHitsIndex;
+    UInt_t ActsHitsVolumeID;
+    UInt_t ActsHitsBoundaryID;
+    UInt_t ActsHitsLayerID;
+    UInt_t ActsHitsApproachID;
+    UInt_t ActsHitsSensitiveID;
+
+    // Acts Particle Information - need the truth info on the particles in order to do the truth tracking
+    std::vector<std::uint64_t> ActsParticlesParticleId;
+    std::vector<std::int32_t> ActsParticlesParticleType;
+    std::vector<std::uint32_t> ActsParticlesProcess;
+    std::vector<float> ActsParticlesVx;
+    std::vector<float> ActsParticlesVy;
+    std::vector<float> ActsParticlesVz;
+    std::vector<float> ActsParticlesVt;
+    std::vector<float> ActsParticlesPx;
+    std::vector<float> ActsParticlesPy;
+    std::vector<float> ActsParticlesPz;
+    std::vector<float> ActsParticlesM;
+    std::vector<float> ActsParticlesQ;
+    std::vector<float> ActsParticlesEta;
+    std::vector<float> ActsParticlesPhi;
+    std::vector<float> ActsParticlesPt;
+    std::vector<float> ActsParticlesP;
+    std::vector<std::uint32_t> ActsParticlesVertexPrimary;
+    std::vector<std::uint32_t> ActsParticlesVertexSecondary;
+    std::vector<std::uint32_t> ActsParticlesParticle;
+    
+    std::vector<std::uint32_t> ActsParticlesGeneration;
+    std::vector<std::uint32_t> ActsParticlesSubParticle;
+    std::vector<float> ActsParticlesELoss;
+    std::vector<float> ActsParticlesPathInX0;
+    std::vector<float> ActsParticlesPathInL0;
+    std::vector<std::int32_t> ActsParticlesNumberOfHits;
+    std::vector<std::uint32_t> ActsParticlesOutcome;
+  
 
   private:
     void FillPrimaryTruthTree(G4int sdId, std::string sdName);

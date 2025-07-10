@@ -78,6 +78,11 @@
   addDiffusionCmd->SetGuidance("add toy diffusion effect");
   addDiffusionCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
+  saveActsCmd = new G4UIcmdWithABool("/histo/actsHits", this);
+  saveActsCmd->SetGuidance("save hits in Acts format");
+  saveActsCmd->SetParameterName("actsHits", true);
+  saveActsCmd->SetDefaultValue(true);
+
   //  histoCmd = new G4UIcmdWithAnInteger("/histo/setSeed",this);
   //  histoCmd->SetGuidance("Set random seed :");
   //  histoCmd->SetDefaultValue(1);
@@ -93,6 +98,7 @@ AnalysisManagerMessenger::~AnalysisManagerMessenger()
   delete save3DEvdCmd;
   delete save2DEvdCmd;
   delete circleFitCmd;
+  delete saveActsCmd;
   delete addDiffusionCmd;
   delete histoDir;
 }
@@ -107,6 +113,7 @@ void AnalysisManagerMessenger::SetNewValue(G4UIcommand* command,G4String newValu
   if (command == save3DEvdCmd) anamanager->save3DEvd(save3DEvdCmd->GetNewBoolValue(newValues));
   if (command == save2DEvdCmd) anamanager->save2DEvd(save2DEvdCmd->GetNewBoolValue(newValues));
   if (command == circleFitCmd) anamanager->circleFit(circleFitCmd->GetNewBoolValue(newValues));
+  if (command == saveActsCmd) anamanager->saveActs(saveActsCmd->GetNewBoolValue(newValues));
   if (command == addDiffusionCmd) anamanager->addDiffusion(newValues);
 
   //  if(command == histoCmd) histo->setSeed(newValues);
