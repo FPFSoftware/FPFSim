@@ -27,7 +27,6 @@ class LArBoxHit : public G4VHit {
 	void SetCopyNum(G4int boxNum) { fBoxNum = boxNum; }
 	void SetPDG(G4int PDG) { fPDG = PDG; }
     void SetDeltaMom(G4ThreeVector& TrackDeltaMom) { fDeltaMom = TrackDeltaMom; }
-    void SetDeltaEdep(G4double deltaE) { fDeltaEdep = deltaE; }
   	void SetTime(G4double time) { fTime = time; }
 	//end fran added
     void SetPreStepPosition(G4ThreeVector& PreStepPosition) { fPreStepPosition = PreStepPosition; }
@@ -57,8 +56,7 @@ class LArBoxHit : public G4VHit {
 	//fran added
 	G4int GetCopyNum() const { return fBoxNum; }
 	G4int GetPDG() const { return fPDG; }
-	G4ThreeVector GetDeltaMomentum() const { return fDeltaMom; }
-	G4double GetDeltaEdep() const { return fDeltaEdep; }
+	G4ThreeVector GetDeltaMom() const { return fDeltaMom; }
 	G4double GetTime() const { return fTime; }
 	//end fran added
     G4ThreeVector GetPreStepPosition() const { return fPreStepPosition; }
@@ -89,7 +87,6 @@ class LArBoxHit : public G4VHit {
 	G4int fBoxNum;
 	G4int fPDG;
 	G4ThreeVector fDeltaMom;
-	G4double fDeltaEdep;
   	G4double fTime;
 	//end fran added
     G4ThreeVector fPreStepPosition;

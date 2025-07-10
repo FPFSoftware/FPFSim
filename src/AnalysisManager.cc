@@ -300,6 +300,7 @@ void AnalysisManager::bookFLArEHitTree() {
 void AnalysisManager::bookFlarHadCalHitTree() {
   flarHadHit = new TTree("hadXY_hits", "hadXYHitTreeInfo");
 
+  //x
   flarHadHit->Branch("hadXTrackID"			, &hadXTrackID 			, "hadXTrackID/I");
   flarHadHit->Branch("hadXParticleID" 		, &hadXParticleID		, "hadXParticleID/I");
   flarHadHit->Branch("hadXParentID" 		, &hadXParentID			, "hadXParentID/I");
@@ -321,6 +322,30 @@ void AnalysisManager::bookFlarHadCalHitTree() {
   flarHadHit->Branch("hadXDeltaPz" 			, &hadXDeltaPz			, "hadXDeltaPz/D");
 
   flarHadHit->Branch("hadXEdep" 			, &hadXEdep				, "hadXEdep/D");
+
+  //y
+  flarHadHit->Branch("hadYTrackID"			, &hadYTrackID 			, "hadYTrackID/I");
+  flarHadHit->Branch("hadYParticleID" 		, &hadYParticleID		, "hadYParticleID/I");
+  flarHadHit->Branch("hadYParentID" 		, &hadYParentID			, "hadYParentID/I");
+  flarHadHit->Branch("hadYPDG" 				, &hadYPDG				, "hadYPDG/I");
+  flarHadHit->Branch("hadYCopyNum" 			, &hadYCopyNum			, "hadYCopyNum/I");
+
+  flarHadHit->Branch("hadYT" 				, &hadYT				, "hadYT/I");
+
+  flarHadHit->Branch("hadYx" 				, &hadYx				, "hadYx/D");//Pre-position
+  flarHadHit->Branch("hadYy" 				, &hadYy				, "hadYy/D");
+  flarHadHit->Branch("hadYz" 				, &hadYz				, "hadYz/D");
+
+  flarHadHit->Branch("hadYPx" 				, &hadYPx				, "hadYPx/D");//momentum
+  flarHadHit->Branch("hadYPy" 				, &hadYPy				, "hadYPy/D");
+  flarHadHit->Branch("hadYPz" 				, &hadYPz				, "hadYPz/D");
+
+  flarHadHit->Branch("hadYDeltaPx" 			, &hadYDeltaPx			, "hadYDeltaPx/D");
+  flarHadHit->Branch("hadYDeltaPy" 			, &hadYDeltaPy			, "hadYDeltaPy/D");
+  flarHadHit->Branch("hadYDeltaPz" 			, &hadYDeltaPz			, "hadYDeltaPz/D");
+
+  flarHadHit->Branch("hadYEdep" 			, &hadYEdep				, "hadYEdep/D");
+
 
 }
 
@@ -359,6 +384,7 @@ void AnalysisManager::BeginOfRun() {
 		m_saveFlare = true;
 		flareDir = thefile->mkdir("flare");
 		bookFLArEHitTree();
+		bookFlarHadCalHitTree();
 	}
   }
 }
@@ -554,6 +580,24 @@ void AnalysisManager::BeginOfEvent() {
 	hadXDeltaPz = 0;
 	hadXEdep = 0;
 
+	hadYTrackID = 0;
+	hadYParentID = 0;
+	hadYPDG = 0;
+	hadYCopyNum = 0;
+	hadYParticleID = 0;
+	hadYT = 0;
+	hadYx = 0;
+	hadYy = 0;
+	hadYz = 0;
+	hadYPx = 0;
+	hadYPy = 0;
+	hadYPz = 0;
+	hadYDeltaPx = 0;
+	hadYDeltaPy = 0;
+	hadYDeltaPz = 0;
+	hadYEdep = 0;
+
+
   }
 
   ActsHitsEventID = 0;
@@ -669,6 +713,7 @@ void AnalysisManager::EndOfEvent(const G4Event* event) {
 
 	  	prim->Fill();
 
+		//G4cout<<"passed1"<<G4endl;
 
       }
     }
@@ -693,185 +738,190 @@ void AnalysisManager::EndOfEvent(const G4Event* event) {
   nFromFSLParticles = tracksFromFSLSecondary.size();
   nFromFSPizeroParticles = tracksFromFSPizeroSecondary.size();
   nFromFSLDecayPizeroParticles = tracksFromFSLDecayPizeroSecondary.size();
+//G4cout<<"passed9"<<G4endl;
 
   // find all the tracks originate from the final state lepton, include FSL itself (TID=1)
   // should only work with neutrino interaction generator
   // exception to single particle generator: tau, mu
-  if (neutrino.NuPDG()!=0 || abs(primaries[0].PDG())==15 || abs(primaries[0].PDG())==13) {
-    tracksFromFSL.insert(1);
-    for (auto x : allTracksPTPair) {
-      if (tracksFromFSL.find(x.first) != tracksFromFSL.end()) {
-        tracksFromFSL.insert(x.second);
-      }
-    }
-  }
+  /* if (neutrino.NuPDG()!=0 || abs(primaries[0].PDG())==15 || abs(primaries[0].PDG())==13) {
+	//this part causing errors, so commenting out */
+  /*   tracksFromFSL.insert(1); */
+  /*   for (auto x : allTracksPTPair) { */
+  /*     if (tracksFromFSL.find(x.first) != tracksFromFSL.end()) { */
+  /*       tracksFromFSL.insert(x.second); */
+  /*     } */
+  /*   } */
+  /* } */
+ //G4cout<<"passed10"<<G4endl;
 
   // tracksFromFSL includes all the tracks orginating from the fsl
   // tracksFromFSLSecondary only inclues the tracks directly decayed from the fsl
-  std::cout<<"Recorded tracks       : "<<allTracksPTPair.size()<<std::endl;
-  std::cout<<"Tracks from FSL       : "<<tracksFromFSL.size()<<std::endl;
-  std::cout<<"Tracks from FSL (2nd) : "<<tracksFromFSLSecondary.size()<<std::endl;
-  std::cout<<"number of primary particles : "<<nPrimaryParticle
-    <<" , in which number of particles from fsl : "<<nFromFSLParticles<<std::endl;
+  /* std::cout<<"Recorded tracks       : "<<allTracksPTPair.size()<<std::endl; */
+  /* std::cout<<"Tracks from FSL       : "<<tracksFromFSL.size()<<std::endl; */
+  /* std::cout<<"Tracks from FSL (2nd) : "<<tracksFromFSLSecondary.size()<<std::endl; */
+  /* std::cout<<"number of primary particles : "<<nPrimaryParticle */
+  /*   <<" , in which number of particles from fsl : "<<nFromFSLParticles<<std::endl; */
   //std::cout<<"Test nTestNPrimaryTrack : "<<nTestNPrimaryTrack<<std::endl;
   // return;
   //- cluster all tracks to primary particles
   //- mark the index of the final state lepton from the neutrino interaction
-  trackClusters.resize(nPrimaryParticle);
-  for (int iPrim= 0; iPrim< nPrimaryParticle; ++iPrim) {
-    trackClusters[iPrim].insert(primaries[iPrim].TID());
-    if (primaries[iPrim].TID()==1 && neutrino.NuPDG()!=0) {
-      fPrimIdxFSL = iPrim;
-    }
-  }
-  if (fPrimIdxFSL>=0) primaries[fPrimIdxFSL].SetProngType(0);
+  /* trackClusters.resize(nPrimaryParticle); */
+  /* for (int iPrim= 0; iPrim< nPrimaryParticle; ++iPrim) { */
+  /*   trackClusters[iPrim].insert(primaries[iPrim].TID()); */
+  /*   if (primaries[iPrim].TID()==1 && neutrino.NuPDG()!=0) { */
+  /*     fPrimIdxFSL = iPrim; */
+  /*   } */
+  /* } */
+  /* if (fPrimIdxFSL>=0) primaries[fPrimIdxFSL].SetProngType(0); */
 
-  for (auto x : allTracksPTPair) {
-    // if this track is the fsl (TID=1) and it decays (nFromFSLParticles>0),
-    // then it forms a single cluster by itself, this is mainly for studying the tau decay.
-    if ((x.second==1) && (nFromFSLParticles>0)) continue;
-    // if this track is the decay product of the fsl, it should already been added to the trackClusters
-    if ((x.first==1) && (nFromFSLParticles>0) && (tracksFromFSLSecondary.find(x.second) != tracksFromFSLSecondary.end())) continue;
-    // if this is the decay product of the final state pizero, it should already been added to the trackClusters
-    if ((tracksFromFSPizeroSecondary.find(x.second) != tracksFromFSPizeroSecondary.end())) continue;
-    // if this is the decay product of the tau decay pizero, it should already been added to the trackClusters
-    if ((tracksFromFSLDecayPizeroSecondary.find(x.second) != tracksFromFSLDecayPizeroSecondary.end())) continue;
-    // add the track to the corresponding cluster if its parent is in the cluster.
-    // one track can have only one parent, break the loop once its parent is found.
-    for (int iPrim= 0; iPrim< nPrimaryParticle; ++iPrim) {
-      if (trackClusters[iPrim].find(x.first) != trackClusters[iPrim].end()) {
-        trackClusters[iPrim].insert(x.second);
-        break;
-      }
-    }
-  }
+  /* for (auto x : allTracksPTPair) { */
+  /*   // if this track is the fsl (TID=1) and it decays (nFromFSLParticles>0), */
+  /*   // then it forms a single cluster by itself, this is mainly for studying the tau decay. */
+  /*   if ((x.second==1) && (nFromFSLParticles>0)) continue; */
+  /*   // if this track is the decay product of the fsl, it should already been added to the trackClusters */
+  /*   if ((x.first==1) && (nFromFSLParticles>0) && (tracksFromFSLSecondary.find(x.second) != tracksFromFSLSecondary.end())) continue; */
+  /*   // if this is the decay product of the final state pizero, it should already been added to the trackClusters */
+  /*   if ((tracksFromFSPizeroSecondary.find(x.second) != tracksFromFSPizeroSecondary.end())) continue; */
+  /*   // if this is the decay product of the tau decay pizero, it should already been added to the trackClusters */
+  /*   if ((tracksFromFSLDecayPizeroSecondary.find(x.second) != tracksFromFSLDecayPizeroSecondary.end())) continue; */
+  /*   // add the track to the corresponding cluster if its parent is in the cluster. */
+  /*   // one track can have only one parent, break the loop once its parent is found. */
+  /*   for (int iPrim= 0; iPrim< nPrimaryParticle; ++iPrim) { */
+  /*     if (trackClusters[iPrim].find(x.first) != trackClusters[iPrim].end()) { */
+  /*       trackClusters[iPrim].insert(x.second); */
+  /*       break; */
+  /*     } */
+  /*   } */
+  /* } */
+//G4cout<<"passed2"<<G4endl;
 
-  if (GeometricalParameters::Get()->GetAddFLArE())
-  {
-    G4cout << "Adding FLArE pixel map..." << G4endl;
-    const Double_t res_tpc[3] = {1, 5, 5}; // mm
-    if (neutrino.NuPDG()!=0) {
-      pm3D = new PixelMap3D(evtID, nPrimaryParticle, neutrino.NuPDG(), res_tpc);
-    } else {
-      pm3D = new PixelMap3D(evtID, nPrimaryParticle, primaries[0].PDG(), res_tpc);
-    }
-    // boundary in global coord.
-    pm3D->SetPMBoundary(GeometricalParameters::Get()->GetFLArEPosition()/mm -
-                          GeometricalParameters::Get()->GetTPCSizeXYZ()/mm/2,
-                          GeometricalParameters::Get()->GetFLArEPosition()/mm +
-                          GeometricalParameters::Get()->GetTPCSizeXYZ()/mm/2);
-    pm3D->InitializePM();
+  /* if (GeometricalParameters::Get()->GetAddFLArE()) */
+  /* { */
+  /*   G4cout << "Adding FLArE pixel map..." << G4endl; */
+  /*   const Double_t res_tpc[3] = {1, 5, 5}; // mm */
+  /*   if (neutrino.NuPDG()!=0) { */
+  /*     pm3D = new PixelMap3D(evtID, nPrimaryParticle, neutrino.NuPDG(), res_tpc); */
+  /*   } else { */
+  /*     pm3D = new PixelMap3D(evtID, nPrimaryParticle, primaries[0].PDG(), res_tpc); */
+  /*   } */
+  /*   // boundary in global coord. */
+  /*   pm3D->SetPMBoundary(GeometricalParameters::Get()->GetFLArEPosition()/mm - */
+  /*                         GeometricalParameters::Get()->GetTPCSizeXYZ()/mm/2, */
+  /*                         GeometricalParameters::Get()->GetFLArEPosition()/mm + */
+  /*                         GeometricalParameters::Get()->GetTPCSizeXYZ()/mm/2); */
+  /*   pm3D->InitializePM(); */
 
-    /// FillTrueEdep must run after FillPrimaryTruthTree,
-    /// otherwise tracksFromFSL and tracksFromFSLSecondary are invalid
-    /// Pixel map is also filled here
-    for (auto sdname : SDNamelist) {
-      FillTrueEdep(sdname.first, sdname.second);
-    }
+  /*   /// FillTrueEdep must run after FillPrimaryTruthTree, */
+  /*   /// otherwise tracksFromFSL and tracksFromFSLSecondary are invalid */
+  /*   /// Pixel map is also filled here */
+  /*   for (auto sdname : SDNamelist) { */
+  /*     FillTrueEdep(sdname.first, sdname.second); */
+  /*   } */
 
-    if (m_save2DEvd) pm3D->Write2DPMToFile(thefile);
+  /*   if (m_save2DEvd) pm3D->Write2DPMToFile(thefile); */
 
-    pm3D->Process3DPM(fH5file, neutrino, m_save3DEvd);
-    sparseFractionMem = pm3D->GetSparseFractionMem();
-    sparseFractionBins = pm3D->GetSparseFractionBins();
+  /*   pm3D->Process3DPM(fH5file, neutrino, m_save3DEvd); */
+  /*   sparseFractionMem = pm3D->GetSparseFractionMem(); */
+  /*   sparseFractionBins = pm3D->GetSparseFractionBins(); */
 
-    if (m_circularFit){
+  /*   if (m_circularFit){ */
 
-      circNhits = hitXFSL.size();
-      trkNhits = trkXFSL.size();
+  /*     circNhits = hitXFSL.size(); */
+  /*     trkNhits = trkXFSL.size(); */
 
-      // apply circular fitting to FLArE hadCath/muonFinder
-      if ( circNhits > 0 ){
-        circularfitter::CircleFit* circFit = new circularfitter::CircleFit(hitXFSL,hitZFSL);
-        circularfitter::LineFit* lineFit = new circularfitter::LineFit(hitZFSL,hitYFSL);
-        xc = circFit->GetXc();
-        zc = circFit->GetZc();
-        rc = circFit->GetR();
-        p0 = lineFit->GetP0();
-        p1 = lineFit->GetP1();
-        cosDip = lineFit->GetCosDip();
-      }
+  /*     // apply circular fitting to FLArE hadCath/muonFinder */
+  /*     if ( circNhits > 0 ){ */
+  /*       circularfitter::CircleFit* circFit = new circularfitter::CircleFit(hitXFSL,hitZFSL); */
+  /*       circularfitter::LineFit* lineFit = new circularfitter::LineFit(hitZFSL,hitYFSL); */
+  /*       xc = circFit->GetXc(); */
+  /*       zc = circFit->GetZc(); */
+  /*       rc = circFit->GetR(); */
+  /*       p0 = lineFit->GetP0(); */
+  /*       p1 = lineFit->GetP1(); */
+  /*       cosDip = lineFit->GetCosDip(); */
+  /*     } */
 
-      // apply circular fitting for FASER2 spectrometer magnet
-      if( trkNhits > 0 ){
+  /*     // apply circular fitting for FASER2 spectrometer magnet */
+  /*     if( trkNhits > 0 ){ */
 
-        Nmagnets = (GeometricalParameters::Get()->GetFASER2MagnetOption() == GeometricalParameters::magnetOption::SAMURAI) ? 1 :
-                    GeometricalParameters::Get()->GetNFASER2Magnets();
-        G4cout << "Number of FASER2 magnets: " << Nmagnets << G4endl;
+  /*       Nmagnets = (GeometricalParameters::Get()->GetFASER2MagnetOption() == GeometricalParameters::magnetOption::SAMURAI) ? 1 : */
+  /*                   GeometricalParameters::Get()->GetNFASER2Magnets(); */
+  /*       G4cout << "Number of FASER2 magnets: " << Nmagnets << G4endl; */
 
-        circularfitter::CircleExtractor* circExtract = new circularfitter::CircleExtractor(trkXFSL,trkYFSL,trkZFSL);
-        magzpos = circExtract->GetMagnetZs();
-        trkxc = circExtract->GetXc();
-        trkzc = circExtract->GetZc();
-        trkrc = circExtract->GetR();
+  /*       circularfitter::CircleExtractor* circExtract = new circularfitter::CircleExtractor(trkXFSL,trkYFSL,trkZFSL); */
+  /*       magzpos = circExtract->GetMagnetZs(); */
+  /*       trkxc = circExtract->GetXc(); */
+  /*       trkzc = circExtract->GetZc(); */
+  /*       trkrc = circExtract->GetR(); */
 
-        std::vector<circularfitter::line> pre  = circExtract->GetPreLine();
-        std::vector<circularfitter::line> post = circExtract->GetPostLine();
-        for(int i=0; i<Nmagnets; i++){
+  /*       std::vector<circularfitter::line> pre  = circExtract->GetPreLine(); */
+  /*       std::vector<circularfitter::line> post = circExtract->GetPostLine(); */
+  /*       for(int i=0; i<Nmagnets; i++){ */
           //G4cout << "circle: " << trkzc[i] << " " << trkxc[i] << " " << trkrc[i] << G4endl;
-          trkqIn.push_back( pre[i].q );
-          trkmIn.push_back( pre[i].m );
-          trkqOut.push_back( post[i].q );
-          trkmOut.push_back( post[i].m );
-        }
+          /* trkqIn.push_back( pre[i].q ); */
+          /* trkmIn.push_back( pre[i].m ); */
+          /* trkqOut.push_back( post[i].q ); */
+          /* trkmOut.push_back( post[i].m ); */
+        /* } */
 
-        circularfitter::LineFit* lineFit2 = new circularfitter::LineFit(trkZFSL,trkYFSL);
-        trkp0 = lineFit2->GetP0();
-        trkp1 = lineFit2->GetP1();
-        trkcosDip = lineFit2->GetCosDip();
-      }
-    }
+        /* circularfitter::LineFit* lineFit2 = new circularfitter::LineFit(trkZFSL,trkYFSL); */
+        /* trkp0 = lineFit2->GetP0(); */
+        /* trkp1 = lineFit2->GetP1(); */
+        /* trkcosDip = lineFit2->GetCosDip(); */
+      /* } */
+    /* } */
 
-    // FillPseudoRecoVar must run after FillTrueEdep, otherwise some of the variables won't be filled
-    FillPseudoRecoVar();
+    /* // FillPseudoRecoVar must run after FillTrueEdep, otherwise some of the variables won't be filled */
+    /* FillPseudoRecoVar(); */
 
-    delete pm3D;
-  }
+    /* delete pm3D; */
+  /* } */
+//G4cout<<"passed3"<<G4endl;
 
-  int count_tracks = 0;
-  if(m_saveTrack){
-    G4cout << "---> Saving track information to tree..." << G4endl;
-    auto trajectoryContainer = event->GetTrajectoryContainer();
-    if (trajectoryContainer) {
-      for (size_t i = 0; i < trajectoryContainer->entries(); ++i) {
-        auto trajectory = static_cast<G4Trajectory*>((*trajectoryContainer)[i]);
-        trackTID = trajectory->GetTrackID();
-        trackPID = trajectory->GetParentID();
-        trackPDG = trajectory->GetPDGEncoding();
-	trackKinE = trajectory->GetInitialKineticEnergy();
-        trackNPoints = trajectory->GetPointEntries();
-        count_tracks++;
-	for (size_t j = 0; j < trackNPoints; ++j) {
-          G4ThreeVector pos = trajectory->GetPoint(j)->GetPosition();
-	  trackPointX.push_back( pos.x() );
-	  trackPointY.push_back( pos.y() );
-	  trackPointZ.push_back( pos.z() );
-        }
-        trk->Fill();
-	trackPointX.clear();
-	trackPointY.clear();
-	trackPointZ.clear();
-      }
-    } else G4cout << "No tracks found: did you enable their storage with '/tracking/storeTrajectory 1'?" << G4endl;
-    G4cout << "---> Done!" << G4endl;
-  }
+  /* int count_tracks = 0; */
+  /* if(m_saveTrack){ */
+  /*   G4cout << "---> Saving track information to tree..." << G4endl; */
+  /*   auto trajectoryContainer = event->GetTrajectoryContainer(); */
+  /*   if (trajectoryContainer) { */
+  /*     for (size_t i = 0; i < trajectoryContainer->entries(); ++i) { */
+  /*       auto trajectory = static_cast<G4Trajectory*>((*trajectoryContainer)[i]); */
+  /*       trackTID = trajectory->GetTrackID(); */
+  /*       trackPID = trajectory->GetParentID(); */
+  /*       trackPDG = trajectory->GetPDGEncoding(); */
+	/* trackKinE = trajectory->GetInitialKineticEnergy(); */
+  /*       trackNPoints = trajectory->GetPointEntries(); */
+  /*       count_tracks++; */
+	/* for (size_t j = 0; j < trackNPoints; ++j) { */
+  /*         G4ThreeVector pos = trajectory->GetPoint(j)->GetPosition(); */
+	  /* trackPointX.push_back( pos.x() ); */
+	  /* trackPointY.push_back( pos.y() ); */
+	  /* trackPointZ.push_back( pos.z() ); */
+  /*       } */
+  /*       trk->Fill(); */
+	/* trackPointX.clear(); */
+	/* trackPointY.clear(); */
+	/* trackPointZ.clear(); */
+  /*     } */
+  /*   } else G4cout << "No tracks found: did you enable their storage with '/tracking/storeTrajectory 1'?" << G4endl; */
+  /*   G4cout << "---> Done!" << G4endl; */
+  /* } */
 
-  evt->Fill();
+  /* evt->Fill(); */
 
-  G4cout << "Total number of recorded hits : " << nHits << std::endl;
-  if(m_saveTrack) G4cout << "Total number of recorded track: " << count_tracks << std::endl;
+  /* G4cout << "Total number of recorded hits : " << nHits << std::endl; */
+  /* if(m_saveTrack) G4cout << "Total number of recorded track: " << count_tracks << std::endl; */
 
-  for (int iPrim= 0; iPrim< nPrimaryParticle; ++iPrim) {
-    trackClusters[iPrim].clear();
-  }
-  trackClusters.clear();
-  trackClusters.shrink_to_fit();
+  /* for (int iPrim= 0; iPrim< nPrimaryParticle; ++iPrim) { */
+  /*   trackClusters[iPrim].clear(); */
+  /* } */
+  /* trackClusters.clear(); */
+  /* trackClusters.shrink_to_fit(); */
 
 }
 
 void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
 {
-
+  //G4cout<<"passed4"<<G4endl;
   // Get and cast hit collection with LArBoxHits
   LArBoxHitsCollection* hitCollection = dynamic_cast<LArBoxHitsCollection*>(hcofEvent->GetHC(sdId));
   if (hitCollection ) {
@@ -893,9 +943,9 @@ void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
   	  double Py = hit->GetInitMomentum().y();
 	  double Pz = hit->GetInitMomentum().z();
 
-	  double dPx = hit->GetInitMomentum().x();
-  	  double dPy = hit->GetInitMomentum().y();
-	  double dPz = hit->GetInitMomentum().z();
+	  double dPx = hit->GetDeltaMom().x();
+  	  double dPy = hit->GetDeltaMom().y();
+	  double dPz = hit->GetDeltaMom().z();
 
 
 	  double edep =  hit->GetEdep();
@@ -931,7 +981,9 @@ void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
 	  	flarHit->Fill();
 	  }
 
-      if (sdName == "HadCalXSD/lar_box"){
+      else if (sdName == "HadCalXSD/lar_box"){
+		G4cout<<"hadX hit"<<G4endl;
+
 	  	hadXTrackID = tid;
 	  	hadXParentID = pid;
 	  	hadXPDG = PDG;
@@ -950,7 +1002,34 @@ void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
 	  	hadXEdep = edep;
 
 	  	flarHadHit->Fill();
+		//G4cout<<"passed5.5"<<G4endl;
 	  }
+
+		else if (sdName == "HadCalXSD/lar_box"){
+		G4cout<<"hadX hit"<<G4endl;
+
+	  	hadYTrackID = tid;
+	  	hadYParentID = pid;
+	  	hadYPDG = PDG;
+	  	hadYCopyNum = copyNum;
+		hadYParticleID = partID;
+		hadYT = time;
+	  	hadYx = pre_x;
+	  	hadYy = pre_y;
+	  	hadYz = pre_z;
+	  	hadYPx = Px;
+	  	hadYPy = Py;
+	  	hadYPz = Pz;
+	  	hadYDeltaPx = dPx;
+	  	hadYDeltaPy = dPy;
+	  	hadYDeltaPz = dPz;
+	  	hadYEdep = edep;
+
+	  	flarHadHit->Fill();
+		//G4cout<<"passed5.4"<<G4endl;
+
+	  }
+
     }
   }
 
@@ -984,6 +1063,7 @@ void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
       particleId.setGeneration(hit->GetParentID());
 
       sub_part_map.try_emplace(hit->GetTrackID()-1, sub_part_map.size());
+	  //G4cout<<"passed6"<<G4endl;
 
       // This is a fudge - assumes that that the secondary particles are always sub-particles of the primary particle
       particleId.setSubParticle(hit->GetParentID() == 0 ? 0 : sub_part_map[hit->GetTrackID()-1]);
@@ -1050,6 +1130,8 @@ void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
       ActsParticlesOutcome.push_back(0); //? These variables need to be filled, but are unused by Acts
     } // end of loop over hits
     acts_particles_tree->Fill();
+	//G4cout<<"passed7"<<G4endl;
+
   }
 
 
@@ -1199,6 +1281,8 @@ double AnalysisManager::GetTotalEnergy(double px, double py, double pz, double m
 }
 
 void AnalysisManager::FillPseudoRecoVar() {
+  //G4cout<<"passed8"<<G4endl;
+
   //  AngleToBeamDir, dEdx, dEdxInLAr ProngType
   std::cout<<std::fixed<<std::setw(10)<<"PDG"
     <<std::setw(12)<<"Angle"

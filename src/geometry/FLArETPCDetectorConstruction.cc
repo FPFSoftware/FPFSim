@@ -106,22 +106,22 @@ void FLArETPCDetectorConstruction::BuildFLArETPC()
       = new G4Box("TPCModuleBox", TPCModuleWidth/2, TPCModuleHeight/2, TPCModuleLength/2);
     fFLArETPCLog = new G4LogicalVolume(TPCModuleSolid, detectorMaterial, "TPCModuleLog");
 
-	/* int boxCt = 0; */
+	//making indiv boxes below to replace the replicas (more copy nums saved)
+	int boxCt = 0;
+ 	double startEndX = (fLArSizeX/2) - 0.5*TPCModuleWidth;
+ 	double startEndZ = (fLArSizeZ/2) - 0.5*TPCModuleLength;
 
- 	/* startEndX = (TPCLayerWidth/2) - 0.5*TPCModuleWidth;//double check logic here */
- 	/* startEndZ = (TPCLayerLength/2) - 0.5*TPCModuleLength; */
+	for (int boxNumZ = 0; boxNumZ < 7; boxNumZ++) {
+		for (int boxNumX = 0; boxNumX < 3; boxNumX++){
+			G4ThreeVector pos (boxNumX*TPCModuleWidth - startEndX, 0, boxNumZ*TPCModuleLength - startEndZ );
+			new G4PVPlacement(0,pos,fFLArETPCLog, "module",lArBoxLog, false, boxCt);
+			boxCt++;
+		}
+	}
 
-
-	/* for (int boxNumX = 0; boxNum < 3; boxNum++) { */
-	/* 	for (int boxNumZ = 0; boxNumZ < 7; boxNumZ++){ */
-	/* 		G4ThreeVector pos (boxNumX*TPCModuleLength - startEndX, boxNumX*TPCModuleLength - startEndX,TPCModuleHeight ); */
-	/* 		new G4PVPlacement(0,pos,fFLArETPCLog, "module",lArBoxLog, false, boxCt); */
-	/* 		boxCt++; */
-	/* 	} */
-	/* } */
-
-    new G4PVReplica("TPCModulePhysical", fFLArETPCLog, TPCLayerLogical, kXAxis, 3, TPCModuleWidth);
-    new G4PVReplica("TPC", TPCLayerLogical, lArBoxLog, kZAxis, 7, TPCLayerLength);
+	//old replica cold below:
+    //new G4PVReplica("TPCModulePhysical", fFLArETPCLog, TPCLayerLogical, kXAxis, 3, TPCModuleWidth);
+    //new G4PVReplica("TPC", TPCLayerLogical, lArBoxLog, kZAxis, 7, TPCLayerLength);
     G4VisAttributes* TPCModuleVis = new G4VisAttributes(G4Colour(86./255, 152./255, 195./255));
     TPCModuleVis->SetVisibility(true);
     TPCModuleVis->SetForceWireframe(true);
