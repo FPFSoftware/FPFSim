@@ -29,6 +29,10 @@ private:
   FASER2TrackerHitsCollection *fHitCollection = nullptr;
   /// ID of hit collection
   G4int fHCID = -1;
+  // Container to store the track IDs of the tracks which have hit this SD
+  // Structure is map<sensorID, vector<trackID>>
+  // We have this so that each particle hits each tracker only once - subsequent hits to the same tracker will not be recorded
+  std::map<G4int, std::vector<G4int>> fTrackIDRecord; 
 };
 
 #endif

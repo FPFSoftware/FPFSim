@@ -16,6 +16,7 @@ void FASER2TrackerSD::Initialize(G4HCofThisEvent *HCE) {
   if (fHCID < 0)
     fHCID = GetCollectionID(0);
   HCE->AddHitsCollection(fHCID, fHitCollection);
+  fTrackIDRecord.clear(); // Clear the track ID record for each event
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -90,7 +91,22 @@ G4bool FASER2TrackerSD::ProcessHits(G4Step* aStep, G4TouchableHistory* ROhist){
     tmpHit->SetIsPrimaryTrack(0);
     tmpHit->SetIsSecondaryTrack(1);
   }
-  // fTmpHits.push_back(tmpHit); 
+
+  // Check if this sensor has already been hit by this track
+  if (fTrackIDRecord.find(sensor_id) != fTrackIDRecord.end()) 
+  {
+    std::vector<G4int> tracks_that_hit_sensor = fTrackIDRecord[sensor_id];
+    if (std::find(tracks_that_hit_sensor.begin(), tracks_that_hit_sensor.end(), track->GetTrackID()) != tracks_that_hit_sensor.end()) 
+    {
+      return 0; // This track has already hit this sensor, so we skip this hit
+    }
+    fTrackIDRecord[sensor_id].push_back(track->GetTrackID());
+  }
+  else
+  {
+    fTrackIDRecord[sensor_id] = {track->GetTrackID()};
+  }
+
   fHitCollection->insert(tmpHit);
   
   return 0;
