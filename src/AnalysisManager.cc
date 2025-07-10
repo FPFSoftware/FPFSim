@@ -27,6 +27,7 @@
 #include <G4Poisson.hh>
 #include <G4Trajectory.hh>
 
+#include <TDirectory.h>
 #include <TFile.h>
 #include <TTree.h>
 #include <TH2F.h>
@@ -263,10 +264,10 @@ void AnalysisManager::BeginOfRun() {
   G4cout<<"Number of SDs : "<<NumberOfSDs<<G4endl;
   for (auto sdname : SDNamelist){
     G4cout<<sdname.first<<" "<<sdname.second<<G4endl;
-
 	//make flareHit tree if it's in this list of names:
 	if(sdname.second == "lArBoxSD/lar_box"){
 		m_saveFlare = true;
+		flareDir = thefile->mkdir("flare");
 		bookFLArEHitTree();
 	}
   }
@@ -276,7 +277,11 @@ void AnalysisManager::EndOfRun() {
   thefile->cd();
   evt->Write();
   prim->Write();
-  flarHit->Write();
+  if (m_saveFlare){
+	thefile->cd(flareDir->GetName());
+  	flarHit->Write();
+	thefile->cd();
+  }
   if(m_saveTrack) trk->Write();
   thefile->Close();
   fH5file.close();

@@ -51,6 +51,7 @@ class AnalysisManager {
     TTree*   trk;
     TTree*   prim;
     TTree*   flarHit;
+	TDirectory* flareDir;
     std::string  fH5Filename;
     hep_hpc::hdf5::File fH5file;
 
