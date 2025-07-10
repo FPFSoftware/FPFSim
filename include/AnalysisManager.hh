@@ -23,6 +23,7 @@ class AnalysisManager {
     void bookTrkTree();
     void bookPrimTree();
     void bookFLArEHitTree();
+    void bookFlarHadCalHitTree();
     void BeginOfRun();
     void EndOfRun();
     void BeginOfEvent();
@@ -39,6 +40,7 @@ class AnalysisManager {
     void save3DEvd(G4bool val) { m_save3DEvd = val; }
     void save2DEvd(G4bool val) { m_save2DEvd = val; }
     void circleFit(G4bool val) { m_circularFit = val; }
+    void saveActs(G4bool val) { m_saveActs = val; }
     void addDiffusion(G4String val) { m_addDiffusion = val; }
 
   private:
@@ -51,7 +53,11 @@ class AnalysisManager {
     TTree*   trk;
     TTree*   prim;
     TTree*   flarHit;
+	TTree*	 flarHadHit;
 	TDirectory* flareDir;
+    TTree*   acts_hits_tree;
+    TTree*   acts_particles_tree;
+
     std::string  fH5Filename;
     hep_hpc::hdf5::File fH5file;
 
@@ -149,6 +155,7 @@ class AnalysisManager {
     G4bool m_save3DEvd;
     G4bool m_save2DEvd;
     G4bool m_circularFit;
+    G4bool m_saveActs;
     TString m_addDiffusion;
 
     PixelMap3D* pm3D;
@@ -218,14 +225,13 @@ class AnalysisManager {
 	float_t primE;
 	float_t primKE;
 
-
-
+	//flare Hit Tree
 	UInt_t flareTrackID;
 	UInt_t flareParticleID;
 	UInt_t flareParentID;
 	UInt_t flarePDG;
 	UInt_t flareCopyNum;
-	UInt_t flareT;
+	double flareT;
 
 	double flareX;
 	double flareY;
@@ -241,7 +247,93 @@ class AnalysisManager {
 
 	double flareEdep;
 
+	//Flare Had cal Hit tree
+	UInt_t hadXTrackID;
+	UInt_t hadXParentID;
+	UInt_t hadXPDG;
+	UInt_t hadXCopyNum;
+	UInt_t hadXParticleID;
+	double hadXT;
+	double hadXx;
+	double hadXy;
+	double hadXz;
+	double hadXPx;
+	double hadXPy;
+	double hadXPz;
+	double hadXDeltaPx;
+	double hadXDeltaPy;
+	double hadXDeltaPz;
+	double hadXEdep;
 
+	UInt_t hadYTrackID;
+	UInt_t hadYParentID;
+	UInt_t hadYPDG;
+	UInt_t hadYCopyNum;
+	UInt_t hadYParticleID;
+	double hadYT;
+	double hadYx;
+	double hadYy;
+	double hadYz;
+	double hadYPx;
+	double hadYPy;
+	double hadYPz;
+	double hadYDeltaPx;
+	double hadYDeltaPy;
+	double hadYDeltaPz;
+	double hadYEdep;
+
+
+    // Acts Hit Information - the types are set to match the types expected by Acts::RootSimHitReader
+    UInt_t ActsHitsEventID;
+    ULong64_t ActsHitsGeometryID;
+    ULong64_t ActsHitsParticleID;
+    Float_t ActsHitsX;
+    Float_t ActsHitsY;
+    Float_t ActsHitsZ;
+    Float_t ActsHitsT;
+    Float_t ActsHitsPx;
+    Float_t ActsHitsPy;
+    Float_t ActsHitsPz;
+    Float_t ActsHitsE;
+    Float_t ActsHitsDeltaPx;
+    Float_t ActsHitsDeltaPy;
+    Float_t ActsHitsDeltaPz;
+    Float_t ActsHitsDeltaE;
+    Int_t ActsHitsIndex;
+    UInt_t ActsHitsVolumeID;
+    UInt_t ActsHitsBoundaryID;
+    UInt_t ActsHitsLayerID;
+    UInt_t ActsHitsApproachID;
+    UInt_t ActsHitsSensitiveID;
+
+    // Acts Particle Information - need the truth info on the particles in order to do the truth tracking
+    std::vector<std::uint64_t> ActsParticlesParticleId;
+    std::vector<std::int32_t> ActsParticlesParticleType;
+    std::vector<std::uint32_t> ActsParticlesProcess;
+    std::vector<float> ActsParticlesVx;
+    std::vector<float> ActsParticlesVy;
+    std::vector<float> ActsParticlesVz;
+    std::vector<float> ActsParticlesVt;
+    std::vector<float> ActsParticlesPx;
+    std::vector<float> ActsParticlesPy;
+    std::vector<float> ActsParticlesPz;
+    std::vector<float> ActsParticlesM;
+    std::vector<float> ActsParticlesQ;
+    std::vector<float> ActsParticlesEta;
+    std::vector<float> ActsParticlesPhi;
+    std::vector<float> ActsParticlesPt;
+    std::vector<float> ActsParticlesP;
+    std::vector<std::uint32_t> ActsParticlesVertexPrimary;
+    std::vector<std::uint32_t> ActsParticlesVertexSecondary;
+    std::vector<std::uint32_t> ActsParticlesParticle;
+
+    std::vector<std::uint32_t> ActsParticlesGeneration;
+    std::vector<std::uint32_t> ActsParticlesSubParticle;
+    std::vector<float> ActsParticlesELoss;
+    std::vector<float> ActsParticlesPathInX0;
+    std::vector<float> ActsParticlesPathInL0;
+    std::vector<std::int32_t> ActsParticlesNumberOfHits;
+    std::vector<std::uint32_t> ActsParticlesOutcome;
 
 
   private:

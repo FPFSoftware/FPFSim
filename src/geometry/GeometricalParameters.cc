@@ -12,6 +12,9 @@ GeometricalParameters::GeometricalParameters()
   fHallOffsetX = 1.44*m;
   fHallOffsetY = 2.21*m;
 
+  // FLArE TPC volume
+  fAddFLArE = false; //default
+
   // rock envelope
   fEnableRockEnvelope = false;
   fRockFrontThickness = 10*m;
@@ -54,6 +57,7 @@ GeometricalParameters::GeometricalParameters()
   fBabyMINDBlockSequence = "|MMMMD||DMMMD||DMMMMD||MMDMMD||MMDMMD||MDMDMD||DMMMD|";
 
   // FASER2 magnet
+  fAddFASER2 = false; //default
   fFASER2MagnetOption = magnetOption::SAMURAI;
   fFASER2MagnetField = 1.0*tesla;
   fMagnetTotalSizeZ = 4*m; //updates during construction
@@ -92,6 +96,7 @@ GeometricalParameters::GeometricalParameters()
   fFASER2VetoShieldThickness = 10*cm; //! These values are placeholders and require dedicated optmisation studies!
 
   // FASERnu2 emulsion detector
+  fAddFASERnu2 = false; //default
   fFASERnu2TotalSizeZ = 8.5*m; //updates during construction
   fNEmulsionTungstenLayers = 3300;
   fTungstenThickness = 2*mm;
@@ -104,6 +109,7 @@ GeometricalParameters::GeometricalParameters()
   fFASERnu2Pos = G4ThreeVector(0., 0., 22023.*mm);
 
   // FORMOSA
+  fAddFORMOSA = false; //default
   fFORMOSATotalSizeZ = 5*m; //updates during construction
   fNScinBarsX = 20;
   fNScinBarsY = 20;

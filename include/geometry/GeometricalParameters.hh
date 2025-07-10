@@ -221,6 +221,15 @@ class GeometricalParameters  {
     void AddSD2List(int idx, std::string val) { fSDNamelist.insert(std::make_pair(idx, val)); }
     std::set<std::pair<int, std::string> > GetSDNamelist() { return fSDNamelist; }
 
+    void SetAddFLArE(G4bool val) { fAddFLArE = val; }
+    bool GetAddFLArE() { return fAddFLArE; }
+    void SetAddFORMOSA(G4bool val) { fAddFORMOSA = val; }
+    bool GetAddFORMOSA() { return fAddFORMOSA; }
+    void SetAddFASERnu2(G4bool val) { fAddFASERnu2 = val; }
+    bool GetAddFASERnu2() { return fAddFASERnu2; }
+    void SetAddFASER2(G4bool val) { fAddFASER2 = val; }
+    bool GetAddFASER2() { return fAddFASER2; }
+
   private:
     //the singleton
     static GeometricalParameters *me;
@@ -230,6 +239,11 @@ class GeometricalParameters  {
     G4double fHallOffsetX; // x offset of hall center from the LOS
     G4double fHallOffsetY; // x offset of hall center from the LOS
 
+    bool fAddFLArE;
+    bool fAddFORMOSA;
+    bool fAddFASERnu2;
+    bool fAddFASER2;
+    
     // rock envelope
     G4bool fEnableRockEnvelope;
     G4double fRockFrontThickness;

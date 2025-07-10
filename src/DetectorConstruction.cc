@@ -2,6 +2,7 @@
 #include "DetectorConstructionMaterial.hh"
 #include "DetectorConstructionMessenger.hh"
 #include "LArBoxSD.hh"
+#include "FASER2TrackerSD.hh"
 
 #include "geometry/FASER2DetectorConstruction.hh"
 #include "geometry/GeometricalParameters.hh"
@@ -131,6 +132,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   // FLArE TPC volume
 
   if (m_addFLArE) {
+    GeometricalParameters::Get()->SetAddFLArE(m_addFLArE);    
     FLArETPCDetectorConstruction *FLArETPCAssembler = new FLArETPCDetectorConstruction();
     G4double lArSizeZ               = GeometricalParameters::Get()->GetTPCSizeZ();
     G4double TPCInsulationThickness = GeometricalParameters::Get()->GetTPCInsulationThickness();
@@ -201,6 +203,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   // FORMOSA
 
   if (m_addFORMOSA) {
+    GeometricalParameters::Get()->SetAddFORMOSA(m_addFORMOSA);
     FORMOSADetectorConstruction *FORMOSAAssembler = new FORMOSADetectorConstruction();
     G4LogicalVolume* FORMOSAAssembly = FORMOSAAssembler->GetFORMOSAAssembly();
     FORMOSAScintillatorBarLogical = FORMOSAAssembler->GetScintillatorBar();
@@ -219,6 +222,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   // FASERnu2 Emulsion Detector
 
   if (m_addFASERnu2) {
+    GeometricalParameters::Get()->SetAddFASERnu2(m_addFASERnu2);
     FASERnu2DetectorConstruction *FASERnu2Assembler = new FASERnu2DetectorConstruction();
     FASERnu2EmulsionLogical = FASERnu2Assembler->GetEmulsionFilm();
     FASERnu2VetoInterfaceLogical = FASERnu2Assembler->GetVetoInterfaceDetector();
@@ -238,6 +242,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   // FASER2 Magnet + Tracking stations
 
   if (m_addFASER2) {
+    GeometricalParameters::Get()->SetAddFASER2(m_addFASER2);
     FASER2DetectorConstruction *magnetAssembler = new FASER2DetectorConstruction();
     FASER2MagnetLogical = magnetAssembler->GetMagneticVolume(); //need to assign B field
     FASER2TrackingLogical = magnetAssembler->GetTrackingStations();
@@ -388,26 +393,24 @@ void DetectorConstruction::ConstructSDandField() {
   }
 
   if (m_addFASER2) {
-    for (auto& station: FASER2TrackingLogical)
-    {
-      LArBoxSD* TrkScinSD = new LArBoxSD("FASER2TrackerSD"+ std::to_string(SDIdx));
-      station->SetSensitiveDetector(TrkScinSD);
-      sdManager->AddNewDetector(TrkScinSD);
-      GeometricalParameters::Get()->AddSD2List(SDIdx, "FASER2TrackerSD"+ std::to_string(SDIdx)+"/lar_box");
-      SDIdx++;
-    }
-
-    LArBoxSD* FASER2VetoSD = new LArBoxSD("FASER2VetoSD");
-    FASER2VetoLogical->SetSensitiveDetector(FASER2VetoSD);
-    sdManager->AddNewDetector(FASER2VetoSD);
-    GeometricalParameters::Get()->AddSD2List(SDIdx, "FASER2VetoSD/lar_box");
+    
+    FASER2TrackerSD* TrkScinSD = new FASER2TrackerSD("FASER2TrackerSD");
+    FASER2TrackingLogical->SetSensitiveDetector(TrkScinSD);
+    sdManager->AddNewDetector(TrkScinSD);
+    GeometricalParameters::Get()->AddSD2List(SDIdx, "FASER2TrackerSD/tracker_box");
     SDIdx++;
 
-    LArBoxSD* FASER2MuonDetSD = new LArBoxSD("FASER2MuonSD");
-    FASER2MuonLogical->SetSensitiveDetector(FASER2MuonDetSD);
-    sdManager->AddNewDetector(FASER2MuonDetSD);
-    GeometricalParameters::Get()->AddSD2List(SDIdx, "FASER2MuonSD/lar_box");
-    SDIdx++;
+    // LArBoxSD* FASER2VetoSD = new LArBoxSD("FASER2VetoSD"); //TODO: Should implement a new SD class for FASER2Veto
+    // FASER2VetoLogical->SetSensitiveDetector(FASER2VetoSD);
+    // sdManager->AddNewDetector(FASER2VetoSD);
+    // GeometricalParameters::Get()->AddSD2List(SDIdx, "FASER2VetoSD/lar_box");
+    // SDIdx++;
+
+    // LArBoxSD* FASER2MuonDetSD = new LArBoxSD("FASER2MuonSD"); //TODO: Should probably be a FASER2TrackerSD
+    // FASER2MuonLogical->SetSensitiveDetector(FASER2MuonDetSD);
+    // sdManager->AddNewDetector(FASER2MuonDetSD);
+    // GeometricalParameters::Get()->AddSD2List(SDIdx, "FASER2MuonSD/lar_box");
+    // SDIdx++;
 
     // FASER2 magnetic field
     G4ThreeVector fieldValueFASER2 = GeometricalParameters::Get()->GetFASER2MagnetField();
