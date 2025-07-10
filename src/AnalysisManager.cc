@@ -236,6 +236,35 @@ void AnalysisManager::bookFLArEHitTree() {
 }
 
 
+void AnalysisManager::bookFLArEHitTree() {
+  flarHit = new TTree("FLArE_hits", "flarHitTreeInfo");
+
+  flarHit->Branch("flareTrackID"			, &flareTrackID 		, "flareTrackID/I");
+  flarHit->Branch("flareParticleID" 		, &flareParticleID		, "flareParticleID/I");
+  flarHit->Branch("flareParentID" 			, &flareParentID		, "flareParentID/I");
+  flarHit->Branch("flarePDG" 				, &flarePDG				, "flarePDG/I");
+  flarHit->Branch("flareCopyNum" 			, &flareCopyNum			, "flareCopyNum/I");
+
+  flarHit->Branch("flareT" 					, &flareT				, "flareT/I");
+
+  flarHit->Branch("flareX" 					, &flareX				, "flareX/D");//Pre-position
+  flarHit->Branch("flareY" 					, &flareY				, "flareY/D");
+  flarHit->Branch("flareZ" 					, &flareZ				, "flareZ/D");
+
+  flarHit->Branch("flarePx" 				, &flarePx				, "flarePx/D");//Post-position
+  flarHit->Branch("flarePy" 				, &flarePy				, "flarePy/D");
+  flarHit->Branch("flarePz" 				, &flarePz				, "flarePz/D");
+
+  flarHit->Branch("flareDeltaPx" 			, &flareDeltaPx			, "flareDeltaPx/D");
+  flarHit->Branch("flareDeltaPy" 			, &flareDeltaPy			, "flareDeltaPy/D");
+  flarHit->Branch("flareDeltaPz" 			, &flareDeltaPz			, "flareDeltaPz/D");
+
+  flarHit->Branch("flareEdep" 				, &flareEdep			, "flareEdep/D");
+
+}
+
+
+
 
 
 
@@ -545,41 +574,76 @@ void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
       double pre_y  = hit->GetPreStepPosition().y();
       double pre_z  = hit->GetPreStepPosition().z();
 
+	  UInt_t tid = hit->GetTID();
+	  UInt_t pid = hit->GetPID();
+	  UInt_t PDG = hit->GetPDG();
+	  UInt_t copyNum = hit->GetCopyNum();
+
+	  UInt_t time = hit->GetTime();
+
+	  double Px = hit->GetInitMomentum().x();
+  	  double Py = hit->GetInitMomentum().y();
+	  double Pz = hit->GetInitMomentum().z();
+
+	  double dPx = hit->GetInitMomentum().x();
+  	  double dPy = hit->GetInitMomentum().y();
+	  double dPz = hit->GetInitMomentum().z();
+
+
+	  double edep =  hit->GetEdep();
+
+	  auto particleId = ActsFatras::Barcode();
+	  particleId.setVertexPrimary(1);//fix this value
+	  particleId.setGeneration(parentID);
+	  particleId.setSubParticle(0);
+	  particleId.setParticle(trackID);
+	  partID = particleId.value();
+
+
       // energy deposition in different volumes of the detector
       if (sdName == "lArBoxSD/lar_box"){
-        edepInLAr += hit->GetEdep();
-
-	  	flareTrackID = hit->GetTID();
-	  	flareParentID = hit->GetPID();
-	  	flarePDG = hit->GetPDG();
-	  	flareCopyNum = hit->GetCopyNum();
-
-		flareT = hit->GetTime();
-
+	  	flareTrackID = tid
+	  	flareParentID = pid;
+	  	flarePDG = PDG;
+	  	flareCopyNum = copyNum;
+		flareParticleID = partID;
+		flareT = time;
 	  	flareX = pre_x;
 	  	flareY = pre_y;
 	  	flareZ = pre_z;
+	  	flarePx = Px;
+	  	flarePy = Py;
+	  	flarePz = Pz;
+	  	flareDeltaPx = dPx;
+	  	flareDeltaPy = dPy;
+	  	flareDeltaPz = dPz;
+	  	flareEdep = edep;//should this be += or =?
 
-	  	flarePx = hit->GetInitMomentum().x();
-	  	flarePy = hit->GetInitMomentum().y();
-	  	flarePz = hit->GetInitMomentum().z();
-
-	  	flareDeltaPx = hit->GetDeltaMomentum().x();
-	  	flareDeltaPy = hit->GetDeltaMomentum().y();
-	  	flareDeltaPz = hit->GetDeltaMomentum().z();
-
-	  	flareEdep = hit->GetEdep();
-
-		auto particleId = ActsFatras::Barcode();
-		particleId.setVertexPrimary(1);//fix this value
-		particleId.setGeneration(flareParentID);
-		particleId.setSubParticle(0);
-		particleId.setParticle(flareTrackID);
-		flareParticleID = particleId.value();
 
 	  	flarHit->Fill();
-
 	  }
+
+      if (sdName == "HadCalXSD/lar_box"){
+	  	hadXTrackID = tid
+	  	hadXParentID = pid;
+	  	hadXPDG = PDG;
+	  	hadXCopyNum = copyNum;
+		hadXParticleID = partID;
+		hadXT = time;
+	  	hadXx = pre_x;
+	  	hadXy = pre_y;
+	  	hadXz = pre_z;
+	  	hadXPx = Px;
+	  	hadXPy = Py;
+	  	hadXPz = Pz;
+	  	hadXDeltaPx = dPx;
+	  	hadXDeltaPy = dPy;
+	  	hadXDeltaPz = dPz;
+	  	hadXEdep = edep;
+
+	  	hadXHit->Fill();
+	  }
+
 
     } // end of hit loop
   }

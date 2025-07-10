@@ -9,7 +9,7 @@
 #include "G4SystemOfUnits.hh"
 #include "G4ThreeVector.hh"
 #include "G4VisAttributes.hh"
-#include "G4Colour.hh" 
+#include "G4Colour.hh"
 #include "G4PVReplica.hh"
 #include "G4UserLimits.hh"
 #include "G4PVPlacement.hh"
@@ -28,9 +28,9 @@ FLArETPCDetectorConstruction::FLArETPCDetectorConstruction()
   } else if (fDetMaterialName == GeometricalParameters::tpcMaterialOption::LiquidKrypton) {
     detectorMaterial = fMaterials->Material("LiquidKrypton");
     G4cout<<"**** FLArE TPC Material : Liquid Krypton ****"<<G4endl;
-  } 
+  }
   if (!detectorMaterial) {
-    G4cout << "ERROR: undefined target material!" << G4endl;  
+    G4cout << "ERROR: undefined target material!" << G4endl;
   }
   G4cout << "Building FLArE TPC" << G4endl;
 
@@ -58,7 +58,7 @@ FLArETPCDetectorConstruction::FLArETPCDetectorConstruction()
   } else if (fDetGeomOption == GeometricalParameters::tpcConfigOption::ThreeBySeven) {
     new G4PVPlacement(noRot, tpcCenter, lArBoxLog, "LArPhysical", fFLArETPCAssembly, false, 0, false);
   } else {
-    G4cout << "ERROR: undefined TPC configuration!" << G4endl;  
+    G4cout << "ERROR: undefined TPC configuration!" << G4endl;
   }
   new G4PVPlacement(noRot, tpcCenter, cryoInsulationLog, "CryostatPhysical", fFLArETPCAssembly, false, 0, false);
 
@@ -72,7 +72,7 @@ FLArETPCDetectorConstruction::~FLArETPCDetectorConstruction()
   delete cryoInsulationLog;
 }
 
-void FLArETPCDetectorConstruction::BuildFLArETPC() 
+void FLArETPCDetectorConstruction::BuildFLArETPC()
 {
   auto lArBox = new G4Box("lArBox", fLArSizeX/2., fLArSizeY/2., fLArSizeZ/2.);
 
@@ -105,6 +105,21 @@ void FLArETPCDetectorConstruction::BuildFLArETPC()
     auto TPCModuleSolid
       = new G4Box("TPCModuleBox", TPCModuleWidth/2, TPCModuleHeight/2, TPCModuleLength/2);
     fFLArETPCLog = new G4LogicalVolume(TPCModuleSolid, detectorMaterial, "TPCModuleLog");
+
+	/* int boxCt = 0; */
+
+ 	/* startEndX = (TPCLayerWidth/2) - 0.5*TPCModuleWidth;//double check logic here */
+ 	/* startEndZ = (TPCLayerLength/2) - 0.5*TPCModuleLength; */
+
+
+	/* for (int boxNumX = 0; boxNum < 3; boxNum++) { */
+	/* 	for (int boxNumZ = 0; boxNumZ < 7; boxNumZ++){ */
+	/* 		G4ThreeVector pos (boxNumX*TPCModuleLength - startEndX, boxNumX*TPCModuleLength - startEndX,TPCModuleHeight ); */
+	/* 		new G4PVPlacement(0,pos,fFLArETPCLog, "module",lArBoxLog, false, boxCt); */
+	/* 		boxCt++; */
+	/* 	} */
+	/* } */
+
     new G4PVReplica("TPCModulePhysical", fFLArETPCLog, TPCLayerLogical, kXAxis, 3, TPCModuleWidth);
     new G4PVReplica("TPC", TPCLayerLogical, lArBoxLog, kZAxis, 7, TPCLayerLength);
     G4VisAttributes* TPCModuleVis = new G4VisAttributes(G4Colour(86./255, 152./255, 195./255));
@@ -122,8 +137,8 @@ void FLArETPCDetectorConstruction::BuildCryostatInsulation()
   //-----------------------------------
   // insulation
   auto lArBox = new G4Box("lArBox", fLArSizeX/2., fLArSizeY/2., fLArSizeZ/2.);
-  auto CryoInsulationBlockSolid = new G4Box("CryoInsulationBlock", 
-                                            fLArSizeX/2.+fThicknessInsulation, 
+  auto CryoInsulationBlockSolid = new G4Box("CryoInsulationBlock",
+                                            fLArSizeX/2.+fThicknessInsulation,
                                             fLArSizeY/2.+fThicknessInsulation,
                                             fLArSizeZ/2.+fThicknessInsulation);
   auto CryoInsulationSolid = new G4SubtractionSolid("CryoInsulation",
@@ -131,9 +146,9 @@ void FLArETPCDetectorConstruction::BuildCryostatInsulation()
                                                     lArBox,
                                                     0, //no rotation
                                                     G4ThreeVector(0,0,0)); // no translation
-  cryoInsulationLog = new G4LogicalVolume(CryoInsulationSolid, 
-                                          fMaterials->Material("R_PUF"), 
-                                          "CryoInsulationLogical"); 
+  cryoInsulationLog = new G4LogicalVolume(CryoInsulationSolid,
+                                          fMaterials->Material("R_PUF"),
+                                          "CryoInsulationLogical");
   auto CryoInsulationVis = new G4VisAttributes(G4Colour(86./255, 152./255, 195./255));
   CryoInsulationVis->SetVisibility(true);
   CryoInsulationVis->SetForceWireframe(true);
