@@ -982,7 +982,7 @@ void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
 	  }
 
       else if (sdName == "HadCalXSD/lar_box"){
-		G4cout<<"hadX hit"<<G4endl;
+		//G4cout<<"hadX hit"<<G4endl;
 
 	  	hadXTrackID = tid;
 	  	hadXParentID = pid;
@@ -1005,8 +1005,8 @@ void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
 		//G4cout<<"passed5.5"<<G4endl;
 	  }
 
-		else if (sdName == "HadCalXSD/lar_box"){
-		G4cout<<"hadX hit"<<G4endl;
+		else if (sdName == "HadCalYSD/lar_box"){
+		//G4cout<<"hadX hit"<<G4endl;
 
 	  	hadYTrackID = tid;
 	  	hadYParentID = pid;
