@@ -17,10 +17,11 @@ using namespace std;
  * - run macros
  * - start interactive UI mode (no arguments)
  */
-int main(int argc, char** argv) {
-  std::cout<<"Application starting..."<<std::endl;
-//  G4long myseed = 345354;
-//  CLHEP::HepRandom::setTheSeed(myseed);
+int main(int argc, char** argv)
+{
+  G4cout<< " FPFSim starting..." << G4endl;
+  //G4long myseed = 345354;
+  //CLHEP::HepRandom::setTheSeed(myseed);
 
   // invoke analysis manager before ui manager to invoke analysis manager messenger
   AnalysisManager* analysis = AnalysisManager::GetInstance();
@@ -44,7 +45,7 @@ int main(int argc, char** argv) {
   G4UImanager* UImanager = G4UImanager::GetUIpointer();
 
   // Parse command line arguments
-  if (argc==1) {
+  if ( argc==1 ){
     G4UIExecutive* ui = new G4UIExecutive(argc, argv);
     UImanager->ApplyCommand("/control/execute macros/vis.mac");
     ui->SessionStart();
@@ -61,7 +62,7 @@ int main(int argc, char** argv) {
         ui->SessionStart();
         delete ui;
       } else {
-        std::cout<<"Please specify the second argument as vis to visualize the event"<<std::endl;
+        G4cout << "Please specify the second argument as vis to visualize the event" << G4endl;
         return 0;
       }
     }
@@ -70,7 +71,7 @@ int main(int argc, char** argv) {
   delete visManager;
   delete runManager;
 
-  std::cout<<"Application sucessfully ended.\nBye :-)"<<std::endl;
+  G4cout << "Application sucessfully ended.\nBye :-)" << G4endl;
 
   return 0;
 }

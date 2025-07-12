@@ -65,6 +65,11 @@ G4bool LArBoxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* R0hist) {
   G4String PosVolume = PostStep->GetPhysicalVolume()->GetName();
   G4int StepStatus   = PostStep->GetStepStatus();
 
+  if(edep <= 0) //no energy deposited, skip
+  { 
+    return false;
+  }
+
   G4int copyNum = aStep->GetPreStepPoint()->GetTouchableHandle()->GetCopyNumber();
   G4ThreeVector delta_momentum = (PostStep->GetMomentum())-InitMomentum;
 
@@ -78,9 +83,6 @@ G4bool LArBoxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* R0hist) {
     trackIsFromPrimaryPizero = aTrackInfo->IsTrackFromPrimaryPizero();
     trackIsFromFSLPizero = aTrackInfo->IsTrackFromFSLPizero();
     trackIsFromPrimaryLepton = aTrackInfo->IsTrackFromPrimaryLepton();
-
-
-
   }
 
   // Fill hit information

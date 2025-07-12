@@ -138,27 +138,27 @@ void AnalysisManager::bookEvtTree()
 
 void AnalysisManager::bookPrimTree()
 {
-  fPrim = new TTree("primaries", "primPTreeInfo");
-  fPrim->Branch("primEvtID", &evtID, "primEvtID/I");
-  fPrim->Branch("primVtxID", &primVtxID, "primVtxID/I");
-  fPrim->Branch("primPDG", &primPDG, "primPDG/I");
-  fPrim->Branch("primParticleID", &primParticleID, "primParticleID/I");
-  fPrim->Branch("primTrackID", &primTrackID, "primTrackID/I");
-  fPrim->Branch("primM", &primM, "primM/F");
-  fPrim->Branch("primQ", &primQ, "primQ/F");
-  fPrim->Branch("primEta", &primEta, "primEta/F");
-  fPrim->Branch("primPhi", &primPhi, "primPhi/F");
-  fPrim->Branch("primPt", &primPt, "primPt/F");
-  fPrim->Branch("primP", &primP, "primP/F");
-  fPrim->Branch("primVx", &primVx, "primVx/F"); // position
-  fPrim->Branch("primVy", &primVy, "primVy/F");
-  fPrim->Branch("primVz", &primVz, "primVz/F");
-  fPrim->Branch("primVt", &primVt, "primVt/F");
-  fPrim->Branch("primPx", &primPx, "primPx/F"); // momentum
-  fPrim->Branch("primPy", &primPy, "primPy/F");
-  fPrim->Branch("primPz", &primPz, "primPz/F");
-  fPrim->Branch("primE", &primE, "primE/F");    // initial total energy
-  fPrim->Branch("primKE", &primKE, "primKE/F"); // initial kinetic energy
+  fPrim = new TTree("primaries", "primaries info");
+  fPrim->Branch("evtID", &evtID, "evtID/I");
+  fPrim->Branch("vtxID", &primVtxID, "vtxID/I");
+  fPrim->Branch("PDG", &primPDG, "PDG/I");
+  fPrim->Branch("trackID", &primTrackID, "trackID/I");
+  fPrim->Branch("barcode", &primParticleID, "bardcode/I");
+  fPrim->Branch("mass", &primM, "mass/F");
+  fPrim->Branch("charge", &primQ, "charge/F");
+  fPrim->Branch("Vx", &primVx, "Vx/F"); // position
+  fPrim->Branch("Vy", &primVy, "Vy/F");
+  fPrim->Branch("Vz", &primVz, "Vz/F");
+  fPrim->Branch("Vt", &primVt, "Vt/F");
+  fPrim->Branch("Px", &primPx, "Px/F"); // momentum
+  fPrim->Branch("Py", &primPy, "Py/F");
+  fPrim->Branch("Pz", &primPz, "Pz/F");
+  fPrim->Branch("E", &primE, "E/F");    // initial total energy
+  fPrim->Branch("KE", &primKE, "KE/F"); // initial kinetic energy
+  fPrim->Branch("Eta", &primEta, "Eta/F");
+  fPrim->Branch("Phi", &primPhi, "Phi/F");
+  fPrim->Branch("Pt", &primPt, "Pt/F");
+  fPrim->Branch("P", &primP, "P/F");
 }
 
 void AnalysisManager::bookTrkTree()
@@ -181,7 +181,8 @@ void AnalysisManager::bookTrkTree()
 void AnalysisManager::bookFLArETrees()
 {
   // create subdirectory in file
-  fFLArEDir = fFile->mkdir("flare");
+  fFLArEDir = fFile->mkdir("flare","FLArE output",kTRUE);
+  fFile->cd(fFLArEDir->GetName());
 
   // FLArE hits tree
   fFLArEHits = new TTree("flare_hits", "FLArE hits info");
@@ -222,6 +223,8 @@ void AnalysisManager::bookFLArETrees()
   fFLArEHCALHits->Branch("hadDeltaPz", &flareDeltaPz, "hadDeltaPz/D");
   fFLArEHCALHits->Branch("hadEdep", &flareEdep, "hadEdep/D");
   fFLArEHCALHits->Branch("hadIsZX", &flareIsZX, "hadIsZX/B");
+
+  fFile->cd();
 }
 
 //---------------------------------------------------------------------
@@ -230,7 +233,8 @@ void AnalysisManager::bookFLArETrees()
 void AnalysisManager::bookFASER2Trees()
 {
   // create subdirectory in file
-  fFASER2Dir = fFile->mkdir("faser2");
+  fFASER2Dir = fFile->mkdir("faser2","FASER2 output",kTRUE);
+  fFile->cd(fFASER2Dir->GetName());
 
   //* Acts Hits Tree [i == unsigned int; F == float; l == Long unsigned 64 int]
   fActsHitsTree = new TTree("hits", "ActsHitsTree");
@@ -285,6 +289,8 @@ void AnalysisManager::bookFASER2Trees()
   fActsParticlesTree->Branch("total_l0", &ActsParticlesPathInL0);
   fActsParticlesTree->Branch("number_of_hits", &ActsParticlesNumberOfHits);
   fActsParticlesTree->Branch("outcome", &ActsParticlesOutcome);
+
+  fFile->cd();
 }
 
 //---------------------------------------------------------------------
@@ -626,8 +632,8 @@ void AnalysisManager::FillPrimariesTree(const G4Event *event)
   /// neutrino truth info from event generator.
   for (G4int ivtx = 0; ivtx < event->GetNumberOfPrimaryVertex(); ++ivtx)
   {
-    G4cout << "  vtx " << ivtx << "/" << nPrimaryVertex << " -> " 
-           << event->GetPrimaryVertex(ivtx)->GetNumberOfParticle() << " primaries " << G4endl;
+    G4cout << "=== Vertex " << ivtx+1 << " of " << nPrimaryVertex << " -> " 
+           << event->GetPrimaryVertex(ivtx)->GetNumberOfParticle() << " primaries ===" << G4endl;
     for (G4int ipp = 0; ipp < event->GetPrimaryVertex(ivtx)->GetNumberOfParticle(); ++ipp)
     {
       G4PrimaryParticle *primary_particle = event->GetPrimaryVertex(ivtx)->GetPrimary(ipp);
@@ -654,7 +660,7 @@ void AnalysisManager::FillPrimariesTree(const G4Event *event)
         primPx = primary_particle_info->GetMomentumMC().x();
         primPy = primary_particle_info->GetMomentumMC().y();
         primPz = primary_particle_info->GetMomentumMC().z();
-        primM = primary_particle_info->GetMass();
+        primM = primary_particle_info->GetMass()/MeV;
         primQ = primary_particle_info->GetCharge();
 
         G4double energy = GetTotalEnergy(primPx, primPy, primPz, primM);
@@ -689,7 +695,7 @@ void AnalysisManager::FillTrajectoriesTree(const G4Event* event)
 {
   int count_tracks = 0;
 
-  G4cout << "---> Saving track information to tree..." << G4endl; 
+  G4cout << "==== Saving track information to tree ====" << G4endl; 
   auto trajectoryContainer = event->GetTrajectoryContainer(); 
   if (!trajectoryContainer)
   {
@@ -726,7 +732,7 @@ void AnalysisManager::FillTrajectoriesTree(const G4Event* event)
 
 void AnalysisManager::FillFLArEOutput()
 {
-  G4cout << "Filling FLArE output trees" << G4endl;
+  G4cout << "===== Filling FLArE output trees =====" << G4endl;
 
   // loop over the detected FLArE sensitive volumes
   // for now, everything is lar_box
@@ -797,7 +803,7 @@ void AnalysisManager::FillFLArEOutput()
 
 void AnalysisManager::FillFASER2Output()
 {
-  G4cout << "Filling FASER2 output trees" << G4endl;
+  G4cout << "==== Filling FASER2 output trees ====" << G4endl;
 
   // loop over the detected FASER2 sensitive volumes
   int nHits = 0;
