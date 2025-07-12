@@ -181,18 +181,16 @@ Older versions of FORESEE output events in the HepMC2 format. To run over HepMC2
 |/gen/hepmc/vtxOffset     | if `hepmc` is selected, give an x, y, z offset to each vertex. Useful if you need to align events from another generator (i.e. FORESEE) with this G4 simulation.|
 |/gen/hepmc/placeInDecayVolume | if `hepmc` is selected, will automatically translate vertex into the FASER2 decay volume. Assumes that the vertices start from (0,0,0). If this is not the case then `/gen/hepmc/vtxOffset` must also be set.|
 
-### Analysis
+### Output
 
 |Command |Description |
 |:--|:--|
-|/histo/fileName     | option for AnalysisManagerMessenger, set name of the file saving all analysis variables|
-|/histo/saveHit      | if `true` save info for all hits, `false` in default to save space|
-|/histo/saveTrack    | if `true` save info for all tracks, `false` in default, requires `\tracking\storeTrajectory 1`|
-|/histo/save3DEvd    | if `true` save 3D spatial distribution of energy deposition, `false` in default|
-|/histo/save2DEvd    | if `true` save 2D spatial distribution of energy deposition, `false` in default|
-|/histo/circleFit    | if `true` run circle fitting and save information in output, `false` in default to save space|
-|/histo/addDiffusion | if `toy` diffuse energy, if `single` diffuse single electron, `false` in default without diffusion|
-|/histo/actsHits     | if `true` save the truth particle and hit information in a format that can be read by the FASER2 Acts tracking software, `true` by default if FASER2 is enabled|
+|/out/fileName     | option for AnalysisManagerMessenger, set name of the file saving all analysis variables|
+|/out/saveTrack    | if `true` save info for all tracks, `false` in default, requires `\tracking\storeTrajectory 1`|
+|/out/save3DEvd    | if `true` save 3D spatial distribution of energy deposition, `false` in default|
+|/out/save2DEvd    | if `true` save 2D spatial distribution of energy deposition, `false` in default|
+|/out/addDiffusion | if `toy` diffuse energy, if `single` diffuse single electron, `false` in default without diffusion|
+|/out/actsHits     | if `true` save the truth particle and hit information in a format that can be read by the FASER2 Acts tracking software, `true` by default if FASER2 is enabled|
 
 ## How to save an event display with high resolution using the DAWN Event Display
 

@@ -42,81 +42,62 @@
   AnalysisManagerMessenger::AnalysisManagerMessenger(AnalysisManager* manager)
 :anamanager (manager)
 {
-  histoDir = new G4UIdirectory("/histo/");
-  histoDir->SetGuidance("histograms control");
+  outDir = new G4UIdirectory("/out/");
+  outDir->SetGuidance("output control");
 
-  factoryCmd = new G4UIcmdWithAString("/histo/fileName", this);
-  factoryCmd->SetGuidance("set name for the histograms file");
-  factoryCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+  fileCmd = new G4UIcmdWithAString("/out/fileName", this);
+  fileCmd->SetGuidance("set name for the histograms file");
+  fileCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-  saveHitCmd = new G4UIcmdWithABool("/histo/saveHit", this);
-  saveHitCmd->SetGuidance("whether save the information of all hits");
-  saveHitCmd->SetParameterName("saveHit", true);
-  saveHitCmd->SetDefaultValue(false);
-
-  saveTrackCmd = new G4UIcmdWithABool("/histo/saveTrack", this);
+  saveTrackCmd = new G4UIcmdWithABool("/out/saveTrack", this);
   saveTrackCmd->SetGuidance("whether save the information of all tracks");
   saveTrackCmd->SetParameterName("saveTrack", true);
   saveTrackCmd->SetDefaultValue(false);
 
-  save3DEvdCmd = new G4UIcmdWithABool("/histo/save3DEvd", this);
+  save3DEvdCmd = new G4UIcmdWithABool("/out/save3DEvd", this);
   save3DEvdCmd->SetGuidance("whether save 3D Pixel Map");
   save3DEvdCmd->SetParameterName("save3DEvd", true);
   save3DEvdCmd->SetDefaultValue(false);
 
-  save2DEvdCmd = new G4UIcmdWithABool("/histo/save2DEvd", this);
+  save2DEvdCmd = new G4UIcmdWithABool("/out/save2DEvd", this);
   save2DEvdCmd->SetGuidance("whether save 2D Pixel Map");
   save2DEvdCmd->SetParameterName("save2DEvd", true);
   save2DEvdCmd->SetDefaultValue(false);
 
-  circleFitCmd = new G4UIcmdWithABool("/histo/circleFit", this);
-  circleFitCmd->SetGuidance("perform circular fit");
-  circleFitCmd->SetParameterName("circleFit", true);
-  circleFitCmd->SetDefaultValue(false);
-
-  addDiffusionCmd = new G4UIcmdWithAString("/histo/addDiffusion", this);
+  addDiffusionCmd = new G4UIcmdWithAString("/out/addDiffusion", this);
   addDiffusionCmd->SetGuidance("add toy diffusion effect");
   addDiffusionCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-  saveActsCmd = new G4UIcmdWithABool("/histo/actsHits", this);
+  saveActsCmd = new G4UIcmdWithABool("/out/actsHits", this);
   saveActsCmd->SetGuidance("save hits in Acts format");
   saveActsCmd->SetParameterName("actsHits", true);
   saveActsCmd->SetDefaultValue(true);
 
-  //  histoCmd = new G4UIcmdWithAnInteger("/histo/setSeed",this);
-  //  histoCmd->SetGuidance("Set random seed :");
-  //  histoCmd->SetDefaultValue(1);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 AnalysisManagerMessenger::~AnalysisManagerMessenger()
 {
-  delete factoryCmd;
-  delete saveHitCmd;
+  delete fileCmd;
   delete saveTrackCmd;
   delete save3DEvdCmd;
   delete save2DEvdCmd;
-  delete circleFitCmd;
   delete saveActsCmd;
   delete addDiffusionCmd;
-  delete histoDir;
+  delete outDir;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void AnalysisManagerMessenger::SetNewValue(G4UIcommand* command,G4String newValues)
 {
-  if (command == factoryCmd) anamanager->setFileName(newValues);
-  if (command == saveHitCmd) anamanager->saveHit(saveHitCmd->GetNewBoolValue(newValues));
+  if (command == fileCmd) anamanager->setFileName(newValues);
   if (command == saveTrackCmd) anamanager->saveTrack(saveTrackCmd->GetNewBoolValue(newValues));
   if (command == save3DEvdCmd) anamanager->save3DEvd(save3DEvdCmd->GetNewBoolValue(newValues));
   if (command == save2DEvdCmd) anamanager->save2DEvd(save2DEvdCmd->GetNewBoolValue(newValues));
-  if (command == circleFitCmd) anamanager->circleFit(circleFitCmd->GetNewBoolValue(newValues));
   if (command == saveActsCmd) anamanager->saveActs(saveActsCmd->GetNewBoolValue(newValues));
   if (command == addDiffusionCmd) anamanager->addDiffusion(newValues);
-
-  //  if(command == histoCmd) histo->setSeed(newValues);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
