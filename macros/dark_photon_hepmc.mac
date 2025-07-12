@@ -10,12 +10,12 @@
 /gen/hepmc/placeInDecayVolume true
 
 # define output options
-/histo/save3DEvd false
-/histo/save2DEvd false
-/histo/saveHit true
-/histo/addDiffusion false
-/histo/circleFit true
-/histo/fileName test_dark_photon_hepmc.root
+/out/save3DEvd false
+/out/save2DEvd false
+
+/out/addDiffusion false
+
+/out/fileName test_dark_photon_hepmc.root
 
 # shoot 5 particles
 /run/beamOn 5

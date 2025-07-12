@@ -33,12 +33,12 @@ cat << EOF >> temp.mac
 /gen/genie/genieInput nutau_bai_ar40_e2000.ghep.root
 /gen/genie/genieIStart ${istart}
 
-/histo/addDiffusion false
-/histo/saveHit false
-/histo/save3DEvd true
-/histo/save2DEvd false
-/histo/circleFit true
-/histo/fileName ${outputfile}
+/out/addDiffusion false
+
+/out/save3DEvd true
+/out/save2DEvd false
+
+/out/fileName ${outputfile}
 
 /run/beamOn ${num_evt_per_file}
 EOF

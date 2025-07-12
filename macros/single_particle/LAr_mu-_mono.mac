@@ -14,10 +14,10 @@
 /gps/ene/mono 19.894621 GeV
 
 # define output options
-/histo/save3DEvd false
-/histo/save2DEvd false
-/histo/saveHit false
-/histo/fileName mu-_momentum_20GeV.root
+/out/save3DEvd false
+/out/save2DEvd false
+
+/out/fileName mu-_momentum_20GeV.root
 
 # shoot 1 particles
 /run/beamOn 1

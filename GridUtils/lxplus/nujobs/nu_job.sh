@@ -81,12 +81,12 @@ function generate_macros {
 /gen/genie/genieInput ${gst}
 /gen/genie/genieIStart ${istart}
 
-/histo/save3DEvd false
-/histo/save2DEvd false
-/histo/saveHit false
-/histo/addDiffusion false
-/histo/circleFit true
-/histo/fileName ${outputfile}
+/out/save3DEvd false
+/out/save2DEvd false
+
+/out/addDiffusion false
+
+/out/fileName ${outputfile}
 
 /run/beamOn ${n_evt_per_job}
 EOF

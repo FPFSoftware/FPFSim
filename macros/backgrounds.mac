@@ -10,15 +10,15 @@
 /gen/bkg/backgroundWindow 187.5 us
 
 # define output options
-/histo/save3DEvd false
-/histo/save2DEvd true
-/histo/saveHit false
-/histo/addDiffusion false
-/histo/fileName test_backgrounds.root
+/out/save3DEvd false
+/out/save2DEvd true
+
+/out/addDiffusion false
+/out/fileName test_backgrounds.root
 
 # store and save trajectories for EVD
 /tracking/storeTrajectory 1
-/histo/saveTrack true
+/out/saveTrack true
 
 # shoot background equivalent to 1 "spill"
 /run/beamOn 1

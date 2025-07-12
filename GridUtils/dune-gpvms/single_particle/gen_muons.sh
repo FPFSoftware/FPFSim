@@ -35,10 +35,10 @@ cat << EOF >> ${filename}
 /gps/particle ${particle}
 /gps/ene/mono ${particle_kin} GeV
 
-/histo/saveEvd false
-/histo/saveHit false
-/histo/circleFit true
-/histo/fileName ${outputfile}
+/out/saveEvd false
+
+
+/out/fileName ${outputfile}
 
 /run/beamOn ${num_evt_per_file}
 EOF
