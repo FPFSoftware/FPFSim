@@ -186,42 +186,44 @@ void AnalysisManager::bookFLArETrees()
 
   // FLArE hits tree
   fFLArEHits = new TTree("flare_hits", "FLArE hits info");
+  fFLArEHits->Branch("flareEvtID", &evtID, "flareEvtID/I");
   fFLArEHits->Branch("flareTrackID", &flareTrackID, "flareTrackID/I");
-  fFLArEHits->Branch("flareParticleID", &flareParticleID, "flareParticleID/I");
+  fFLArEHits->Branch("flareBarcode", &flareParticleID, "flareParticleID/I");
   fFLArEHits->Branch("flareParentID", &flareParentID, "flareParentID/I");
   fFLArEHits->Branch("flarePDG", &flarePDG, "flarePDG/I");
   fFLArEHits->Branch("flareCopyNum", &flareCopyNum, "flareCopyNum/I");
   fFLArEHits->Branch("flareT", &flareT, "flareT/I");
-  fFLArEHits->Branch("flareX", &flareX, "flareX/D"); // Pre-position
-  fFLArEHits->Branch("flareY", &flareY, "flareY/D");
-  fFLArEHits->Branch("flareZ", &flareZ, "flareZ/D");
-  fFLArEHits->Branch("flarePx", &flarePx, "flarePx/D"); // momentum
-  fFLArEHits->Branch("flarePy", &flarePy, "flarePy/D");
-  fFLArEHits->Branch("flarePz", &flarePz, "flarePz/D");
-  fFLArEHits->Branch("flareDeltaPx", &flareDeltaPx, "flareDeltaPx/D");
-  fFLArEHits->Branch("flareDeltaPy", &flareDeltaPy, "flareDeltaPy/D");
-  fFLArEHits->Branch("flareDeltaPz", &flareDeltaPz, "flareDeltaPz/D");
-  fFLArEHits->Branch("flareEdep", &flareEdep, "flareEdep/D");
+  fFLArEHits->Branch("flareX", &flareX, "flareX/F"); // Pre-position
+  fFLArEHits->Branch("flareY", &flareY, "flareY/F");
+  fFLArEHits->Branch("flareZ", &flareZ, "flareZ/F");
+  fFLArEHits->Branch("flarePx", &flarePx, "flarePx/F"); // momentum
+  fFLArEHits->Branch("flarePy", &flarePy, "flarePy/F");
+  fFLArEHits->Branch("flarePz", &flarePz, "flarePz/F");
+  fFLArEHits->Branch("flareDeltaPx", &flareDeltaPx, "flareDeltaPx/F");
+  fFLArEHits->Branch("flareDeltaPy", &flareDeltaPy, "flareDeltaPy/F");
+  fFLArEHits->Branch("flareDeltaPz", &flareDeltaPz, "flareDeltaPz/F");
+  fFLArEHits->Branch("flareEdep", &flareEdep, "flareEdep/F");
 
   // FLArE HCAL hits
   fFLArEHCALHits = new TTree("hcal_hits", "FLArE HCAL hits info");
 
+  fFLArEHCALHits->Branch("hadEvtID", &evtID, "hadEvtID/I");
   fFLArEHCALHits->Branch("hadTrackID", &flareTrackID, "hadTrackID/I");
-  fFLArEHCALHits->Branch("hadParticleID", &flareParticleID, "hadParticleID/I");
+  fFLArEHCALHits->Branch("hadBarcode", &flareParticleID, "hadParticleID/I");
   fFLArEHCALHits->Branch("hadParentID", &flareParentID, "hadParentID/I");
   fFLArEHCALHits->Branch("hadPDG", &flarePDG, "hadPDG/I");
   fFLArEHCALHits->Branch("hadCopyNum", &flareCopyNum, "hadCopyNum/I");
   fFLArEHCALHits->Branch("hadT", &flareT, "hadT/I");
-  fFLArEHCALHits->Branch("hadX", &flareX, "hadX/D"); // Pre-position
-  fFLArEHCALHits->Branch("hadY", &flareY, "hadY/D");
-  fFLArEHCALHits->Branch("hadZ", &flareZ, "hadZ/D");
-  fFLArEHCALHits->Branch("hadPx", &flarePx, "hadPx/D"); // momentum
-  fFLArEHCALHits->Branch("hadPy", &flarePy, "hadPy/D");
-  fFLArEHCALHits->Branch("hadPz", &flarePz, "hadPz/D");
-  fFLArEHCALHits->Branch("hadDeltaPx", &flareDeltaPx, "hadDeltaPx/D");
-  fFLArEHCALHits->Branch("hadDeltaPy", &flareDeltaPy, "hadDeltaPy/D");
-  fFLArEHCALHits->Branch("hadDeltaPz", &flareDeltaPz, "hadDeltaPz/D");
-  fFLArEHCALHits->Branch("hadEdep", &flareEdep, "hadEdep/D");
+  fFLArEHCALHits->Branch("hadX", &flareX, "hadX/F"); // Pre-position
+  fFLArEHCALHits->Branch("hadY", &flareY, "hadY/F");
+  fFLArEHCALHits->Branch("hadZ", &flareZ, "hadZ/F");
+  fFLArEHCALHits->Branch("hadPx", &flarePx, "hadPx/F"); // momentum
+  fFLArEHCALHits->Branch("hadPy", &flarePy, "hadPy/F");
+  fFLArEHCALHits->Branch("hadPz", &flarePz, "hadPz/F");
+  fFLArEHCALHits->Branch("hadDeltaPx", &flareDeltaPx, "hadDeltaPx/F");
+  fFLArEHCALHits->Branch("hadDeltaPy", &flareDeltaPy, "hadDeltaPy/F");
+  fFLArEHCALHits->Branch("hadDeltaPz", &flareDeltaPz, "hadDeltaPz/F");
+  fFLArEHCALHits->Branch("hadEdep", &flareEdep, "hadEdep/F");
   fFLArEHCALHits->Branch("hadIsZX", &flareIsZX, "hadIsZX/B");
 
   fFile->cd();
@@ -1014,7 +1016,7 @@ void AnalysisManager::FillFASER2Output()
   //   } // end of hit loop
   // }
 
-double AnalysisManager::GetTotalEnergy(double px, double py, double pz, double m)
+float_t AnalysisManager::GetTotalEnergy(float_t px, float_t py, float_t pz, float_t m)
 {
   return TMath::Sqrt(px * px + py * py + pz * pz + m * m);
 }

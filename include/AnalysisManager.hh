@@ -62,7 +62,7 @@ class AnalysisManager {
     void FillFLArEOutput();
     void FillFASER2Output();
 
-    double GetTotalEnergy(double px, double py, double pz, double m);
+    float_t GetTotalEnergy(float_t px, float_t py, float_t pz, float_t m);
 
     // TODO: needed??
     void FillPseudoRecoVar();
@@ -242,17 +242,17 @@ class AnalysisManager {
     UInt_t flareParentID;
     UInt_t flarePDG;
     UInt_t flareCopyNum;
-    double flareT;
-    double flareX;
-    double flareY;
-    double flareZ;
-    double flarePx;
-    double flarePy;
-    double flarePz;
-    double flareDeltaPx;
-    double flareDeltaPy;
-    double flareDeltaPz;
-    double flareEdep;
+    float_t flareT;
+    float_t flareX;
+    float_t flareY;
+    float_t flareZ;
+    float_t flarePx;
+    float_t flarePy;
+    float_t flarePz;
+    float_t flareDeltaPx;
+    float_t flareDeltaPy;
+    float_t flareDeltaPz;
+    float_t flareEdep;
     bool flareIsZX;
 
     //---------------------------------------------------
