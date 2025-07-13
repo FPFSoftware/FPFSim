@@ -672,6 +672,7 @@ void AnalysisManager::FillPrimariesTree(const G4Event *event)
         primE = energy;
         primKE = energy - primM;
 
+<<<<<<< HEAD
         // store a copy as a FPFParticle for further processing
         primaryIDs.push_back(primTrackID); //store to avoid duplicates
         primaries.push_back(FPFParticle(primPDG, 0, 
@@ -679,6 +680,94 @@ void AnalysisManager::FillPrimariesTree(const G4Event *event)
 		                        primM,
                             primVx, primVy, primVz, primVt,
                             primPx, primPy, primPz,energy));
+=======
+	  double dPx = hit->GetDeltaMom().x();
+  	  double dPy = hit->GetDeltaMom().y();
+	  double dPz = hit->GetDeltaMom().z();
+
+
+	  double edep =  hit->GetEdep();
+
+	  auto particleId = ActsFatras::Barcode();
+	  particleId.setVertexPrimary(1);//fix this value
+	  particleId.setGeneration(pid);
+	  particleId.setSubParticle(0);
+	  particleId.setParticle(tid);
+	  double partID = particleId.value();
+
+
+      // energy deposition in different volumes of the detector
+      if (sdName == "lArBoxSD/lar_box"){
+	  	flareTrackID = tid;
+	  	flareParentID = pid;
+	  	flarePDG = PDG;
+	  	flareCopyNum = copyNum;
+		flareParticleID = partID;
+		flareT = time;
+	  	flareX = pre_x;
+	  	flareY = pre_y;
+	  	flareZ = pre_z;
+	  	flarePx = Px;
+	  	flarePy = Py;
+	  	flarePz = Pz;
+	  	flareDeltaPx = dPx;
+	  	flareDeltaPy = dPy;
+	  	flareDeltaPz = dPz;
+	  	flareEdep = edep;//should this be += or =?
+
+
+	  	flarHit->Fill();
+	  }
+
+      else if (sdName == "HadCalXSD/lar_box"){
+		//G4cout<<"hadX hit"<<G4endl;
+
+	  	hadXTrackID = tid;
+	  	hadXParentID = pid;
+	  	hadXPDG = PDG;
+	  	hadXCopyNum = copyNum;
+		hadXParticleID = partID;
+		hadXT = time;
+	  	hadXx = pre_x;
+	  	hadXy = pre_y;
+	  	hadXz = pre_z;
+	  	hadXPx = Px;
+	  	hadXPy = Py;
+	  	hadXPz = Pz;
+	  	hadXDeltaPx = dPx;
+	  	hadXDeltaPy = dPy;
+	  	hadXDeltaPz = dPz;
+	  	hadXEdep = edep;
+
+	  	flarHadHit->Fill();
+		//G4cout<<"passed5.5"<<G4endl;
+	  }
+
+		else if (sdName == "HadCalYSD/lar_box"){
+		//G4cout<<"hadX hit"<<G4endl;
+
+	  	hadYTrackID = tid;
+	  	hadYParentID = pid;
+	  	hadYPDG = PDG;
+	  	hadYCopyNum = copyNum;
+		hadYParticleID = partID;
+		hadYT = time;
+	  	hadYx = pre_x;
+	  	hadYy = pre_y;
+	  	hadYz = pre_z;
+	  	hadYPx = Px;
+	  	hadYPy = Py;
+	  	hadYPz = Pz;
+	  	hadYDeltaPx = dPx;
+	  	hadYDeltaPy = dPy;
+	  	hadYDeltaPz = dPz;
+	  	hadYEdep = edep;
+
+	  	flarHadHit->Fill();
+		//G4cout<<"passed5.4"<<G4endl;
+
+	  }
+>>>>>>> a1b77ebd14ee79c538492581a97650adfac9f243
 
         fPrim->Fill();
       }
