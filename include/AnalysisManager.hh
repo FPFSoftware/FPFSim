@@ -37,12 +37,17 @@ class AnalysisManager {
     void setFileName(std::string val) { fFilename = val; }
     void saveTrack(G4bool val) { fSaveTrack = val; }
     void saveActs(G4bool val) { fSaveActs = val; }
-    void addDiffusion(G4String val) { fAddDiffusion = val; } // TODO: needed?
-    void save3DEvd(G4bool val) { fSave3DEvd = val; } // TODO: needed?
-    void save2DEvd(G4bool val) { fSave2DEvd = val; } // TODO: needed?
+    void savePseudoReco(G4bool val) { fSavePseudoReco = val; }
+    void addDiffusion(G4String val) { fAddDiffusion = val; } 
+    void save3DEvd(G4bool val) { fSave3DEvd = val; } 
+    void save2DEvd(G4bool val) { fSave2DEvd = val; }
+
+    // build TID to primary ancerstor association
+    // filled progressively from StackingAction
+    void SetTrackPrimaryAncestor(G4int trackID, G4int ancestorID) { trackToPrimaryAncestor[trackID] = ancestorID; }
+    G4int GetTrackPrimaryAncestor(G4int trackID) { return trackToPrimaryAncestor.at(trackID); }
 
     // TODO: needed???
-    void SetTrackPTPair(G4int PID, G4int TID) { allTracksPTPair.insert(std::make_pair(PID, TID)); }
     void AddOnePrimaryTrack() { nTestNPrimaryTrack++; }
 
   private:
@@ -60,12 +65,11 @@ class AnalysisManager {
     void FillTrajectoriesTree(const G4Event* event);
     
     void FillFLArEOutput();
+    void FillFLArEPseudoReco();
+
     void FillFASER2Output();
 
     float_t GetTotalEnergy(float_t px, float_t py, float_t pz, float_t m);
-
-    // TODO: needed??
-    void FillPseudoRecoVar();
 
     static AnalysisManager* fInstance;
     AnalysisManagerMessenger* fMessenger;
@@ -73,8 +77,9 @@ class AnalysisManager {
     G4bool fSaveTrack;
     G4bool fSave3DEvd;
     G4bool fSave2DEvd;
-    G4bool fSaveActs;
+    G4bool fSavePseudoReco;
     TString fAddDiffusion;
+    G4bool fSaveActs;
 
     std::map<int, std::string> fSDNamelist;
     std::vector<int> fFlareSDs;
@@ -99,21 +104,17 @@ class AnalysisManager {
     TDirectory* fFLArEDir;
     TTree*   fFLArEHits;
 	  TTree*	 fFLArEHCALHits;
+    TTree*   fFLArEPseudoReco; 
+
     TDirectory* fFASER2Dir;
     TTree*   fActsHitsTree;
     TTree*   fActsParticlesTree;
 
-    // TODO: needed???  
-    std::set<std::pair<int, int> > allTracksPTPair;
-    G4int    nTestNPrimaryTrack;
-    /* 
-    std::vector<std::set<int> > trackClusters;
-    std::set<int> tracksFromFSL;
-    std::set<int> tracksFromFSLSecondary;
-    std::set<int> tracksFromFSPizeroSecondary;
-    std::set<int> tracksFromFSLDecayPizeroSecondary;
-    int fPrimIdxFSL;
-    */
+    // track to primary ancestor
+    std::map<G4int, G4int> trackToPrimaryAncestor;
+
+    // TODO: no longer needed?
+    G4int nTestNPrimaryTrack;
 
     //---------------------------------------------------
     // OUTPUT VARIABLES FOR COMMON TREES
@@ -123,82 +124,8 @@ class AnalysisManager {
     // TODO: turn arrays in std::vector!
 
     G4int    evtID;
-    /* FPFNeutrino neutrino;
+    FPFNeutrino neutrino; //TODO: remove??
  
-    // Truth information from genie
-    G4int    nuIdx;             ///<- neutrino index (for genie neutrino interaction)
-    G4int    nuPDG;             ///<- neutrino PDG code (for genie neutrino interaction)
-    G4double nuE;               ///<- neutrino energy
-    G4double nuX;               ///<- neutrino vertex X
-    G4double nuY;               ///<- neutrino vertex Y
-    G4double nuZ;               ///<- neutrino vertex Z
-    G4int    nuIntType;         ///<- interaction type: CC, NC, et.al.
-    G4int    nuScatteringType;  ///<- scattering type: QE, DIS, RES, MEC, et. al.
-    G4double nuW;               ///<- invariant hadronic mass
-    G4int    nuFSLPDG;          ///<- Final state lepton PDG code (for genie neutrino interaction)
-    G4double nuFSLPx;           ///<- Final state lepton Px
-    G4double nuFSLPy;           ///<- Final state lepton Py
-    G4double nuFSLPz;           ///<- Final state lepton Pz
-    G4double nuFSLE;            ///<- Final state lepton total energy (GeV)
-
-    G4int    countPrimaryParticle;
-    G4int    nPrimaryParticle;  ///<- number of primary particle
-                                ///<- (in case of genie neutrino interaction, number of stable particle in the final state)
-                                ///<- (in case of the FSL decay, decay products counted as primary particle)
-                                ///<- (in case of the final state pizero, decay products counted as primary particle)
-    //// Geant4 truth
-    G4int    primaryParentPDG[1000];        ///<- parent PDG of primary particles
-    G4double primaryTrackLength[1000];      ///<- track length of primary particles
-    G4double primaryTrackLengthInTPC[1000]; ///<- track length of primary particles in TPC region
-
-    // pseudo-reco
-    G4double ProngEInDetector[1000];
-    G4double ProngEInLAr[1000];
-    G4double ProngEInHadCal[1000];
-    G4double ProngEInMuonFinder[1000];
-    G4double ProngEInMuonFinderLayer1X[1000];
-    G4double ProngEInMuonFinderLayer1Y[1000];
-    G4double ProngEInMuonFinderLayer2X[1000];
-    G4double ProngEInMuonFinderLayer2Y[1000];
-    G4double ProngAngleToBeamDir[1000];
-    G4double ShowerLength[1000];
-    G4double ShowerLengthInLAr[1000];
-    G4double ShowerWidth[1000];
-    G4double ShowerWidthInLAr[1000];
-    G4double ProngAvgdEdx[1000];
-    G4double ProngAvgdEdxInLAr[1000];
-    G4double ProngdEdxAlongTrack[1000][100];
-    G4int    ProngdEdxTrackLength[1000][100];
-    G4double TotalDedxLongitudinal[3000];
-    G4double TrueTotalDedxLongitudinal[3000];
-    // reco
-    // direction
-    G4double dir_pol_x[1000];
-    G4double dir_pol_y[1000];
-    G4double dir_pol_z[1000];
-    G4double dir_coc_x[1000];
-    G4double dir_coc_y[1000];
-    G4double dir_coc_z[1000];
-
-    G4double edepInLAr;
-    G4double edepInHadCalX;
-    G4double edepInHadCalY;
-    G4double edepInMuonFinderX;
-    G4double edepInMuonFinderY;
-    G4double edepInHadAborb;
-    G4double edepInMuonFinderAbsorb;
-    G4double missCountedEnergy;
-
-    G4int    nFromFSLParticles;
-    G4int    nFromFSPizeroParticles;
-    G4int    nFromFSLDecayPizeroParticles;
-    G4int    fromFSLParticlePDG[2000000];
-
-    PixelMap3D* pm3D;
-    G4double sparseFractionMem;
-    G4double sparseFractionBins;
-    */
-
     //---------------------------------------------------
     // Output variables for TRAJECTORIES tree
     int trackTID;
@@ -237,6 +164,8 @@ class AnalysisManager {
     // TODO: merge hit variables? no need to use different names?
     // TODO: somehow need to add back here info from evt tree
 
+    PixelMap3D* pm3D;
+
     UInt_t flareTrackID;
     UInt_t flareParticleID;
     UInt_t flareParentID;
@@ -254,6 +183,34 @@ class AnalysisManager {
     float_t flareDeltaPz;
     float_t flareEdep;
     bool flareIsZX;
+
+    // flare pseudo-reco
+    float_t edepInLAr;
+    float_t edepInHCALX;
+    float_t edepInHCALY;
+    float_t sparseFractionMem;
+    float_t sparseFractionBins;
+    std::vector<float_t> TotalDedxLongitudinal;
+    std::vector<float_t> TrueTotalDedxLongitudinal;
+    G4int nprimaries;
+    std::vector<float_t> primaryPDG;
+    std::vector<float_t> primaryTrackLength;      
+    std::vector<float_t> primaryTrackLengthInTPC; 
+    std::vector<float_t> ProngEInLAr;
+    std::vector<float_t> ProngEInHadCal;
+    std::vector<float_t> ProngAngleToBeamDir;
+    std::vector<float_t> ShowerLength;
+    std::vector<float_t> ShowerLengthInLAr;
+    std::vector<float_t> ShowerWidth;
+    std::vector<float_t> ShowerWidthInLAr;
+    std::vector<float_t> ProngAvgdEdx;
+    std::vector<float_t> ProngAvgdEdxInLAr;
+    std::vector<float_t> dir_pol_x;
+    std::vector<float_t> dir_pol_y;
+    std::vector<float_t> dir_pol_z;
+    std::vector<float_t> dir_coc_x;
+    std::vector<float_t> dir_coc_y;
+    std::vector<float_t> dir_coc_z;
 
     //---------------------------------------------------
     // OUTPUT VARIABLES FOR FASER2 TREES
