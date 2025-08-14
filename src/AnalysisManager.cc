@@ -354,6 +354,7 @@ void AnalysisManager::EndOfRun()
     fFile->cd(fFLArEDir->GetName());
     fFLArEHits->Write();
     fFLArEHCALHits->Write();
+    if(fSavePseudoReco) fFLArEPseudoReco->Write();
     fFile->cd(); // go back to top
   }
   if (fFaser2SDs.size()>0)
