@@ -6,7 +6,7 @@
 
 # define genie input options
 /gen/select genie
-/gen/genie/genieInput /home/atreus/numu_kling_ar40_e5000.gst.root
+/gen/genie/genieInput /eos/user/m/mvicenzi/genie/numu_kling_ar40_e5000.gst.root
 /gen/genie/genieIStart 5
 
 # define output options
