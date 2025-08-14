@@ -289,7 +289,7 @@ void DetectorConstruction::ConstructSDandField() {
     LArBoxSD* TPCModuleSD = new LArBoxSD("FLArEBoxSD");
     TPCModuleLogical->SetSensitiveDetector(TPCModuleSD);
     sdManager->AddNewDetector(TPCModuleSD);
-    GeometricalParameters::Get()->AddSD2List(SDIdx, "FLArEBoxSD/lar_box");
+    GeometricalParameters::Get()->AddSD2List(SDIdx,"FLArEBoxSD/lar_box");
     SDIdx++;
 
     if (m_useBabyMIND) {
@@ -297,13 +297,13 @@ void DetectorConstruction::ConstructSDandField() {
       LArBoxSD* BabyMINDHorBarSD = new LArBoxSD("FLArEBabyMINDHorBarSD");
       BabyMINDHorizontalBar->SetSensitiveDetector(BabyMINDHorBarSD);
       sdManager->AddNewDetector(BabyMINDHorBarSD);
-      GeometricalParameters::Get()->AddSD2List(SDIdx, "FLArEBabyMINDHorBarSD/lar_box");
+      GeometricalParameters::Get()->AddSD2List(SDIdx,"FLArEBabyMINDHorBarSD/lar_box");
       SDIdx++;
 
       LArBoxSD* BabyMINDVerBarSD = new LArBoxSD("FLArEBabyMINDVerBarSD");
       BabyMINDVerticalBar->SetSensitiveDetector(BabyMINDVerBarSD);
       sdManager->AddNewDetector(BabyMINDVerBarSD);
-      GeometricalParameters::Get()->AddSD2List(SDIdx, "FLArEBabyMINDVerBarSD/lar_box");
+      GeometricalParameters::Get()->AddSD2List(SDIdx,"FLArEBabyMINDVerBarSD/lar_box");
       SDIdx++;
 
       // magnetic field for BabyMIND

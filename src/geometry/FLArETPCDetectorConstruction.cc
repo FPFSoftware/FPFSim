@@ -87,48 +87,37 @@ void FLArETPCDetectorConstruction::BuildFLArETPC()
     fFLArETPCLog->SetUserLimits(new G4UserLimits(0.5*mm));
   } else if (fDetGeomOption == GeometricalParameters::tpcConfigOption::ThreeBySeven) {
     G4cout << "TPC module configuration: 3x7" << G4endl;
-    lArBoxLog = new G4LogicalVolume(lArBox, detectorMaterial, "TPCModuleLogical");
+    lArBoxLog = new G4LogicalVolume(lArBox, detectorMaterial, "lArLogical");
     auto lArBoxVis = new G4VisAttributes(G4Colour(86./255, 152./255, 195./255));
     lArBoxVis->SetVisibility(false);
     lArBoxLog->SetVisAttributes(lArBoxVis);
 
-    G4double TPCLayerWidth   = fLArSizeX;
-    G4double TPCLayerHeight  = fLArSizeY;
-    G4double TPCLayerLength  = fLArSizeZ / 7.0;
-    G4double TPCModuleWidth  = TPCLayerWidth / 3.0;
-    G4double TPCModuleHeight = TPCLayerHeight;
-    G4double TPCModuleLength = TPCLayerLength;
-    auto TPCLayerSolid
-      = new G4Box("TPCLayerBox", TPCLayerWidth/2, TPCLayerHeight/2, TPCLayerLength/2);
-    auto TPCLayerLogical
-      = new G4LogicalVolume(TPCLayerSolid, detectorMaterial, "TPCLayerLogical");
-    auto TPCModuleSolid
-      = new G4Box("TPCModuleBox", TPCModuleWidth/2, TPCModuleHeight/2, TPCModuleLength/2);
-    fFLArETPCLog = new G4LogicalVolume(TPCModuleSolid, detectorMaterial, "TPCModuleLog");
+    G4double TPCModuleWidth  = fLArSizeX / 3.0;
+    G4double TPCModuleHeight = fLArSizeY;
+    G4double TPCModuleLength = fLArSizeZ / 7.0;
 
-	//making indiv boxes below to replace the replicas (more copy nums saved)
-	int boxCt = 0;
- 	double startEndX = (fLArSizeX/2) - 0.5*TPCModuleWidth;
- 	double startEndZ = (fLArSizeZ/2) - 0.5*TPCModuleLength;
+    auto TPCModuleSolid = new G4Box("TPCModuleBox", TPCModuleWidth/2, TPCModuleHeight/2, TPCModuleLength/2);
+    fFLArETPCLog = new G4LogicalVolume(TPCModuleSolid, detectorMaterial, "TPCModuleLogical");
 
-	for (int boxNumZ = 0; boxNumZ < 7; boxNumZ++) {
-		for (int boxNumX = 0; boxNumX < 3; boxNumX++){
-			G4ThreeVector pos (boxNumX*TPCModuleWidth - startEndX, 0, boxNumZ*TPCModuleLength - startEndZ );
-			new G4PVPlacement(0,pos,fFLArETPCLog, "module",lArBoxLog, false, boxCt);
-			boxCt++;
-		}
-	}
+	  //making indiv boxes below to replace the replicas (more copy nums saved)
+    int boxCt = 0;
+    double startEndX = (fLArSizeX/2) - 0.5*TPCModuleWidth;
+    double startEndZ = (fLArSizeZ/2) - 0.5*TPCModuleLength;
 
-	//old replica cold below:
-    //new G4PVReplica("TPCModulePhysical", fFLArETPCLog, TPCLayerLogical, kXAxis, 3, TPCModuleWidth);
-    //new G4PVReplica("TPC", TPCLayerLogical, lArBoxLog, kZAxis, 7, TPCLayerLength);
+    for (int boxNumZ = 0; boxNumZ < 7; boxNumZ++) {
+      for (int boxNumX = 0; boxNumX < 3; boxNumX++){
+        G4ThreeVector pos (boxNumX*TPCModuleWidth - startEndX, 0, boxNumZ*TPCModuleLength - startEndZ );
+        new G4PVPlacement(0, pos, fFLArETPCLog, "TPCModulePhysical", lArBoxLog, false, boxCt);
+        boxCt++;
+      }
+    }
+
     G4VisAttributes* TPCModuleVis = new G4VisAttributes(G4Colour(86./255, 152./255, 195./255));
     TPCModuleVis->SetVisibility(true);
     TPCModuleVis->SetForceWireframe(true);
     TPCModuleVis->SetForceAuxEdgeVisible(true);
-    TPCLayerLogical->SetVisAttributes(lArBoxVis);
     fFLArETPCLog->SetVisAttributes(TPCModuleVis);
-    fFLArETPCLog->SetUserLimits(new G4UserLimits(0.5*mm));
+    //fFLArETPCLog->SetUserLimits(new G4UserLimits(1.0*mm)); // FIXME?
   }
 }
 
