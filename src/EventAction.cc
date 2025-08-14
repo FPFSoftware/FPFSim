@@ -11,17 +11,19 @@ EventAction::EventAction() :
   G4UserEventAction(),
   fNPrimaryTrack("NPrimaryTrack", 0),
   fNSecondaryTrack("NSecondaryTrack", 0),
-  fNSecondaryTrackNotGamma("NSecondaryTrackNotGamma", 0) {
-    // Register created accumulables
-    G4AccumulableManager* accumulableManager = G4AccumulableManager::Instance();
-    accumulableManager->RegisterAccumulable(fNPrimaryTrack);
-    accumulableManager->RegisterAccumulable(fNSecondaryTrack);
-    accumulableManager->RegisterAccumulable(fNSecondaryTrackNotGamma);
-  }
+  fNSecondaryTrackNotGamma("NSecondaryTrackNotGamma", 0) 
+{
+  // Register created accumulables
+  G4AccumulableManager* accumulableManager = G4AccumulableManager::Instance();
+  accumulableManager->RegisterAccumulable(fNPrimaryTrack);
+  accumulableManager->RegisterAccumulable(fNSecondaryTrack);
+  accumulableManager->RegisterAccumulable(fNSecondaryTrackNotGamma);
+}
 
 EventAction::~EventAction() {;}
 
-void EventAction::BeginOfEventAction(const G4Event* event) {
+void EventAction::BeginOfEventAction(const G4Event* event)
+{
   // Reset all accumulables to their initial values
   G4AccumulableManager* accumulableManager = G4AccumulableManager::Instance();
   accumulableManager->Reset();
@@ -30,37 +32,45 @@ void EventAction::BeginOfEventAction(const G4Event* event) {
   ana->BeginOfEvent();
 }
 
-void EventAction::EndOfEventAction(const G4Event* event) {
-  G4cout<<"This is the "<<event->GetEventID()<<"th event"<<G4endl;
-  if (fNPrimaryTrack.GetValue()) {
+void EventAction::EndOfEventAction(const G4Event* event)
+{
+  G4cout << "This is the " << event->GetEventID() << "th event"<<G4endl;
+
+  if (fNPrimaryTrack.GetValue()) 
     G4cout << " * Produced "<< fNPrimaryTrack.GetValue() << " primary tracks." << G4endl;
-  } else {
+  else 
     G4cout << " * No primary tracks produced" << G4endl;
-  }
+
   if (fNSecondaryTrack.GetValue()) 
     G4cout << " * Produced "<< fNSecondaryTrack.GetValue() << " secondary tracks." << G4endl;
   else
     G4cout << " * No secondary tracks produced" << G4endl;
+
   if (fNSecondaryTrackNotGamma.GetValue()) 
     G4cout << " * Produced "<< fNSecondaryTrackNotGamma.GetValue() << " secondary tracks (excluding gamma)." << G4endl;
   else
     G4cout << " * No secondary tracks (excluding gamma) produced" << G4endl;
 
   // skip AnalysisManager if there are no tracks at all!
-  if(!fNPrimaryTrack.GetValue() && !fNSecondaryTrack.GetValue() && !fNSecondaryTrackNotGamma.GetValue()) return;
+  if(!fNPrimaryTrack.GetValue() && !fNSecondaryTrack.GetValue() && !fNSecondaryTrackNotGamma.GetValue()) 
+    return;
 
   AnalysisManager* ana = AnalysisManager::GetInstance();
   ana->EndOfEvent(event);
+
 }
 
-void EventAction::AddPrimaryTrack() {
+void EventAction::AddPrimaryTrack() 
+{
   fNPrimaryTrack += 1;
 }
 
-void EventAction::AddSecondaryTrack() {
+void EventAction::AddSecondaryTrack() 
+{
   fNSecondaryTrack += 1;
 }
 
-void EventAction::AddSecondaryTrackNotGamma() {
+void EventAction::AddSecondaryTrackNotGamma() 
+{
   fNSecondaryTrackNotGamma += 1;
 }
