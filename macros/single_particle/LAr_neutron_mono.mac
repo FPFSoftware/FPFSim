@@ -14,8 +14,8 @@
 /gps/ene/mono 4.147947 GeV
 
 # define output options
-/out/save3DEvd false
-/out/save2DEvd false
+/out/flare/save3DEvd false
+/out/flare/save2DEvd false
 
 /out/fileName neutron_momentum_5GeV.root
 

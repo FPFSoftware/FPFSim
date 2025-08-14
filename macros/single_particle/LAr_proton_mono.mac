@@ -14,8 +14,8 @@
 /gps/ene/mono 7.116562 GeV
 
 # define output options
-/out/save3DEvd false
-/out/save2DEvd false
+/out/flare/save3DEvd false
+/out/flare/save2DEvd false
 
 /out/fileName proton_momentum_8GeV.root
 

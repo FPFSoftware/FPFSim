@@ -76,10 +76,10 @@
   pseudoRecoCmd->SetParameterName("pseudoReco", true);
   pseudoRecoCmd->SetDefaultValue(false);
 
-  faser2Dir = new G4UIdirectory("/out/faser2/");
+  faser2Dir = new G4UIdirectory("/out/faser/");
   faser2Dir->SetGuidance("flare output control");
 
-  saveActsCmd = new G4UIcmdWithABool("/out/faser2/actsHits", this);
+  saveActsCmd = new G4UIcmdWithABool("/out/faser/actsHits", this);
   saveActsCmd->SetGuidance("save hits in Acts format");
   saveActsCmd->SetParameterName("actsHits", true);
   saveActsCmd->SetDefaultValue(true);

@@ -14,8 +14,8 @@
 /gps/ene/mono 24.865388 GeV
 
 # define output options
-/out/save3DEvd false
-/out/save2DEvd false
+/out/flare/save3DEvd false
+/out/flare/save2DEvd false
 
 /out/fileName pi0_momentum_25GeV.root
 

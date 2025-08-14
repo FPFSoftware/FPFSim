@@ -11,10 +11,10 @@
 /gen/placeInDecayVolume true
 
 # define output options
-/out/save3DEvd false
-/out/save2DEvd false
+/out/flare/save3DEvd false
+/out/flare/save2DEvd false
 
-/out/addDiffusion false
+/out/flare/addDiffusion false
 
 /out/fileName test_dark_photon_hepmc.root
 

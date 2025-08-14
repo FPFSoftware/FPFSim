@@ -19,8 +19,8 @@
 /gps/ene/mono 1000 GeV
 
 # define output options
-/out/save3DEvd false
-/out/save2DEvd false
+/out/flare/save3DEvd false
+/out/flare/save2DEvd false
 
 /out/fileName 1000GeV.root
 

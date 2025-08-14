@@ -1,5 +1,6 @@
 # define detector material before run initialization
-/control/execute macros/geometry_options/FPF_hall_Reference.mac
+/control/execute macros/geometry_options/FLArE_only_newBabyMIND.mac
+/det/saveGdml false
 
 /run/initialize
 /random/setSeeds 324199 420475
@@ -8,16 +9,12 @@
 /gen/select gun
 /gps/verbose 0
 /gps/pos/type Point
-/gps/pos/centre 0 0 -2.5 m
+/gps/pos/centre 0 0 7.8 m
 /gps/direction 0 0 1
 /gps/particle mu-
-/gps/ene/mono 19.894621 GeV
+/gps/ene/mono 5.0 GeV
 
-# define output options
-/out/save3DEvd false
-/out/save2DEvd false
-
-/out/fileName mu-_momentum_20GeV.root
+/out/fileName mu-_5GeV_newBabyMIND.root
 
 # shoot 1 particles
-/run/beamOn 1
+/run/beamOn 50

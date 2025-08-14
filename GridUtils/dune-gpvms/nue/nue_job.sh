@@ -33,10 +33,10 @@ cat << EOF >> temp.mac
 /gen/genie/genieInput nue_kling_ar40_e5000.ghep.root
 /gen/genie/genieIStart ${istart}
 
-/out/addDiffusion false
+/out/flare/addDiffusion false
 
-/out/save3DEvd true
-/out/save2DEvd false
+/out/flare/save3DEvd true
+/out/flare/save2DEvd false
 
 /out/fileName ${outputfile}
 

@@ -6,14 +6,15 @@
 
 # define genie input options
 /gen/select genie
-/gen/genie/genieInput /eos/user/m/mvicenzi/genie/numu_kling_ar40_e5000.gst.root
+/gen/genie/genieInput /home/atreus/numu_kling_ar40_e5000.gst.root
 /gen/genie/genieIStart 5
 
 # define output options
-/out/save3DEvd false
-/out/save2DEvd false
+/out/flare/save3DEvd false
+/out/flare/save2DEvd false
+/out/flare/pseudoReco false
 
-/out/addDiffusion false
+/out/flare/addDiffusion false
 /out/fileName test_genie_numu.root
 
 # shoot 5 particles

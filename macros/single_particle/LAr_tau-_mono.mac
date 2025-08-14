@@ -14,8 +14,8 @@
 /gps/ene/mono 18.301916 GeV
 
 # define output options
-/out/save3DEvd false
-/out/save2DEvd false
+/out/flare/save3DEvd false
+/out/flare/save2DEvd false
 
 /out/fileName tau-_momentum_20GeV.root
 

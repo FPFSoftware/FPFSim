@@ -81,10 +81,10 @@ function generate_macros {
 /gen/genie/genieInput ${gst}
 /gen/genie/genieIStart ${istart}
 
-/out/save3DEvd false
-/out/save2DEvd false
+/out/flare/save3DEvd false
+/out/flare/save2DEvd false
 
-/out/addDiffusion false
+/out/flare/addDiffusion false
 
 /out/fileName ${outputfile}
 

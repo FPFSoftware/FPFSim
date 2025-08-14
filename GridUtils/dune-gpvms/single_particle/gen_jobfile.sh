@@ -30,7 +30,7 @@ cat << EOF >> ${filename}
 /gps/particle ${particle}
 /gps/ene/mono ${particle_kin} GeV
 
-/out/saveEvd false
+/out/flare/save2DEvd false
 /out/fileName ${outputfile}
 
 /run/beamOn ${num_evt_per_file}

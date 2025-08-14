@@ -75,11 +75,10 @@ function generate_macros {
 /gen/bkg/backgroundWindow ${twindow}
 /gen/bkg/eventOffset ${istart}
 
-/histo/save3DEvd false
-/histo/save2DEvd false
-/histo/saveHit false
-/histo/addDiffusion false
-/histo/fileName ${outputfile}
+/out/flare/save3DEvd false
+/out/flare/save2DEvd false
+/out/flare/addDiffusion false
+/out/fileName ${outputfile}
 
 /run/beamOn ${n_evt_per_job}
 EOF

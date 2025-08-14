@@ -186,11 +186,12 @@ Older versions of FORESEE output events in the HepMC2 format. To run over HepMC2
 |Command |Description |
 |:--|:--|
 |/out/fileName     | option for AnalysisManagerMessenger, set name of the file saving all analysis variables|
-|/out/saveTrack    | if `true` save info for all tracks, `false` in default, requires `\tracking\storeTrajectory 1`|
-|/out/save3DEvd    | if `true` save 3D spatial distribution of energy deposition, `false` in default|
-|/out/save2DEvd    | if `true` save 2D spatial distribution of energy deposition, `false` in default|
-|/out/addDiffusion | if `toy` diffuse energy, if `single` diffuse single electron, `false` in default without diffusion|
-|/out/actsHits     | if `true` save the truth particle and hit information in a format that can be read by the FASER2 Acts tracking software, `true` by default if FASER2 is enabled|
+|/out/saveTrack    | if `true` save all tracks, `false` by default, requires `\tracking\storeTrajectory 1`|
+|/out/flare/save3DEvd    | if `true` save 3D spatial distribution of energy deposition, `false` by default |
+|/out/flare/save2DEvd    | if `true` save 2D spatial distribution of energy deposition, `false` by default |
+|/out/flare/addDiffusion | if `toy` diffuse energy, if `single` diffuse single electron, `false` by default |
+|/out/flare/pseudoReco   | if `true` save pseudo-reco ouput tree, `false` by default |
+|/out/faser/actsHits    | if `true` save the truth particle and hit information in a format that can be read by the FASER2 Acts tracking software, `true` by default if FASER2 is enabled|
 
 ## How to save an event display with high resolution using the DAWN Event Display
 
