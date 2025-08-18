@@ -75,6 +75,7 @@ AnalysisManager::AnalysisManager()
   fSave3DEvd = false;
   fSave2DEvd = false;
   fSavePseudoReco = false;
+  fEnableFLArE = true;
   fSaveActs = true;
   fAddDiffusion = "false";
 }
@@ -295,17 +296,9 @@ void AnalysisManager::BeginOfRun()
   if (fFile)
     delete fFile;
 
-  // Preparing output files
+  // Preparing output file
   fFile = new TFile(fFilename.c_str(), "RECREATE");
-  fH5Filename = fFilename;
-  if (fH5Filename.find(".root") != std::string::npos)
-  {
-    const size_t pos = fH5Filename.find(".root");
-    fH5Filename.resize(pos);
-  }
-  fH5Filename += ".h5";
-  fH5file = hep_hpc::hdf5::File(fH5Filename, H5F_ACC_TRUNC);
-
+  
   // Booking common output trees
   bookEvtTree();
   bookPrimTree();
@@ -321,7 +314,7 @@ void AnalysisManager::BeginOfRun()
     G4cout << sdname.first << " " << sdname.second << G4endl;
 
     // if FLArE is enabled, book trees
-    if ( sdname.second.find("FLArE") != std::string::npos )
+    if ( fEnableFLArE && sdname.second.find("FLArE") != std::string::npos )
     {
       fFlareSDs.push_back(sdname.first);
       bookFLArETrees();
@@ -335,6 +328,21 @@ void AnalysisManager::BeginOfRun()
       bookFASER2Trees();
     }
   }
+
+  // if FLArE is enabled & its geometry was found
+  // prepare .h5 output file
+  if( fFlareSDs.size()>0 )
+  {
+    fH5Filename = fFilename;
+    if (fH5Filename.find(".root") != std::string::npos)
+    {
+      const size_t pos = fH5Filename.find(".root");
+      fH5Filename.resize(pos);
+    }
+    fH5Filename += ".h5";
+    fH5file = hep_hpc::hdf5::File(fH5Filename, H5F_ACC_TRUNC);
+  }
+
 }
 
 //---------------------------------------------------------------------
@@ -356,6 +364,7 @@ void AnalysisManager::EndOfRun()
     fFLArEHCALHits->Write();
     if(fSavePseudoReco) fFLArEPseudoReco->Write();
     fFile->cd(); // go back to top
+    fH5file.close();
   }
   if (fFaser2SDs.size()>0)
   {
@@ -366,7 +375,6 @@ void AnalysisManager::EndOfRun()
   }
 
   fFile->Close();
-  fH5file.close();
 }
 
 //---------------------------------------------------------------------

@@ -59,6 +59,7 @@ class AnalysisManagerMessenger: public G4UImessenger
     G4UIcmdWithABool* fSaveTrackCmd; 
     
     G4UIdirectory* fFLArEDir; 
+    G4UIcmdWithABool* fEnableFLArEOutCmd;
     G4UIcmdWithABool* fSave3DEvdCmd;
     G4UIcmdWithABool* fSave2DEvdCmd;
     G4UIcmdWithABool* fPseudoRecoCmd;

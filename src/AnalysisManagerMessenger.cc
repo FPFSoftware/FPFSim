@@ -57,6 +57,11 @@
   fFLArEDir = new G4UIdirectory("/out/flare/");
   fFLArEDir->SetGuidance("flare output control");
 
+  fEnableFLArEOutCmd = new G4UIcmdWithABool("/out/flare/enableOutput", this);
+  fEnableFLArEOutCmd->SetGuidance("whether to save FLArE output");
+  fEnableFLArEOutCmd->SetParameterName("enableOutput", true);
+  fEnableFLArEOutCmd->SetDefaultValue(true);
+
   fSave3DEvdCmd = new G4UIcmdWithABool("/out/flare/save3DEvd", this);
   fSave3DEvdCmd->SetGuidance("whether save 3D Pixel Map");
   fSave3DEvdCmd->SetParameterName("save3DEvd", true);
@@ -96,6 +101,7 @@ AnalysisManagerMessenger::~AnalysisManagerMessenger()
   delete fSave2DEvdCmd;
   delete fAddDiffusionCmd;
   delete fPseudoRecoCmd;
+  delete fEnableFLArEOutCmd;
   delete fSaveActsCmd;
   delete fOutDir;
   delete fFLArEDir;
@@ -109,6 +115,7 @@ void AnalysisManagerMessenger::SetNewValue(G4UIcommand* command,G4String newValu
   if (command == fFileCmd) fAnalysisManager->setFileName(newValues);
   if (command == fSaveTrackCmd) fAnalysisManager->saveTrack(fSaveTrackCmd->GetNewBoolValue(newValues));
 
+  if (command == fEnableFLArEOutCmd) fAnalysisManager->enableFLArE(fEnableFLArEOutCmd->GetNewBoolValue(newValues));
   if (command == fSave3DEvdCmd) fAnalysisManager->save3DEvd(fSave3DEvdCmd->GetNewBoolValue(newValues));
   if (command == fSave2DEvdCmd) fAnalysisManager->save2DEvd(fSave2DEvdCmd->GetNewBoolValue(newValues));
   if (command == fPseudoRecoCmd) fAnalysisManager->savePseudoReco(fPseudoRecoCmd->GetNewBoolValue(newValues));

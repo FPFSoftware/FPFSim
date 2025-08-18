@@ -41,6 +41,7 @@ class AnalysisManager {
     void addDiffusion(G4String val) { fAddDiffusion = val; } 
     void save3DEvd(G4bool val) { fSave3DEvd = val; } 
     void save2DEvd(G4bool val) { fSave2DEvd = val; }
+    void enableFLArE(G4bool val) { fEnableFLArE = val;}
 
     // build TID to primary ancestor association
     // filled progressively from StackingAction
@@ -80,6 +81,7 @@ class AnalysisManager {
     G4bool fSavePseudoReco;
     TString fAddDiffusion;
     G4bool fSaveActs;
+    G4bool fEnableFLArE;
 
     std::map<int, std::string> fSDNamelist;
     std::vector<int> fFlareSDs;
