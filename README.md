@@ -187,6 +187,7 @@ Older versions of FORESEE output events in the HepMC2 format. To run over HepMC2
 |:--|:--|
 |/out/fileName     | option for AnalysisManagerMessenger, set name of the file saving all analysis variables|
 |/out/saveTrack    | if `true` save all tracks, `false` by default, requires `\tracking\storeTrajectory 1`|
+|/out/flare/enableOutput | if `true` save FLArE output, `true` by default |
 |/out/flare/save3DEvd    | if `true` save 3D spatial distribution of energy deposition, `false` by default |
 |/out/flare/save2DEvd    | if `true` save 2D spatial distribution of energy deposition, `false` by default |
 |/out/flare/addDiffusion | if `toy` diffuse energy, if `single` diffuse single electron, `false` by default |
