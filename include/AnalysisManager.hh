@@ -42,7 +42,7 @@ class AnalysisManager {
     void save3DEvd(G4bool val) { fSave3DEvd = val; } 
     void save2DEvd(G4bool val) { fSave2DEvd = val; }
 
-    // build TID to primary ancerstor association
+    // build TID to primary ancestor association
     // filled progressively from StackingAction
     void SetTrackPrimaryAncestor(G4int trackID, G4int ancestorID) { trackToPrimaryAncestor[trackID] = ancestorID; }
     G4int GetTrackPrimaryAncestor(G4int trackID) { return trackToPrimaryAncestor.at(trackID); }

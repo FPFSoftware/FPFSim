@@ -52,20 +52,20 @@ class AnalysisManagerMessenger: public G4UImessenger
 
   private:
 
-    AnalysisManager* anamanager;
+    AnalysisManager* fAnalysisManager;
 
-    G4UIdirectory* outDir; 
-    G4UIcmdWithAString* fileCmd;
-    G4UIcmdWithABool* saveTrackCmd; 
+    G4UIdirectory* fOutDir; 
+    G4UIcmdWithAString* fFileCmd;
+    G4UIcmdWithABool* fSaveTrackCmd; 
     
-    G4UIdirectory* flareDir; 
-    G4UIcmdWithABool* save3DEvdCmd;
-    G4UIcmdWithABool* save2DEvdCmd;
-    G4UIcmdWithABool* pseudoRecoCmd;
-    G4UIcmdWithAString* addDiffusionCmd;
+    G4UIdirectory* fFLArEDir; 
+    G4UIcmdWithABool* fSave3DEvdCmd;
+    G4UIcmdWithABool* fSave2DEvdCmd;
+    G4UIcmdWithABool* fPseudoRecoCmd;
+    G4UIcmdWithAString* fAddDiffusionCmd;
 
-    G4UIdirectory* faser2Dir; 
-    G4UIcmdWithABool* saveActsCmd;
+    G4UIdirectory* fFASER2Dir; 
+    G4UIcmdWithABool* fSaveActsCmd;
 
 };
 
