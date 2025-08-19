@@ -1,7 +1,7 @@
 #ifndef GeometricalParameters_hh
 #define GeometricalParameters_hh
 
-#include <set>
+#include <map>
 
 #include "G4String.hh"
 #include "G4ThreeVector.hh"
@@ -219,16 +219,7 @@ class GeometricalParameters  {
 
     // Sensitive detectors
     void AddSD2List(int idx, std::string val) { fSDNamelist.insert(std::make_pair(idx, val)); }
-    std::set<std::pair<int, std::string> > GetSDNamelist() { return fSDNamelist; }
-
-    void SetAddFLArE(G4bool val) { fAddFLArE = val; }
-    bool GetAddFLArE() { return fAddFLArE; }
-    void SetAddFORMOSA(G4bool val) { fAddFORMOSA = val; }
-    bool GetAddFORMOSA() { return fAddFORMOSA; }
-    void SetAddFASERnu2(G4bool val) { fAddFASERnu2 = val; }
-    bool GetAddFASERnu2() { return fAddFASERnu2; }
-    void SetAddFASER2(G4bool val) { fAddFASER2 = val; }
-    bool GetAddFASER2() { return fAddFASER2; }
+    std::map<int, std::string> GetSDNamelist() { return fSDNamelist; }
 
   private:
     //the singleton
@@ -238,11 +229,6 @@ class GeometricalParameters  {
     G4double fHallHeadDistance; ///<- distance between the entrance wall and the first detector
     G4double fHallOffsetX; // x offset of hall center from the LOS
     G4double fHallOffsetY; // x offset of hall center from the LOS
-
-    bool fAddFLArE;
-    bool fAddFORMOSA;
-    bool fAddFASERnu2;
-    bool fAddFASER2;
     
     // rock envelope
     G4bool fEnableRockEnvelope;
@@ -324,7 +310,6 @@ class GeometricalParameters  {
     
     G4bool fFASER2FillCaloAndWall; // if true then fill volumes with material, otherwise use air to save CPU
 
-
     // FASERnu2 Emulsion detector
     G4double fFASERnu2TotalSizeZ;
     // Emulsion/Tungsten
@@ -353,7 +338,7 @@ class GeometricalParameters  {
     G4ThreeVector fFORMOSAPos;
 
     // Sensitive detectors
-    std::set<std::pair<int, std::string> > fSDNamelist;
+    std::map<int, std::string> fSDNamelist;
 };
 
 #endif 

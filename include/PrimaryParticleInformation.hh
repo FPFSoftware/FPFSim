@@ -38,11 +38,12 @@ class PrimaryParticleInformation : public G4VUserPrimaryParticleInformation {
     /// Get the particle PDG code
     inline G4int GetPDG() const { return fPDG; };
 
-    /// Get the particle mass in MeV
-    inline G4double GetMass() const { return fMass; };
 
     /// Get the particle charge
     inline G4double GetCharge() const { return fCharge; };
+
+    /// Get the particle mass in MeV
+    inline G4double GetMass() const { return fMass; };
 
     /// Get the particle initial momentum.
     inline G4ThreeVector GetMomentumMC() const { return fMomentumMC; };
@@ -63,7 +64,7 @@ class PrimaryParticleInformation : public G4VUserPrimaryParticleInformation {
 
     /// Prints the information about the particle.
     virtual void Print() const;
-    
+
   private:
 
     /// A particle unique ID.
@@ -71,12 +72,9 @@ class PrimaryParticleInformation : public G4VUserPrimaryParticleInformation {
 
     /// A particle type (PDG code).
     G4int fPDG;
-    
+
     /// A particle mass
     G4double fMass;
-
-    /// A particle charge
-    G4double fCharge;
 
     /// A particle initial momentum (from particle generator)
     G4ThreeVector fMomentumMC;
@@ -101,7 +99,7 @@ class PrimaryParticleInformation : public G4VUserPrimaryParticleInformation {
 
     /// Scattering type of the neutrino interaction if it is from GENIE
     G4int fScatteringType;
-    
+
     /// invariant hadronic mass
     G4double fW;
 
@@ -113,6 +111,11 @@ class PrimaryParticleInformation : public G4VUserPrimaryParticleInformation {
 
     /// fsl X4 of the neutrino interaction if it is from GENIE
     TLorentzVector fFSLX4;
+
+
+    /// particle's charge
+    G4double fCharge;
+
 };
 
 #endif

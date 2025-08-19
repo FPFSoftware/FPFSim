@@ -10,11 +10,12 @@
 /gen/genie/genieIStart 5
 
 # define output options
-/histo/save3DEvd false
-/histo/save2DEvd false
-/histo/saveHit false
-/histo/addDiffusion false
-/histo/fileName test_genie_numu.root
+/out/flare/save3DEvd false
+/out/flare/save2DEvd false
+/out/flare/pseudoReco false
+
+/out/flare/addDiffusion false
+/out/fileName test_genie_numu.root
 
 # shoot 5 particles
 /run/beamOn 5

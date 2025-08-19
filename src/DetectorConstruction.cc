@@ -132,7 +132,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   // FLArE TPC volume
 
   if (m_addFLArE) {
-    GeometricalParameters::Get()->SetAddFLArE(m_addFLArE);    
     FLArETPCDetectorConstruction *FLArETPCAssembler = new FLArETPCDetectorConstruction();
     G4double lArSizeZ               = GeometricalParameters::Get()->GetTPCSizeZ();
     G4double TPCInsulationThickness = GeometricalParameters::Get()->GetTPCInsulationThickness();
@@ -203,7 +202,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   // FORMOSA
 
   if (m_addFORMOSA) {
-    GeometricalParameters::Get()->SetAddFORMOSA(m_addFORMOSA);
     FORMOSADetectorConstruction *FORMOSAAssembler = new FORMOSADetectorConstruction();
     G4LogicalVolume* FORMOSAAssembly = FORMOSAAssembler->GetFORMOSAAssembly();
     FORMOSAScintillatorBarLogical = FORMOSAAssembler->GetScintillatorBar();
@@ -222,7 +220,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   // FASERnu2 Emulsion Detector
 
   if (m_addFASERnu2) {
-    GeometricalParameters::Get()->SetAddFASERnu2(m_addFASERnu2);
     FASERnu2DetectorConstruction *FASERnu2Assembler = new FASERnu2DetectorConstruction();
     FASERnu2EmulsionLogical = FASERnu2Assembler->GetEmulsionFilm();
     FASERnu2VetoInterfaceLogical = FASERnu2Assembler->GetVetoInterfaceDetector();
@@ -242,7 +239,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   // FASER2 Magnet + Tracking stations
 
   if (m_addFASER2) {
-    GeometricalParameters::Get()->SetAddFASER2(m_addFASER2);
     FASER2DetectorConstruction *magnetAssembler = new FASER2DetectorConstruction();
     FASER2MagnetLogical = magnetAssembler->GetMagneticVolume(); //need to assign B field
     FASER2TrackingLogical = magnetAssembler->GetTrackingStations();
@@ -290,24 +286,24 @@ void DetectorConstruction::ConstructSDandField() {
 
   if (m_addFLArE) {
 
-    LArBoxSD* TPCModuleSD = new LArBoxSD("lArBoxSD");
+    LArBoxSD* TPCModuleSD = new LArBoxSD("FLArEBoxSD");
     TPCModuleLogical->SetSensitiveDetector(TPCModuleSD);
     sdManager->AddNewDetector(TPCModuleSD);
-    GeometricalParameters::Get()->AddSD2List(SDIdx, "lArBoxSD/lar_box");
+    GeometricalParameters::Get()->AddSD2List(SDIdx,"FLArEBoxSD/lar_box");
     SDIdx++;
 
     if (m_useBabyMIND) {
 
-      LArBoxSD* BabyMINDHorBarSD = new LArBoxSD("BabyMINDHorBarSD");
+      LArBoxSD* BabyMINDHorBarSD = new LArBoxSD("FLArEBabyMINDHorBarSD");
       BabyMINDHorizontalBar->SetSensitiveDetector(BabyMINDHorBarSD);
       sdManager->AddNewDetector(BabyMINDHorBarSD);
-      GeometricalParameters::Get()->AddSD2List(SDIdx, "BabyMINDHorBarSD/lar_box");
+      GeometricalParameters::Get()->AddSD2List(SDIdx,"FLArEBabyMINDHorBarSD/lar_box");
       SDIdx++;
 
-      LArBoxSD* BabyMINDVerBarSD = new LArBoxSD("BabyMINDVerBarSD");
+      LArBoxSD* BabyMINDVerBarSD = new LArBoxSD("FLArEBabyMINDVerBarSD");
       BabyMINDVerticalBar->SetSensitiveDetector(BabyMINDVerBarSD);
       sdManager->AddNewDetector(BabyMINDVerBarSD);
-      GeometricalParameters::Get()->AddSD2List(SDIdx, "BabyMINDVerBarSD/lar_box");
+      GeometricalParameters::Get()->AddSD2List(SDIdx,"FLArEBabyMINDVerBarSD/lar_box");
       SDIdx++;
 
       // magnetic field for BabyMIND
@@ -319,40 +315,40 @@ void DetectorConstruction::ConstructSDandField() {
 
     } else {
 
-      LArBoxSD* HadCalXSD = new LArBoxSD("HadCalXSD");
+      LArBoxSD* HadCalXSD = new LArBoxSD("FLArEHadCalXSD");
       HadCalXCellLogical->SetSensitiveDetector(HadCalXSD);
       sdManager->AddNewDetector(HadCalXSD);
-      GeometricalParameters::Get()->AddSD2List(SDIdx, "HadCalXSD/lar_box");
+      GeometricalParameters::Get()->AddSD2List(SDIdx, "FLArEHadCalXSD/lar_box");
       SDIdx++;
 
-      LArBoxSD* HadCalYSD = new LArBoxSD("HadCalYSD");
+      LArBoxSD* HadCalYSD = new LArBoxSD("FLArEHadCalYSD");
       HadCalYCellLogical->SetSensitiveDetector(HadCalYSD);
       sdManager->AddNewDetector(HadCalYSD);
-      GeometricalParameters::Get()->AddSD2List(SDIdx, "HadCalYSD/lar_box");
+      GeometricalParameters::Get()->AddSD2List(SDIdx, "FLArEHadCalYSD/lar_box");
       SDIdx++;
 
-      LArBoxSD* MuonFinderXSD = new LArBoxSD("MuonFinderXSD");
+      LArBoxSD* MuonFinderXSD = new LArBoxSD("FLArEMuonFinderXSD");
       MuonFinderXCellLogical->SetSensitiveDetector(MuonFinderXSD);
       sdManager->AddNewDetector(MuonFinderXSD);
-      GeometricalParameters::Get()->AddSD2List(SDIdx, "MuonFinderXSD/lar_box");
+      GeometricalParameters::Get()->AddSD2List(SDIdx, "FLArEMuonFinderXSD/lar_box");
       SDIdx++;
 
-      LArBoxSD* MuonFinderYSD = new LArBoxSD("MuonFinderYSD");
+      LArBoxSD* MuonFinderYSD = new LArBoxSD("FLArEMuonFinderYSD");
       MuonFinderYCellLogical->SetSensitiveDetector(MuonFinderYSD);
       sdManager->AddNewDetector(MuonFinderYSD);
-      GeometricalParameters::Get()->AddSD2List(SDIdx, "MuonFinderYSD/lar_box");
+      GeometricalParameters::Get()->AddSD2List(SDIdx, "FLArEMuonFinderYSD/lar_box");
       SDIdx++;
 
-      LArBoxSD* HadAbsorbSD = new LArBoxSD("HadAbsorbSD");
+      LArBoxSD* HadAbsorbSD = new LArBoxSD("FLArEHadAbsorbSD");
       HadAbsorLayersLogical->SetSensitiveDetector(HadAbsorbSD);
       sdManager->AddNewDetector(HadAbsorbSD);
-      GeometricalParameters::Get()->AddSD2List(SDIdx, "HadAbsorbSD/lar_box");
+      GeometricalParameters::Get()->AddSD2List(SDIdx, "FLArEHadAbsorbSD/lar_box");
       SDIdx++;
 
-      LArBoxSD* MuonFinderAbsorbSD = new LArBoxSD("MuonFinderAbsorbSD");
+      LArBoxSD* MuonFinderAbsorbSD = new LArBoxSD("FLArEMuonFinderAbsorbSD");
       MuonFinderAbsorLayersLogical->SetSensitiveDetector(MuonFinderAbsorbSD);
       sdManager->AddNewDetector(MuonFinderAbsorbSD);
-      GeometricalParameters::Get()->AddSD2List(SDIdx, "MuonFinderAbsorbSD/lar_box");
+      GeometricalParameters::Get()->AddSD2List(SDIdx, "FLArEMuonFinderAbsorbSD/lar_box");
       SDIdx++;
 
       // magnetic field for HadCatcher + MuonFinder
