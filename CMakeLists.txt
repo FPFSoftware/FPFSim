@@ -90,14 +90,12 @@ endforeach()
 
 #----------------------------------------------------------------------------
 # generate dictionaries for the custom classes in the ROOT tree
-ROOT_GENERATE_DICTIONARY(FPFClassesDict ${PROJECT_SOURCE_DIR}/include/FPFNeutrino.hh 
-                                        ${PROJECT_SOURCE_DIR}/include/FPFParticle.hh
+ROOT_GENERATE_DICTIONARY(FPFClassesDict ${PROJECT_SOURCE_DIR}/include/FPFParticle.hh
                                         LINKDEF ${PROJECT_SOURCE_DIR}/include/LinkDef.h
                                         MODULE FPFClasses)
 
 # create a shared library that includes the dictionary
-add_library(FPFClasses SHARED ${PROJECT_SOURCE_DIR}/src/FPFNeutrino.cc
-                              ${PROJECT_SOURCE_DIR}/src/FPFParticle.cc
+add_library(FPFClasses SHARED ${PROJECT_SOURCE_DIR}/src/FPFParticle.cc
                               FPFClassesDict.cxx)
 
 # include directories for headers
