@@ -26,7 +26,6 @@
 #include "LArBoxSD.hh"
 #include "FASER2TrackerSD.hh"
 #include "LArBoxHit.hh"
-#include "PrimaryParticleInformation.hh"
 #include "EventInformation.hh"
 #include "generators/GeneratorVertexMetadata.hh"
 #include "reco/PCAAnalysis3D.hh"
@@ -579,11 +578,9 @@ void AnalysisManager::FillPrimariesTree(const G4Event *event)
       G4PrimaryParticle *primary_particle = event->GetPrimaryVertex(ivtx)->GetPrimary(ipp);
       if (primary_particle)
       {
-        PrimaryParticleInformation *primary_particle_info = dynamic_cast<PrimaryParticleInformation *>(primary_particle->GetUserInformation());
-        primary_particle_info->Print();
-
+ 
         primVtxID = ivtx;
-        primTrackID = primary_particle_info->GetPartID(); // confirm matches track's id later?
+        primTrackID = ipp; // confirm matches track id?
 
         auto particleId = ActsFatras::Barcode();
         particleId.setVertexPrimary(ivtx);
@@ -592,16 +589,16 @@ void AnalysisManager::FillPrimariesTree(const G4Event *event)
         particleId.setParticle(primTrackID - 1);
 
         primParticleID = particleId.value();
-        primPDG = primary_particle_info->GetPDG();
-        primVx = primary_particle_info->GetVertexMC().x();
-        primVy = primary_particle_info->GetVertexMC().y();
-        primVz = primary_particle_info->GetVertexMC().z();
-        primVt = 0;
-        primPx = primary_particle_info->GetMomentumMC().x();
-        primPy = primary_particle_info->GetMomentumMC().y();
-        primPz = primary_particle_info->GetMomentumMC().z();
-        primM = primary_particle_info->GetMass()/MeV;
-        primQ = primary_particle_info->GetCharge();
+        primPDG = primary_particle->GetPDGcode();
+        primVx = event->GetPrimaryVertex(ivtx)->GetPosition().x();
+        primVy = event->GetPrimaryVertex(ivtx)->GetPosition().y();
+        primVz = event->GetPrimaryVertex(ivtx)->GetPosition().z();
+        primVt = event->GetPrimaryVertex(ivtx)->GetT0();
+        primPx = primary_particle->GetMomentum().x();
+        primPy = primary_particle->GetMomentum().y();
+        primPz = primary_particle->GetMomentum().z();
+        primM = primary_particle->GetMass()/MeV;
+        primQ = primary_particle->GetCharge();
 
         G4double energy = GetTotalEnergy(primPx, primPy, primPz, primM);
         TLorentzVector p4(primPx,primPy,primPz,energy);
@@ -619,6 +616,13 @@ void AnalysisManager::FillPrimariesTree(const G4Event *event)
 		                        primM,
                             primVx, primVy, primVz, primVt,
                             primPx, primPy, primPz,energy));
+
+        G4cout << G4endl;
+        G4cout << "PrimaryParticleInfo: PDG code " << primPDG << G4endl
+          << "Particle unique ID : " << primTrackID << G4endl
+          << "Momentum : (" << primPx << ", " << primPy << ", " << primPz << ") MeV" << G4endl
+          << "Vertex : (" << primVx << ", " << primVy << ", " << primVz << ") mm" << G4endl;
+
         fPrim->Fill();
       }
     }

@@ -9,7 +9,6 @@
 
 #include "geometry/GeometricalParameters.hh"
 
-#include "PrimaryParticleInformation.hh"
 #include "EventInformation.hh"
 
 #include "G4Event.hh"
@@ -75,29 +74,5 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
   // save vertex metadata information into the event
   anEvent->SetUserInformation(new EventInformation(fGenerator->GetEventMetadata()));
-
-  // save additional truth information alongside primary particles
-  // loop over the vertices, and then over primary particles,
-  // and for each primary particle create an info object
-  G4int count_particles = 0;
-  for (G4int ivtx = 0; ivtx < anEvent->GetNumberOfPrimaryVertex(); ++ivtx) {
-    for (G4int ipp = 0; ipp < anEvent->GetPrimaryVertex(ivtx)->GetNumberOfParticle(); ++ipp) {
-
-      G4PrimaryParticle* primary_particle = anEvent->GetPrimaryVertex(ivtx)->GetPrimary(ipp);
-
-      if (primary_particle) {
-        primary_particle->SetUserInformation(new PrimaryParticleInformation(
-              count_particles,
-              primary_particle->GetPDGcode(),
-              primary_particle->GetMass(),
-			        primary_particle->GetCharge(),
-              primary_particle->GetMomentum(), 
-              anEvent->GetPrimaryVertex(ivtx)->GetPosition()
-              ));
-
-        count_particles++;
-      }
-    }
-  }
 
 }

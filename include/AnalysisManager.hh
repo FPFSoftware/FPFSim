@@ -14,7 +14,6 @@
 #include "AnalysisManagerMessenger.hh"
 #include "PixelMap3D.hh"
 #include "FPFParticle.hh"
-#include "FPFNeutrino.hh"
 
 #include "hep_hpc/hdf5/File.hpp"
 
@@ -122,7 +121,7 @@ class AnalysisManager {
     //---------------------------------------------------
     // OUTPUT VARIABLES FOR COMMON TREES
 
-    G4int    evtID;
+    G4int evtID;
     G4int vertexID;
     double weight;
     std::string genType;
