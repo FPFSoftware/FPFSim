@@ -15,18 +15,24 @@ struct GeneratorVertexMetadata
   int pdg;           ///< initiator pdg
   TLorentzVector x4; ///< initiator 4-position (vertex)
   TLorentzVector p4; ///< initiator 4-momentum
-  double mass;     ///< initiator mass
-  double charge;   ///< initiator charge
+  double mass;       ///< initiator mass
+  double charge;     ///< initiator charge
 
-  int tgt_pdg;     ///< target pdg
-  int tgt_A;       ///< nuclear target A
-  int tgt_Z;       ///< nuclear target Z
+  int intType = -1;           ///< interaction type 
+  int scatteringType = -1;    ///< scattering type 
+  int fsl_pdg = -1;           ///< final state lepton pdg
+
+  int tgt_pdg = -1;     ///< target pdg
+  int tgt_A = -1;       ///< nuclear target A
+  int tgt_Z = -1;       ///< nuclear target Z
+  int hitnuc_pdg = -1;  ///< hit nucleon pdg
   
-  double xs = 0.0;   ///< cross-section
+  double xs = -1.0;  ///< cross-section
   double Q2 = -1.0;  ///< momentum transfer
-  double xBj =  0.0; ///< Bjorken x
+  double xBj = 0.0;  ///< Bjorken x
   double y = -1.0;   ///< inelasticity
   double W = -1.0;   ///< hadronic invariant mass
+
 };
 
 #endif

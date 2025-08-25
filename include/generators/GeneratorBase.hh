@@ -21,15 +21,15 @@ class GeneratorBase
     virtual void GeneratePrimaries(G4Event *event) = 0;
 
     // return name of current generator
-    const G4String GetGeneratorName() { return fGeneratorName; }
+    G4String GetGeneratorName() const { return fGeneratorName; }
 
     // reset the list of metadata
     void ResetEventMetadata() { fVertexMetadata.clear(); }
 
     // return full event vertex metadata
-    const std::vector<GeneratorVertexMetadata> GetEventMetadata() { return fVertexMetadata; }
+    std::vector<GeneratorVertexMetadata> GetEventMetadata() const { return fVertexMetadata; }
     // return single vertex metadata
-    const GeneratorVertexMetadata GetEventMetadataPerVertex(G4int i) { return fVertexMetadata.at(i); }
+    GeneratorVertexMetadata GetEventMetadataPerVertex(G4int i) const { return fVertexMetadata.at(i); }
 
   protected : 
 

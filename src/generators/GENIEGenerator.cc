@@ -1,6 +1,7 @@
 #include "generators/GeneratorBase.hh"
 #include "generators/GENIEGenerator.hh"
 #include "generators/GENIEGeneratorMessenger.hh"
+#include "generators/GeneratorVertexMetadata.hh"
 
 #include "geometry/GeometricalParameters.hh"
 
@@ -15,6 +16,7 @@
 #include "TMath.h"
 #include "TFile.h"
 #include "TTree.h"
+#include "TLorentzVector.h"
 
 GENIEGenerator::GENIEGenerator()
 {
@@ -88,6 +90,16 @@ void GENIEGenerator::LoadData()
   fGSTTree->SetBranchAddress("pzf",&m_pzf); // hadrons pz (GeV)
   
   fGSTTree->SetBranchAddress("W",&m_W); // invariant hadronic mass (GeV)
+  fGSTTree->SetBranchAddress("Q2",&m_Q2); // momentum transfer (GeV^2)
+  fGSTTree->SetBranchAddress("x",&m_x); // Bjorken x
+  fGSTTree->SetBranchAddress("y",&m_y); // inelasticity
+
+  fGSTTree->SetBranchAddress("wght",&m_wght); // event weigth
+  
+  fGSTTree->SetBranchAddress("tgt",&m_tgt); // nuclear target pdg
+  fGSTTree->SetBranchAddress("Z",&m_Z); // nuclear target Z
+  fGSTTree->SetBranchAddress("A",&m_A); // nuclear target A
+  fGSTTree->SetBranchAddress("hitnuc",&m_hitnuc); // hit nucleon pfg
 
 }
 
@@ -145,41 +157,37 @@ void GENIEGenerator::GeneratePrimaries(G4Event* anEvent)
 
   // compute/repackage what is not directly available from the tree
   // position is randomly extracted in the detector fiducial volume
-  // or set to the center according to config parameter
- 
-  m_neuIdx = currentIdx;
-  m_neuP4.SetPxPyPzE(m_pxv,m_pyv,m_pzv,m_Ev);
-  m_fslP4.SetPxPyPzE(m_pxl,m_pyl,m_pzl,m_El);
-  
-  m_int_type = DecodeInteractionType();
-  m_scattering_type = DecodeScatteringType();
+  // or set to the center according to config parameter 
+  TLorentzVector neuP4(m_pxv,m_pyv,m_pzv,m_Ev);
+  TLorentzVector fslP4(m_pxl,m_pyl,m_pzl,m_El);
+  TLorentzVector neuX4;
 
   G4Random::setTheSeed(currentIdx+1);
   if(fRandomVtx){
-      m_neuX4.SetX(GeometricalParameters::Get()->GetFLArEPosition().x() +
-                 (G4UniformRand()-0.5) * GeometricalParameters::Get()->GetFLArEFidVolSize().x());
-      m_neuX4.SetY(GeometricalParameters::Get()->GetFLArEPosition().y() +
-                 (G4UniformRand()-0.5) * GeometricalParameters::Get()->GetFLArEFidVolSize().y());
-      m_neuX4.SetZ(GeometricalParameters::Get()->GetFLArEPosition().z() +
-                 (G4UniformRand()-0.5) * GeometricalParameters::Get()->GetFLArEFidVolSize().z());
-      m_neuX4.SetT(0.);
+    neuX4.SetX(GeometricalParameters::Get()->GetFLArEPosition().x() +
+              (G4UniformRand()-0.5) * GeometricalParameters::Get()->GetFLArEFidVolSize().x());
+    neuX4.SetY(GeometricalParameters::Get()->GetFLArEPosition().y() +
+              (G4UniformRand()-0.5) * GeometricalParameters::Get()->GetFLArEFidVolSize().y());
+    neuX4.SetZ(GeometricalParameters::Get()->GetFLArEPosition().z() +
+              (G4UniformRand()-0.5) * GeometricalParameters::Get()->GetFLArEFidVolSize().z());
+    neuX4.SetT(0.);
   } else {
-    m_neuX4.SetX(0.*m);
-    m_neuX4.SetY(0.*m);
-    m_neuX4.SetZ(GeometricalParameters::Get()->GetFLArEPosition().z() -
-                GeometricalParameters::Get()->GetFLArEFidVolSize().z()/2);
-    m_neuX4.SetT(0.);
+    neuX4.SetX(0.*m);
+    neuX4.SetY(0.*m);
+    neuX4.SetZ(GeometricalParameters::Get()->GetFLArEPosition().z() -
+                 GeometricalParameters::Get()->GetFLArEFidVolSize().z()/2);
+    neuX4.SetT(0.);
   }
 
   // create primary vertex (neutrino)
-  G4PrimaryVertex* vtx = new G4PrimaryVertex(m_neuX4.X(), m_neuX4.Y(), m_neuX4.Z(), m_neuX4.T()); // in mm
+  G4PrimaryVertex* vtx = new G4PrimaryVertex(neuX4.X(), neuX4.Y(), neuX4.Z(), neuX4.T()); // in mm
 
   // now add all the final state particles into the vertex
   // - final state lepton (if NC, it's the neutrino!)
   G4ParticleDefinition* particleDefinition;
   if ( FindParticleDefinition(m_fslPDG, particleDefinition) ){
 
-    G4PrimaryParticle* plepton = new G4PrimaryParticle(particleDefinition, m_fslP4.X()*GeV, m_fslP4.Y()*GeV, m_fslP4.Z()*GeV, m_fslP4.E()*GeV); //in GeV
+    G4PrimaryParticle* plepton = new G4PrimaryParticle(particleDefinition, fslP4.X()*GeV, fslP4.Y()*GeV, fslP4.Z()*GeV, fslP4.E()*GeV); //in GeV
     /* G4cout << "Lepton PDG " << m_fslPDG << " mass " << particleDefinition->GetPDGMass()*MeV << G4endl;
     G4cout << "p4  " << m_fslP4.X() << " " << m_fslP4.Y() << " " <<  m_fslP4.Z() << " " <<  m_fslP4.E() << G4endl;
     G4cout << "kinE " << ( m_fslP4.E()*GeV - particleDefinition->GetPDGMass()*MeV)  << G4endl; */
@@ -199,6 +207,29 @@ void GENIEGenerator::GeneratePrimaries(G4Event* anEvent)
     vtx->SetPrimary(prim);
 
   }
+
+  // package and ship metadata
+  GeneratorVertexMetadata metadata;
+  metadata.generatorType = fGeneratorName;
+  metadata.processName = EncodeProcessName();
+  metadata.weight = m_wght;
+  metadata.pdg = m_neuPDG; 
+  metadata.x4 = neuX4;
+  metadata.p4 = neuP4;
+  metadata.mass = 0.; // neutrinos always massless
+  metadata.charge = 0.; // neutrinos always no charge
+  metadata.intType = DecodeInteractionType();
+  metadata.scatteringType = DecodeScatteringType();
+  metadata.fsl_pdg = m_fslPDG;
+  metadata.tgt_pdg = m_tgt;
+  metadata.tgt_A = m_A;
+  metadata.tgt_Z = m_Z;
+  metadata.hitnuc_pdg = m_hitnuc;
+  metadata.Q2 = m_Q2;
+  metadata.xBj = m_x;
+  metadata.y = m_y;
+  metadata.W = m_W;
+  fVertexMetadata.push_back(metadata);
 
   anEvent->AddPrimaryVertex(vtx);
   fEventCounter++;
@@ -277,4 +308,22 @@ G4int GENIEGenerator::DecodeScatteringType() const
   else if(m_amnugamma) return kScAMNuGamma;
 
   return kScUnknown;
+}
+
+G4String GENIEGenerator::EncodeProcessName() const
+{
+  G4String process = "";
+  if (m_cc) process += "WeakCC";
+  else if (m_nc) process += "WeakNC";
+  else if (m_em) process += "EM";
+
+  if(m_qel) process += " QE";
+  else if(m_res) process += " RES";
+  else if(m_dis) process += " DIS";
+  else if(m_coh) process += " COH";
+  else if(m_imd) process += " IMD";
+  else if(m_mec) process += " MEC";
+  else if(m_nuel) process += " nuELASTIC";
+
+  return process;
 }

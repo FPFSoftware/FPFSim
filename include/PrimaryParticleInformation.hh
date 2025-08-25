@@ -16,19 +16,8 @@ class PrimaryParticleInformation : public G4VUserPrimaryParticleInformation {
     /// @param aMass A mass of the particle.
     /// @param aMomentum An initial particle momentum (at the primary vertex).
     /// @param aVertex An initial particle vertex.
-    /// @param neutrino index of the neutrino interaction if it is from GENIE
-    /// @param neutrino PDG of the neutrino interaction if it is from GENIE
-    /// @param neutrino P4 of the neutrino interaction if it is from GENIE
-    /// @param neutrino X4 of the neutrino interaction input to the detector
-    /// @param interaction type of the neutrino interaction if it is from GENIE
-    /// @param scattering type of the neutrino interaction if it is from GENIE
-    /// @param fsl PDG of the neutrino interaction if it is from GENIE
-    /// @param fsl P4 of the neutrino interaction if it is from GENIE
     PrimaryParticleInformation(G4int aID, G4int aPDG, G4double aMass, G4double aCharge,
-        G4ThreeVector aMomentum, G4ThreeVector aVertex,
-        G4int aneuIdx, G4int aneuPDG, TLorentzVector aneuP4, TLorentzVector aneuX4,
-        G4int aInttype, G4int aScatteringtype, G4double aW,
-        G4int afslPDG, TLorentzVector afslP4);
+        G4ThreeVector aMomentum, G4ThreeVector aVertex);
 
     virtual ~PrimaryParticleInformation();
 
@@ -37,7 +26,6 @@ class PrimaryParticleInformation : public G4VUserPrimaryParticleInformation {
 
     /// Get the particle PDG code
     inline G4int GetPDG() const { return fPDG; };
-
 
     /// Get the particle charge
     inline G4double GetCharge() const { return fCharge; };
@@ -50,17 +38,6 @@ class PrimaryParticleInformation : public G4VUserPrimaryParticleInformation {
 
     /// Get the particle initial vertex.
     inline G4ThreeVector GetVertexMC() const { return fVertexMC; };
-
-    /// Get the truth information of the neutrino interaction if it's from GENIE
-    inline G4int GetNeuIdx() const { return fNeuIdx; };
-    inline G4int GetNeuPDG() const { return fNeuPDG; };
-    inline TLorentzVector GetNeuP4() const { return fNeuP4; };
-    inline TLorentzVector GetNeuX4() const { return fNeuX4; };
-    inline G4int GetInteractionTypeId() const  { return fInteractionType; };
-    inline G4int GetScatteringTypeId()  const  { return fScatteringType;  };
-    inline G4double GetW() const { return fW; };
-    inline G4int GetFSLPDG() const { return fFSLPDG; };
-    inline TLorentzVector GetFSLP4() const { return fFSLP4; };
 
     /// Prints the information about the particle.
     virtual void Print() const;
@@ -81,37 +58,6 @@ class PrimaryParticleInformation : public G4VUserPrimaryParticleInformation {
 
     /// A particle initial vertex (from particle generator)
     G4ThreeVector fVertexMC;
-
-    /// neutrino index of the neutrino interaction if it is from GENIE
-    G4int fNeuIdx;
-
-    /// neutrino PDG of the neutrino interaction if it is from GENIE
-    G4int fNeuPDG;
-
-    /// neutrino P4 of the neutrino interaction if it is from GENIE
-    TLorentzVector fNeuP4;
-
-    /// neutrino X4 of the neutrino interaction input to the detector
-    TLorentzVector fNeuX4;
-
-    /// Interaction type of the neutrino interaction if it is from GENIE
-    G4int fInteractionType;
-
-    /// Scattering type of the neutrino interaction if it is from GENIE
-    G4int fScatteringType;
-
-    /// invariant hadronic mass
-    G4double fW;
-
-    /// fsl PDG of the neutrino interaction if it is from GENIE
-    G4int fFSLPDG;
-
-    /// fsl P4 of the neutrino interaction if it is from GENIE
-    TLorentzVector fFSLP4;
-
-    /// fsl X4 of the neutrino interaction if it is from GENIE
-    TLorentzVector fFSLX4;
-
 
     /// particle's charge
     G4double fCharge;

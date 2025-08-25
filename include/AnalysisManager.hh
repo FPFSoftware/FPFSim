@@ -62,6 +62,7 @@ class AnalysisManager {
     void bookFLArETrees();      
     void bookFASER2Trees();
 
+    void FillEventTree(const G4Event* event);
     void FillPrimariesTree(const G4Event* event);
     void FillTrajectoriesTree(const G4Event* event);
     
@@ -120,13 +121,29 @@ class AnalysisManager {
 
     //---------------------------------------------------
     // OUTPUT VARIABLES FOR COMMON TREES
-    // TODO: review carefully 
-    // TODO: need to make evt tree less FLARE-centric
-    // TODO: remove pseudo-reco or add it as FLARE-only tree
-    // TODO: turn arrays in std::vector!
 
     G4int    evtID;
-    FPFNeutrino neutrino; //TODO: remove??
+    G4int vertexID;
+    double weight;
+    std::string genType;
+    std::string processName;    
+    int initPDG;           
+    double initX, initY, initZ, initT;
+    double initPx, initPy, initPz, initE;
+    double initM;     
+    double initQ;    
+    int intType;           
+    int scatteringType;    
+    int fslPDG;           
+    int tgtPDG;     
+    int tgtA;      
+    int tgtZ;      
+    int hitnucPDG; 
+    double xs;
+    double Q2;  
+    double xBj; 
+    double y;   
+    double W;  
  
     //---------------------------------------------------
     // Output variables for TRAJECTORIES tree
@@ -164,7 +181,6 @@ class AnalysisManager {
     //---------------------------------------------------
     // OUTPUT VARIABLES FOR FLArE TREES
     // TODO: merge hit variables? no need to use different names?
-    // TODO: somehow need to add back here info from evt tree
 
     PixelMap3D* pm3D;
 

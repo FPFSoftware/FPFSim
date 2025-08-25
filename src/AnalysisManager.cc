@@ -27,13 +27,14 @@
 #include "FASER2TrackerSD.hh"
 #include "LArBoxHit.hh"
 #include "PrimaryParticleInformation.hh"
+#include "EventInformation.hh"
+#include "generators/GeneratorVertexMetadata.hh"
 #include "reco/PCAAnalysis3D.hh"
 #include "reco/Cluster3D.hh"
 #include "reco/LinearFit.hh"
 #include "reco/ShowerLID.hh"
 #include "reco/Barcode.hh"
 #include "FPFParticle.hh"
-#include "FPFNeutrino.hh"
 
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
@@ -89,9 +90,33 @@ void AnalysisManager::bookEvtTree()
 {
   fEvt = new TTree("event", "event info");
   fEvt->Branch("evtID", &evtID, "evtID/I");
-
-  //TODO EXPAND!!!!
-
+  fEvt->Branch("vtxID", &vertexID, "vtxID/I");
+  fEvt->Branch("weight", &weight, "weight/D");
+  fEvt->Branch("genType", &genType);
+  fEvt->Branch("processName", &processName);
+  fEvt->Branch("initPDG", &initPDG, "initPDG/I");
+  fEvt->Branch("initX", &initX, "initX/D");
+  fEvt->Branch("initY", &initY, "initY/D");
+  fEvt->Branch("initZ", &initZ, "initZ/D");
+  fEvt->Branch("initT", &initT, "initT/D");
+  fEvt->Branch("initPx", &initPx, "initPx/D");
+  fEvt->Branch("initPy", &initPy, "initPy/D");
+  fEvt->Branch("initPz", &initPz, "initPz/D"); 
+  fEvt->Branch("initE", &initE, "initE/D");
+  fEvt->Branch("initM", &initM, "initM/D");
+  fEvt->Branch("initQ", &initQ, "initQ/D");
+  fEvt->Branch("intType", &intType, "intType/I");
+  fEvt->Branch("scatteringType", &scatteringType, "scatteringType/I");
+  fEvt->Branch("fslPDG", &fslPDG, "fslPDG/I");
+  fEvt->Branch("tgtPDG", &tgtPDG, "tgtPDG/I");
+  fEvt->Branch("tgtA", &tgtA, "tgtA/I");
+  fEvt->Branch("tgtZ", &tgtZ, "tgtZ/I");
+  fEvt->Branch("hitnucPDG", &hitnucPDG, "hitnucPDG/I");
+  fEvt->Branch("xs", &xs, "xs/D");
+  fEvt->Branch("Q2", &Q2, "Q2/D");
+  fEvt->Branch("xBj", &xBj, "xBj/D");
+  fEvt->Branch("y", &y, "y/D");
+  fEvt->Branch("W", &W, "W/D");
 }
 
 void AnalysisManager::bookPrimTree()
@@ -382,12 +407,9 @@ void AnalysisManager::EndOfRun()
 
 void AnalysisManager::BeginOfEvent()
 {
-  // TODO: REVIEW, CLEAN-UP UNUSED VARIABLES
-  // TODO: change arrays into std::vectors
   // reset vectors that need to be cleared for a new event
-  // only reset arrays or vectors, no need for other defaults??
+  // only reset arrays or vectors, tipically no need for other defaults
 
-  neutrino = FPFNeutrino(); // remove???
   primaries.clear();
   primaryIDs.clear();
 
@@ -467,9 +489,7 @@ void AnalysisManager::EndOfEvent(const G4Event *event)
   evtID = event->GetEventID();
 
   // FILL EVENT TREE
-  // nothing else except evtID for now...
-  // TODO: need to find good way to propagate generator-level info
-  fEvt->Fill();
+  FillEventTree(event);
 
   //-----------------------------------------------------------
 
@@ -496,6 +516,48 @@ void AnalysisManager::EndOfEvent(const G4Event *event)
 
   if( fFaser2SDs.size() > 0 ) FillFASER2Output();
 
+}
+
+//---------------------------------------------------------------------
+//---------------------------------------------------------------------
+
+void AnalysisManager::FillEventTree(const G4Event *event)
+{
+  EventInformation* eventInfo = static_cast<EventInformation*>(event->GetUserInformation());
+  eventInfo->Print();
+  auto metadata = eventInfo->GetEventMetadata();
+  for(int i=0; i<metadata.size(); i++)
+  {
+    vertexID = i;
+    weight = metadata[i].weight;
+    genType = metadata[i].generatorType;
+    processName = metadata[i].processName;
+    initPDG = metadata[i].pdg;
+    initX = metadata[i].x4.X();
+    initY = metadata[i].x4.Y();
+    initZ = metadata[i].x4.Z();
+    initT = metadata[i].x4.T();
+    initPx = metadata[i].p4.X();
+    initPy = metadata[i].p4.Y();
+    initPz = metadata[i].p4.Z();
+    initE = metadata[i].p4.E();
+    initM = metadata[i].mass;
+    initQ = metadata[i].charge;
+    intType = metadata[i].intType;     
+    scatteringType = metadata[i].scatteringType;   
+    fslPDG = metadata[i].fsl_pdg;           
+    tgtPDG = metadata[i].tgt_pdg;  
+    tgtZ = metadata[i].tgt_Z;     
+    tgtA = metadata[i].tgt_A;     
+    hitnucPDG = metadata[i].hitnuc_pdg;  
+    xs = metadata[i].xs;
+    Q2 = metadata[i].Q2;  
+    xBj = metadata[i].xBj;
+    y = metadata[i].y; 
+    W = metadata[i].W; 
+
+    fEvt->Fill();
+  }
 }
 
 //---------------------------------------------------------------------
@@ -614,12 +676,7 @@ void AnalysisManager::FillFLArEOutput()
   // prepare the pixel map
   const double_t res_tpc[3] = {1, 5, 5}; // mm
   
-  // TODO: rethink once generator info is included...
-  /*if (neutrino.NuPDG()!=0) { 
-    pm3D = new PixelMap3D(evtID, nPrimaryParticle, neutrino.NuPDG(), res_tpc); 
-  } else { */
-
-  pm3D = new PixelMap3D(evtID, primaries.size(), primaries[0].PDG(), res_tpc);
+  pm3D = new PixelMap3D(evtID, primaries.size(), initPDG, res_tpc);
   // boundaries in global coordinates
   pm3D->SetPMBoundary(GeometricalParameters::Get()->GetFLArEPosition()/mm -
                       GeometricalParameters::Get()->GetTPCSizeXYZ()/mm/2,
@@ -756,7 +813,7 @@ void AnalysisManager::FillFLArEOutput()
 
   if (fSave2DEvd) pm3D->Write2DPMToFile(fFile,fFLArEDir); 
 
-  pm3D->Process3DPM(fH5file, neutrino, fSave3DEvd);
+  pm3D->Process3DPM(fH5file, initPDG, fslPDG, intType, scatteringType, initE, fSave3DEvd);
 
   sparseFractionMem = pm3D->GetSparseFractionMem();
   sparseFractionBins = pm3D->GetSparseFractionBins();
@@ -958,7 +1015,7 @@ void AnalysisManager::FillFLArEPseudoReco()
   }
 
   slid::ShowerLID *shwlid = new slid::ShowerLID(pm3D->Get3DPixelMap(),
-                                                neutrino.NuVx(), neutrino.NuVy(), neutrino.NuVz(), 0., 0., 1.);
+                                                initX, initY, initZ, 0., 0., 1.);
   Double_t *ptr_dedx = shwlid->GetTotalDedxLongitudinal();
   std::copy(ptr_dedx, ptr_dedx + 3000, TotalDedxLongitudinal.begin());
 
@@ -969,7 +1026,7 @@ void AnalysisManager::FillFLArEPseudoReco()
         pm3D->Get2DPixelMapZY(iPrim + 1),
         pm3D->Get2DVtxPixelMapZX(iPrim + 1),
         pm3D->Get2DVtxPixelMapZY(iPrim + 1),
-        neutrino.NuVx(), neutrino.NuVy(), neutrino.NuVz(),
+        initX, initY, initZ,
         primaries[iPrim].Vx(), primaries[iPrim].Vy(), primaries[iPrim].Vz());
     dir_pol_x[iPrim] = linFit->GetDir().X();
     dir_pol_y[iPrim] = linFit->GetDir().Y();
