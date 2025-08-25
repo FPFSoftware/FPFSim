@@ -58,7 +58,6 @@ link_directories("$ENV{hep_hpc_path}/lib")
 set(HEP_HPC_LIBRARIES "$ENV{hep_hpc_path}/lib/libhep_hpc_hdf5.so;$ENV{hep_hpc_path}/lib/libhep_hpc_Utilities.so;$ENV{hep_hpc_path}/lib/libhep_hpc_concat_hdf5.so")
 message(STATUS "HEP_HPC lib: ${HEP_HPC_LIBRARIES}")
 
-
 # Locate sources and headers for this project
 # We presume the existence of three directories
 
@@ -89,19 +88,6 @@ foreach(_file ${macros} ${genie} ${analysis} ${gridutils} ${setup})
 endforeach()
 
 #----------------------------------------------------------------------------
-# generate dictionaries for the custom classes in the ROOT tree
-ROOT_GENERATE_DICTIONARY(FPFClassesDict ${PROJECT_SOURCE_DIR}/include/FPFParticle.hh
-                                        LINKDEF ${PROJECT_SOURCE_DIR}/include/LinkDef.h
-                                        MODULE FPFClasses)
-
-# create a shared library that includes the dictionary
-add_library(FPFClasses SHARED ${PROJECT_SOURCE_DIR}/src/FPFParticle.cc
-                              FPFClassesDict.cxx)
-
-# include directories for headers
-target_include_directories(FPFClasses PUBLIC ${PROJECT_SOURCE_DIR}/include)
-
-#----------------------------------------------------------------------------
 # Add the executable, and link it to the Geant4 libraries
 #
 add_executable(FPFSim FPFSim.cc ${sources} ${headers})
@@ -112,12 +98,9 @@ target_link_libraries(FPFSim
   ${HDF5_LIBRARIES}
   ${HEP_HPC_LIBRARIES}
   ${HEPMC3_LIBRARIES} ${HEPMC3_FIO_LIBRARIES} ${HEPMC3_LIB}
-  FPFClasses
   )
 
 #----------------------------------------------------------------------------
 # Install the executable to 'bin' directory under CMAKE_INSTALL_PREFIX
 #
 install(TARGETS FPFSim DESTINATION ${PROJECT_SOURCE_DIR}/bin)
-install(TARGETS FPFClasses DESTINATION ${PROJECT_SOURCE_DIR}/lib)
-install(FILES ${PROJECT_SOURCE_DIR}/build/libFPFClasses_rdict.pcm DESTINATION ${PROJECT_SOURCE_DIR}/lib)
