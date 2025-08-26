@@ -12,6 +12,7 @@
 #include <Randomize.hh>
 #include <G4Poisson.hh>
 #include <G4Trajectory.hh>
+#include <G4LorentzVector.hh>
 
 #include <TDirectory.h>
 #include <TFile.h>
@@ -532,14 +533,14 @@ void AnalysisManager::FillEventTree(const G4Event *event)
     genType = metadata[i].generatorType;
     processName = metadata[i].processName;
     initPDG = metadata[i].pdg;
-    initX = metadata[i].x4.X();
-    initY = metadata[i].x4.Y();
-    initZ = metadata[i].x4.Z();
-    initT = metadata[i].x4.T();
-    initPx = metadata[i].p4.X();
-    initPy = metadata[i].p4.Y();
-    initPz = metadata[i].p4.Z();
-    initE = metadata[i].p4.E();
+    initX = metadata[i].x4.x();
+    initY = metadata[i].x4.y();
+    initZ = metadata[i].x4.z();
+    initT = metadata[i].x4.t();
+    initPx = metadata[i].p4.x();
+    initPy = metadata[i].p4.y();
+    initPz = metadata[i].p4.z();
+    initE = metadata[i].p4.e();
     initM = metadata[i].mass;
     initQ = metadata[i].charge;
     intType = metadata[i].intType;     
@@ -601,11 +602,11 @@ void AnalysisManager::FillPrimariesTree(const G4Event *event)
         primQ = primary_particle->GetCharge();
 
         G4double energy = GetTotalEnergy(primPx, primPy, primPz, primM);
-        TLorentzVector p4(primPx,primPy,primPz,energy);
-        primEta = p4.Eta();
-        primPhi = p4.Phi();
-        primPt = p4.Pt();
-        primP = p4.P();
+        G4LorentzVector p4(primPx,primPy,primPz,energy);
+        primEta = p4.eta();
+        primPhi = p4.phi();
+        primPt = p4.perp();
+        primP = p4.vect().mag();
         primE = energy;
         primKE = energy - primM;
 

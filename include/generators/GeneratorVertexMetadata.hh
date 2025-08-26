@@ -2,7 +2,7 @@
 #define GENERATOR_VERTEX_METDATA_HH
 
 #include <string>
-#include "TLorentzVector.h"
+#include "G4LorentzVector.hh"
 
 // Metadata information on each generated vertex
 // Store input interaction/decay process information
@@ -10,13 +10,13 @@ struct GeneratorVertexMetadata
 {
   std::string generatorType;  ///< which generator class
   std::string processName;    ///< which process
-  double weight;              ///< process weight
+  double weight = 1.0;        ///< process weight
 
-  int pdg;           ///< initiator pdg
-  TLorentzVector x4; ///< initiator 4-position (vertex)
-  TLorentzVector p4; ///< initiator 4-momentum
-  double mass;       ///< initiator mass
-  double charge;     ///< initiator charge
+  int pdg = -1;      ///< initiator pdg
+  G4LorentzVector x4 = G4LorentzVector(); ///< initiator 4-position (vertex)
+  G4LorentzVector p4 = G4LorentzVector(); ///< initiator 4-momentum
+  double mass = -1;  ///< initiator mass
+  double charge = 0; ///< initiator charge
 
   int intType = -1;           ///< interaction type 
   int scatteringType = -1;    ///< scattering type 

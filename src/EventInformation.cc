@@ -24,10 +24,10 @@ void EventInformation::Print() const
       << "Generator : " << fGenMetadata[i].generatorType << G4endl
       << "Process name : " << fGenMetadata[i].processName << G4endl
       << "Initiator PDG : " << fGenMetadata[i].pdg << G4endl
-      << "Initiator p4 : (" << fGenMetadata[i].p4.X() << ", " << fGenMetadata[i].p4.Y() << ", " 
-                            << fGenMetadata[i].p4.Z() << ", " << fGenMetadata[i].p4.E() << ")" << G4endl
-      << "Initiator x4 : (" << fGenMetadata[i].x4.X() << ", " << fGenMetadata[i].x4.Y() << ", " 
-                            << fGenMetadata[i].x4.Z() << ", " << fGenMetadata[i].x4.T() << ")" << G4endl;
+      << "Initiator p4 : (" << fGenMetadata[i].p4.x() << ", " << fGenMetadata[i].p4.y() << ", " 
+                            << fGenMetadata[i].p4.z() << ", " << fGenMetadata[i].p4.e() << ")" << G4endl
+      << "Initiator x4 : (" << fGenMetadata[i].x4.x() << ", " << fGenMetadata[i].x4.y() << ", " 
+                            << fGenMetadata[i].x4.z() << ", " << fGenMetadata[i].x4.t() << ")" << G4endl;
   }
 }
 

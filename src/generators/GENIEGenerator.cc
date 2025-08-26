@@ -158,36 +158,35 @@ void GENIEGenerator::GeneratePrimaries(G4Event* anEvent)
   // compute/repackage what is not directly available from the tree
   // position is randomly extracted in the detector fiducial volume
   // or set to the center according to config parameter 
-  TLorentzVector neuP4(m_pxv,m_pyv,m_pzv,m_Ev);
-  TLorentzVector fslP4(m_pxl,m_pyl,m_pzl,m_El);
-  TLorentzVector neuX4;
+  G4LorentzVector neuP4(m_pxv*GeV,m_pyv*GeV,m_pzv*GeV,m_Ev*GeV);
+  G4LorentzVector fslP4(m_pxl*GeV,m_pyl*GeV,m_pzl*GeV,m_El*GeV);
+  G4LorentzVector neuX4;
 
   G4Random::setTheSeed(currentIdx+1);
   if(fRandomVtx){
-    neuX4.SetX(GeometricalParameters::Get()->GetFLArEPosition().x() +
+    neuX4.setX(GeometricalParameters::Get()->GetFLArEPosition().x() +
               (G4UniformRand()-0.5) * GeometricalParameters::Get()->GetFLArEFidVolSize().x());
-    neuX4.SetY(GeometricalParameters::Get()->GetFLArEPosition().y() +
+    neuX4.setY(GeometricalParameters::Get()->GetFLArEPosition().y() +
               (G4UniformRand()-0.5) * GeometricalParameters::Get()->GetFLArEFidVolSize().y());
-    neuX4.SetZ(GeometricalParameters::Get()->GetFLArEPosition().z() +
+    neuX4.setZ(GeometricalParameters::Get()->GetFLArEPosition().z() +
               (G4UniformRand()-0.5) * GeometricalParameters::Get()->GetFLArEFidVolSize().z());
-    neuX4.SetT(0.);
+    neuX4.setT(0.);
   } else {
-    neuX4.SetX(0.*m);
-    neuX4.SetY(0.*m);
-    neuX4.SetZ(GeometricalParameters::Get()->GetFLArEPosition().z() -
+    neuX4.setX(0.*m);
+    neuX4.setY(0.*m);
+    neuX4.setZ(GeometricalParameters::Get()->GetFLArEPosition().z() -
                  GeometricalParameters::Get()->GetFLArEFidVolSize().z()/2);
-    neuX4.SetT(0.);
+    neuX4.setT(0.);
   }
 
   // create primary vertex (neutrino)
-  G4PrimaryVertex* vtx = new G4PrimaryVertex(neuX4.X(), neuX4.Y(), neuX4.Z(), neuX4.T()); // in mm
-
+  G4PrimaryVertex* vtx = new G4PrimaryVertex(neuX4.x(), neuX4.y(), neuX4.z(), neuX4.t()); 
   // now add all the final state particles into the vertex
   // - final state lepton (if NC, it's the neutrino!)
   G4ParticleDefinition* particleDefinition;
   if ( FindParticleDefinition(m_fslPDG, particleDefinition) ){
 
-    G4PrimaryParticle* plepton = new G4PrimaryParticle(particleDefinition, fslP4.X()*GeV, fslP4.Y()*GeV, fslP4.Z()*GeV, fslP4.E()*GeV); //in GeV
+    G4PrimaryParticle* plepton = new G4PrimaryParticle(particleDefinition, fslP4.x(), fslP4.y(), fslP4.z(), fslP4.e());
     /* G4cout << "Lepton PDG " << m_fslPDG << " mass " << particleDefinition->GetPDGMass()*MeV << G4endl;
     G4cout << "p4  " << m_fslP4.X() << " " << m_fslP4.Y() << " " <<  m_fslP4.Z() << " " <<  m_fslP4.E() << G4endl;
     G4cout << "kinE " << ( m_fslP4.E()*GeV - particleDefinition->GetPDGMass()*MeV)  << G4endl; */
@@ -198,9 +197,9 @@ void GENIEGenerator::GeneratePrimaries(G4Event* anEvent)
   // - all final state hadrons
   for (int ipar=0; ipar<m_nf; ++ipar) {
 
-    TLorentzVector p( m_pxf[ipar], m_pyf[ipar], m_pzf[ipar], m_Ef[ipar] );
+    G4LorentzVector p( m_pxf[ipar]*GeV, m_pyf[ipar]*GeV, m_pzf[ipar]*GeV, m_Ef[ipar]*GeV );
     if ( !FindParticleDefinition( m_pdgf[ipar], particleDefinition) ) continue; //skip bad pdgs
-    G4PrimaryParticle* prim = new G4PrimaryParticle(particleDefinition, p.X()*GeV, p.Y()*GeV, p.Z()*GeV, p.E()*GeV); //in GeV
+    G4PrimaryParticle* prim = new G4PrimaryParticle(particleDefinition, p.x(), p.y(), p.z(), p.t()); 
     /* G4cout << "Particle PDG " << m_pdgf[ipar] << " mass " << particleDefinition->GetPDGMass()*MeV << G4endl;
     G4cout << "p4  " << p.X() << " " << p.Y() << " " << p.Z() << " " << p.E() << G4endl;
     G4cout << "kinE " << (p.E()*GeV - particleDefinition->GetPDGMass()*MeV)  << G4endl; */

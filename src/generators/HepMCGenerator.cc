@@ -1,6 +1,8 @@
 #include "generators/GeneratorBase.hh"
 #include "generators/HepMCGenerator.hh"
 #include "generators/HepMCGeneratorMessenger.hh"
+#include "generators/GeneratorVertexMetadata.hh"
+
 #include "geometry/GeometricalParameters.hh"
 
 #include "HepMC3/ReaderAscii.h"
@@ -167,6 +169,16 @@ void HepMCGenerator::HepMC2G4(const std::shared_ptr<HepMC3::GenEvent> hepmcevt, 
         g4vtx->SetPrimary(g4prim);
       }
     }
+
+    // FIXME: event header in original file is very simple
+    // need to save more useful metadata in event header!
+    GeneratorVertexMetadata metadata;
+    metadata.generatorType = fGeneratorName;
+    metadata.processName = "Decay";
+    metadata.weight = hepmcevt->weights()[0];
+    metadata.x4 = xvtx;
+    metadata.xs = hepmcevt->cross_section()->xsec();
+    fVertexMetadata.push_back(metadata);
 
     g4event->AddPrimaryVertex(g4vtx);
   }
