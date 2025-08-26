@@ -11,12 +11,12 @@
 #include "G4IonTable.hh"
 #include "G4SystemOfUnits.hh"
 #include "G4Exception.hh"
+#include "G4LorentzVector.hh"
 #include "Randomize.hh"
 
 #include "TMath.h"
 #include "TFile.h"
 #include "TTree.h"
-#include "TLorentzVector.h"
 
 GENIEGenerator::GENIEGenerator()
 {
