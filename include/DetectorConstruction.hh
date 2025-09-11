@@ -8,6 +8,7 @@
 #include <G4AssemblyVolume.hh>
 #include "fields/BabyMINDMagneticField.hh"
 #include <vector>
+#include <string>
 
 class G4LogicalVolume;
 class DetectorConstructionMessenger;
@@ -48,7 +49,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
     DetectorConstructionMessenger* messenger;
 
     G4bool m_saveGdml;
-    G4String m_fileGdml;
+    std::string m_fileGdml;
     G4bool fCheckOverlap;
     G4bool m_addFLArE;
     G4bool m_useBabyMIND;
