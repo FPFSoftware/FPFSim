@@ -39,7 +39,8 @@
 #include <G4GDMLParser.hh>
 #include <G4SubtractionSolid.hh>
 
-using namespace std;
+#include <filesystem>
+#include <string>
 
 G4ThreadLocal G4UniformMagField* DetectorConstruction::magField = 0;
 G4ThreadLocal G4FieldManager* DetectorConstruction::fieldMgr = 0;
@@ -272,6 +273,12 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   if (m_saveGdml) {
     G4GDMLParser fParser;
     G4cout << "Exporting geometry to " << m_fileGdml << G4endl;
+
+    if(std::filesystem::exists(m_fileGdml)){
+      G4cout << "  File already exists. Deleting first..." << G4endl;
+      std::filesystem::remove(m_fileGdml);
+    }
+
     fParser.Write(m_fileGdml, worldPV, false);
   }
 
