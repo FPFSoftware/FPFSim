@@ -581,7 +581,7 @@ void AnalysisManager::FillPrimariesTree(const G4Event *event)
       {
  
         primVtxID = ivtx;
-        primTrackID = ipp; // confirm matches track id?
+        primTrackID = ipp + 1; // confirm matches track id?
 
         auto particleId = ActsFatras::Barcode();
         particleId.setVertexPrimary(ivtx);
@@ -744,21 +744,22 @@ void AnalysisManager::FillFLArEOutput()
 
       // which primary ancestor does this hit belong to?
       G4int whichPrim = GetTrackPrimaryAncestor(flareTrackID);
+      G4int whichIndex = whichPrim - 1; // need to start from zero
 
       // pseudo reco: track/shower length and width
-      primaryTrackLength[whichPrim] += hit->GetStepLength();
-      double ShowerP = primaries[whichPrim].P();
-      double dsquare_hit_vtx = TMath::Power((flareX-primaries[whichPrim].Vx()),2)+
-                               TMath::Power((flareY-primaries[whichPrim].Vy()),2)+
-                               TMath::Power((flareZ-primaries[whichPrim].Vz()),2);
-      double product_hit_p = (flareX-primaries[whichPrim].Vx())*primaries[whichPrim].Px()+
-                             (flareY-primaries[whichPrim].Vy())*primaries[whichPrim].Py()+
-                             (flareZ-primaries[whichPrim].Vz())*primaries[whichPrim].Pz();
+      primaryTrackLength[whichIndex] += hit->GetStepLength();
+      double ShowerP = primaries[whichIndex].P();
+      double dsquare_hit_vtx = TMath::Power((flareX-primaries[whichIndex].Vx()),2)+
+                               TMath::Power((flareY-primaries[whichIndex].Vy()),2)+
+                               TMath::Power((flareZ-primaries[whichIndex].Vz()),2);
+      double product_hit_p = (flareX-primaries[whichIndex].Vx())*primaries[whichIndex].Px()+
+                             (flareY-primaries[whichIndex].Vy())*primaries[whichIndex].Py()+
+                             (flareZ-primaries[whichIndex].Vz())*primaries[whichIndex].Pz();
       double len_hit = TMath::Abs(product_hit_p)/ShowerP;
       double width_hit = TMath::Sqrt((dsquare_hit_vtx - product_hit_p*product_hit_p/ShowerP/ShowerP));
-      ShowerLength[whichPrim] = (ShowerLength[whichPrim]>len_hit) ? ShowerLength[whichPrim] : len_hit;
+      ShowerLength[whichIndex] = (ShowerLength[whichIndex]>len_hit) ? ShowerLength[whichIndex] : len_hit;
       double weighted_width_hit = width_hit*flareEdep;
-      if (!std::isnan(weighted_width_hit)) ShowerWidth[whichPrim] += weighted_width_hit;
+      if (!std::isnan(weighted_width_hit)) ShowerWidth[whichIndex] += weighted_width_hit;
 
       if (sdName == "FLArEBoxSD/lar_box")
       {
@@ -766,18 +767,18 @@ void AnalysisManager::FillFLArEOutput()
         fFLArEHits->Fill();
 
         if (fAddDiffusion == "toy") 
-          pm3D->FillEntryWithToyElectronTransportation(hit_position_xyz, vtx_xyz, flareEdep, whichPrim);
+          pm3D->FillEntryWithToyElectronTransportation(hit_position_xyz, vtx_xyz, flareEdep, whichIndex);
         else if (fAddDiffusion == "single")
-          pm3D->FillEntryWithToySingleElectronTransportation(hit_position_xyz, vtx_xyz, flareEdep, whichPrim);
-        else if (sdName == "lArBoxSD/lar_box")
-          pm3D->FillEntry(hit_position_xyz, vtx_xyz, flareEdep, whichPrim);
+          pm3D->FillEntryWithToySingleElectronTransportation(hit_position_xyz, vtx_xyz, flareEdep, whichIndex);
+        else
+          pm3D->FillEntry(hit_position_xyz, vtx_xyz, flareEdep, whichIndex);
 
         // accumulate Edep in LAr
         edepInLAr += flareEdep;
-        ProngEInLAr[whichPrim] += flareEdep;
-        primaryTrackLengthInTPC[whichPrim] += hit->GetStepLength();
-        ShowerLengthInLAr[whichPrim] = (ShowerLengthInLAr[whichPrim]>len_hit) ? ShowerLengthInLAr[whichPrim] : len_hit;
-        if (!std::isnan(weighted_width_hit)) ShowerWidthInLAr[whichPrim] += weighted_width_hit;
+        ProngEInLAr[whichIndex] += flareEdep;
+        primaryTrackLengthInTPC[whichIndex] += hit->GetStepLength();
+        ShowerLengthInLAr[whichIndex] = (ShowerLengthInLAr[whichIndex]>len_hit) ? ShowerLengthInLAr[whichIndex] : len_hit;
+        if (!std::isnan(weighted_width_hit)) ShowerWidthInLAr[whichIndex] += weighted_width_hit;
 
         // accumulate dE/dx in LAr
         float_t longitudinal_distance_to_vtx = ((flareX-vtx_xyz[0])*primaries[0].Px()+
@@ -797,7 +798,7 @@ void AnalysisManager::FillFLArEOutput()
 
         // accumulate Edep in HCAL
         edepInHCALX += flareEdep;
-        ProngEInHadCal[whichPrim] += flareEdep;
+        ProngEInHadCal[whichIndex] += flareEdep;
       }
       else if (sdName == "FLArEHadCalYSD/lar_box" || 
                sdName == "FLArEMuonFinderYSD/lar_box" ||
@@ -811,7 +812,7 @@ void AnalysisManager::FillFLArEOutput()
 
         // accumulate Edep in HCAL
         edepInHCALY += flareEdep;
-        ProngEInHadCal[whichPrim] += flareEdep;
+        ProngEInHadCal[whichIndex] += flareEdep;
       }
     }
   }
@@ -985,38 +986,41 @@ void AnalysisManager::FillFLArEPseudoReco()
 
   for (auto iPrim : primaryIDs )
   {
-    primaryPDG[iPrim] = primaries[iPrim].PDG();
+    // trackIDs go from 1 to N, you need index: 0 to N-1
+    G4int iiPrim = iPrim - 1;
 
-    float_t totProngE = ProngEInLAr[iPrim]+ProngEInHadCal[iPrim];
+    primaryPDG[iiPrim] = primaries[iiPrim].PDG();
+
+    float_t totProngE = ProngEInLAr[iiPrim]+ProngEInHadCal[iiPrim];
     if (totProngE>0)
     {
-      ShowerWidth[iPrim] = ShowerWidth[iPrim] / totProngE;
+      ShowerWidth[iiPrim] = ShowerWidth[iiPrim] / totProngE;
     }
-    if (ProngEInLAr[iPrim] > 0)
+    if (ProngEInLAr[iiPrim] > 0)
     {
-      ShowerWidthInLAr[iPrim] = ShowerWidthInLAr[iPrim] / ProngEInLAr[iPrim];
+      ShowerWidthInLAr[iiPrim] = ShowerWidthInLAr[iiPrim] / ProngEInLAr[iiPrim];
     }
 
-    double ShowerP = primaries[iPrim].P();
-    double costheta = primaries[iPrim].Pz() / ShowerP;
-    ProngAngleToBeamDir[iPrim] = TMath::ACos(costheta);
+    double ShowerP = primaries[iiPrim].P();
+    double costheta = primaries[iiPrim].Pz() / ShowerP;
+    ProngAngleToBeamDir[iiPrim] = TMath::ACos(costheta);
 
-    ProngAvgdEdx[iPrim] = (ProngEInLAr[iPrim] +
-                           ProngEInHadCal[iPrim]) /
-                          ShowerLength[iPrim];
-    ProngAvgdEdxInLAr[iPrim] = ProngEInLAr[iPrim] / ShowerLengthInLAr[iPrim];
+    ProngAvgdEdx[iiPrim] = (ProngEInLAr[iiPrim] +
+                           ProngEInHadCal[iiPrim]) /
+                          ShowerLength[iiPrim];
+    ProngAvgdEdxInLAr[iiPrim] = ProngEInLAr[iiPrim] / ShowerLengthInLAr[iiPrim];
 
     std::cout << std::setiosflags(std::ios::fixed) << std::setprecision(3);
-    std::cout << std::setw(10) << primaries[iPrim].PDG();
-    std::cout << std::setw(12) << ProngAngleToBeamDir[iPrim];
-    std::cout << std::setw(13) << primaryTrackLength[iPrim];
-    std::cout << std::setw(13) << ShowerLength[iPrim];
-    std::cout << std::setw(18) << ShowerWidthInLAr[iPrim];
-    std::cout << std::setw(12) << ProngEInLAr[iPrim];
-    std::cout << std::setw(12) << ProngEInHadCal[iPrim];
-    std::cout << std::setw(12) << ProngAvgdEdxInLAr[iPrim];
-    std::cout << std::setw(10) << primaries[iPrim].ProngType();
-    std::cout << std::setw(12) << primaries[iPrim].Pz() << std::endl;
+    std::cout << std::setw(10) << primaries[iiPrim].PDG();
+    std::cout << std::setw(12) << ProngAngleToBeamDir[iiPrim];
+    std::cout << std::setw(13) << primaryTrackLength[iiPrim];
+    std::cout << std::setw(13) << ShowerLength[iiPrim];
+    std::cout << std::setw(18) << ShowerWidthInLAr[iiPrim];
+    std::cout << std::setw(12) << ProngEInLAr[iiPrim];
+    std::cout << std::setw(12) << ProngEInHadCal[iiPrim];
+    std::cout << std::setw(12) << ProngAvgdEdxInLAr[iiPrim];
+    std::cout << std::setw(10) << primaries[iiPrim].ProngType();
+    std::cout << std::setw(12) << primaries[iiPrim].Pz() << std::endl;
   }
 
   slid::ShowerLID *shwlid = new slid::ShowerLID(pm3D->Get3DPixelMap(),
