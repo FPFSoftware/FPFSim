@@ -12,6 +12,7 @@
 #include <Randomize.hh>
 #include <G4Poisson.hh>
 #include <G4Trajectory.hh>
+#include <G4LorentzVector.hh>
 
 #include <TDirectory.h>
 #include <TFile.h>
@@ -26,14 +27,14 @@
 #include "LArBoxSD.hh"
 #include "FASER2TrackerSD.hh"
 #include "LArBoxHit.hh"
-#include "PrimaryParticleInformation.hh"
+#include "EventInformation.hh"
+#include "generators/GeneratorVertexMetadata.hh"
 #include "reco/PCAAnalysis3D.hh"
 #include "reco/Cluster3D.hh"
 #include "reco/LinearFit.hh"
 #include "reco/ShowerLID.hh"
 #include "reco/Barcode.hh"
 #include "FPFParticle.hh"
-#include "FPFNeutrino.hh"
 
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
@@ -89,9 +90,33 @@ void AnalysisManager::bookEvtTree()
 {
   fEvt = new TTree("event", "event info");
   fEvt->Branch("evtID", &evtID, "evtID/I");
-
-  //TODO EXPAND!!!!
-
+  fEvt->Branch("vtxID", &vertexID, "vtxID/I");
+  fEvt->Branch("weight", &weight, "weight/D");
+  fEvt->Branch("genType", &genType);
+  fEvt->Branch("processName", &processName);
+  fEvt->Branch("initPDG", &initPDG, "initPDG/I");
+  fEvt->Branch("initX", &initX, "initX/D");
+  fEvt->Branch("initY", &initY, "initY/D");
+  fEvt->Branch("initZ", &initZ, "initZ/D");
+  fEvt->Branch("initT", &initT, "initT/D");
+  fEvt->Branch("initPx", &initPx, "initPx/D");
+  fEvt->Branch("initPy", &initPy, "initPy/D");
+  fEvt->Branch("initPz", &initPz, "initPz/D"); 
+  fEvt->Branch("initE", &initE, "initE/D");
+  fEvt->Branch("initM", &initM, "initM/D");
+  fEvt->Branch("initQ", &initQ, "initQ/D");
+  fEvt->Branch("intType", &intType, "intType/I");
+  fEvt->Branch("scatteringType", &scatteringType, "scatteringType/I");
+  fEvt->Branch("fslPDG", &fslPDG, "fslPDG/I");
+  fEvt->Branch("tgtPDG", &tgtPDG, "tgtPDG/I");
+  fEvt->Branch("tgtA", &tgtA, "tgtA/I");
+  fEvt->Branch("tgtZ", &tgtZ, "tgtZ/I");
+  fEvt->Branch("hitnucPDG", &hitnucPDG, "hitnucPDG/I");
+  fEvt->Branch("xs", &xs, "xs/D");
+  fEvt->Branch("Q2", &Q2, "Q2/D");
+  fEvt->Branch("xBj", &xBj, "xBj/D");
+  fEvt->Branch("y", &y, "y/D");
+  fEvt->Branch("W", &W, "W/D");
 }
 
 void AnalysisManager::bookPrimTree()
@@ -382,12 +407,9 @@ void AnalysisManager::EndOfRun()
 
 void AnalysisManager::BeginOfEvent()
 {
-  // TODO: REVIEW, CLEAN-UP UNUSED VARIABLES
-  // TODO: change arrays into std::vectors
   // reset vectors that need to be cleared for a new event
-  // only reset arrays or vectors, no need for other defaults??
+  // only reset arrays or vectors, tipically no need for other defaults
 
-  neutrino = FPFNeutrino(); // remove???
   primaries.clear();
   primaryIDs.clear();
 
@@ -467,9 +489,7 @@ void AnalysisManager::EndOfEvent(const G4Event *event)
   evtID = event->GetEventID();
 
   // FILL EVENT TREE
-  // nothing else except evtID for now...
-  // TODO: need to find good way to propagate generator-level info
-  fEvt->Fill();
+  FillEventTree(event);
 
   //-----------------------------------------------------------
 
@@ -501,6 +521,48 @@ void AnalysisManager::EndOfEvent(const G4Event *event)
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
 
+void AnalysisManager::FillEventTree(const G4Event *event)
+{
+  EventInformation* eventInfo = static_cast<EventInformation*>(event->GetUserInformation());
+  eventInfo->Print();
+  auto metadata = eventInfo->GetEventMetadata();
+  for(int i=0; i<metadata.size(); i++)
+  {
+    vertexID = i;
+    weight = metadata[i].weight;
+    genType = metadata[i].generatorType;
+    processName = metadata[i].processName;
+    initPDG = metadata[i].pdg;
+    initX = metadata[i].x4.x();
+    initY = metadata[i].x4.y();
+    initZ = metadata[i].x4.z();
+    initT = metadata[i].x4.t();
+    initPx = metadata[i].p4.x();
+    initPy = metadata[i].p4.y();
+    initPz = metadata[i].p4.z();
+    initE = metadata[i].p4.e();
+    initM = metadata[i].mass;
+    initQ = metadata[i].charge;
+    intType = metadata[i].intType;     
+    scatteringType = metadata[i].scatteringType;   
+    fslPDG = metadata[i].fsl_pdg;           
+    tgtPDG = metadata[i].tgt_pdg;  
+    tgtZ = metadata[i].tgt_Z;     
+    tgtA = metadata[i].tgt_A;     
+    hitnucPDG = metadata[i].hitnuc_pdg;  
+    xs = metadata[i].xs;
+    Q2 = metadata[i].Q2;  
+    xBj = metadata[i].xBj;
+    y = metadata[i].y; 
+    W = metadata[i].W; 
+
+    fEvt->Fill();
+  }
+}
+
+//---------------------------------------------------------------------
+//---------------------------------------------------------------------
+
 void AnalysisManager::FillPrimariesTree(const G4Event *event)
 {
   nPrimaryVertex = event->GetNumberOfPrimaryVertex();
@@ -517,11 +579,9 @@ void AnalysisManager::FillPrimariesTree(const G4Event *event)
       G4PrimaryParticle *primary_particle = event->GetPrimaryVertex(ivtx)->GetPrimary(ipp);
       if (primary_particle)
       {
-        PrimaryParticleInformation *primary_particle_info = dynamic_cast<PrimaryParticleInformation *>(primary_particle->GetUserInformation());
-        primary_particle_info->Print();
-
+ 
         primVtxID = ivtx;
-        primTrackID = primary_particle_info->GetPartID(); // confirm matches track's id later?
+        primTrackID = ipp + 1; // confirm matches track id?
 
         auto particleId = ActsFatras::Barcode();
         particleId.setVertexPrimary(ivtx);
@@ -530,23 +590,23 @@ void AnalysisManager::FillPrimariesTree(const G4Event *event)
         particleId.setParticle(primTrackID - 1);
 
         primParticleID = particleId.value();
-        primPDG = primary_particle_info->GetPDG();
-        primVx = primary_particle_info->GetVertexMC().x();
-        primVy = primary_particle_info->GetVertexMC().y();
-        primVz = primary_particle_info->GetVertexMC().z();
-        primVt = 0;
-        primPx = primary_particle_info->GetMomentumMC().x();
-        primPy = primary_particle_info->GetMomentumMC().y();
-        primPz = primary_particle_info->GetMomentumMC().z();
-        primM = primary_particle_info->GetMass()/MeV;
-        primQ = primary_particle_info->GetCharge();
+        primPDG = primary_particle->GetPDGcode();
+        primVx = event->GetPrimaryVertex(ivtx)->GetPosition().x();
+        primVy = event->GetPrimaryVertex(ivtx)->GetPosition().y();
+        primVz = event->GetPrimaryVertex(ivtx)->GetPosition().z();
+        primVt = event->GetPrimaryVertex(ivtx)->GetT0();
+        primPx = primary_particle->GetMomentum().x();
+        primPy = primary_particle->GetMomentum().y();
+        primPz = primary_particle->GetMomentum().z();
+        primM = primary_particle->GetMass()/MeV;
+        primQ = primary_particle->GetCharge();
 
         G4double energy = GetTotalEnergy(primPx, primPy, primPz, primM);
-        TLorentzVector p4(primPx,primPy,primPz,energy);
-        primEta = p4.Eta();
-        primPhi = p4.Phi();
-        primPt = p4.Pt();
-        primP = p4.P();
+        G4LorentzVector p4(primPx,primPy,primPz,energy);
+        primEta = p4.eta();
+        primPhi = p4.phi();
+        primPt = p4.perp();
+        primP = p4.vect().mag();
         primE = energy;
         primKE = energy - primM;
 
@@ -557,6 +617,13 @@ void AnalysisManager::FillPrimariesTree(const G4Event *event)
 		                        primM,
                             primVx, primVy, primVz, primVt,
                             primPx, primPy, primPz,energy));
+
+        G4cout << G4endl;
+        G4cout << "PrimaryParticleInfo: PDG code " << primPDG << G4endl
+          << "Particle unique ID : " << primTrackID << G4endl
+          << "Momentum : (" << primPx << ", " << primPy << ", " << primPz << ") MeV" << G4endl
+          << "Vertex : (" << primVx << ", " << primVy << ", " << primVz << ") mm" << G4endl;
+
         fPrim->Fill();
       }
     }
@@ -614,12 +681,7 @@ void AnalysisManager::FillFLArEOutput()
   // prepare the pixel map
   const double_t res_tpc[3] = {1, 5, 5}; // mm
   
-  // TODO: rethink once generator info is included...
-  /*if (neutrino.NuPDG()!=0) { 
-    pm3D = new PixelMap3D(evtID, nPrimaryParticle, neutrino.NuPDG(), res_tpc); 
-  } else { */
-
-  pm3D = new PixelMap3D(evtID, primaries.size(), primaries[0].PDG(), res_tpc);
+  pm3D = new PixelMap3D(evtID, primaries.size(), initPDG, res_tpc);
   // boundaries in global coordinates
   pm3D->SetPMBoundary(GeometricalParameters::Get()->GetFLArEPosition()/mm -
                       GeometricalParameters::Get()->GetTPCSizeXYZ()/mm/2,
@@ -682,21 +744,22 @@ void AnalysisManager::FillFLArEOutput()
 
       // which primary ancestor does this hit belong to?
       G4int whichPrim = GetTrackPrimaryAncestor(flareTrackID);
+      G4int whichIndex = whichPrim - 1; // need to start from zero
 
       // pseudo reco: track/shower length and width
-      primaryTrackLength[whichPrim] += hit->GetStepLength();
-      double ShowerP = primaries[whichPrim].P();
-      double dsquare_hit_vtx = TMath::Power((flareX-primaries[whichPrim].Vx()),2)+
-                               TMath::Power((flareY-primaries[whichPrim].Vy()),2)+
-                               TMath::Power((flareZ-primaries[whichPrim].Vz()),2);
-      double product_hit_p = (flareX-primaries[whichPrim].Vx())*primaries[whichPrim].Px()+
-                             (flareY-primaries[whichPrim].Vy())*primaries[whichPrim].Py()+
-                             (flareZ-primaries[whichPrim].Vz())*primaries[whichPrim].Pz();
+      primaryTrackLength[whichIndex] += hit->GetStepLength();
+      double ShowerP = primaries[whichIndex].P();
+      double dsquare_hit_vtx = TMath::Power((flareX-primaries[whichIndex].Vx()),2)+
+                               TMath::Power((flareY-primaries[whichIndex].Vy()),2)+
+                               TMath::Power((flareZ-primaries[whichIndex].Vz()),2);
+      double product_hit_p = (flareX-primaries[whichIndex].Vx())*primaries[whichIndex].Px()+
+                             (flareY-primaries[whichIndex].Vy())*primaries[whichIndex].Py()+
+                             (flareZ-primaries[whichIndex].Vz())*primaries[whichIndex].Pz();
       double len_hit = TMath::Abs(product_hit_p)/ShowerP;
       double width_hit = TMath::Sqrt((dsquare_hit_vtx - product_hit_p*product_hit_p/ShowerP/ShowerP));
-      ShowerLength[whichPrim] = (ShowerLength[whichPrim]>len_hit) ? ShowerLength[whichPrim] : len_hit;
+      ShowerLength[whichIndex] = (ShowerLength[whichIndex]>len_hit) ? ShowerLength[whichIndex] : len_hit;
       double weighted_width_hit = width_hit*flareEdep;
-      if (!std::isnan(weighted_width_hit)) ShowerWidth[whichPrim] += weighted_width_hit;
+      if (!std::isnan(weighted_width_hit)) ShowerWidth[whichIndex] += weighted_width_hit;
 
       if (sdName == "FLArEBoxSD/lar_box")
       {
@@ -704,18 +767,18 @@ void AnalysisManager::FillFLArEOutput()
         fFLArEHits->Fill();
 
         if (fAddDiffusion == "toy") 
-          pm3D->FillEntryWithToyElectronTransportation(hit_position_xyz, vtx_xyz, flareEdep, whichPrim);
+          pm3D->FillEntryWithToyElectronTransportation(hit_position_xyz, vtx_xyz, flareEdep, whichIndex);
         else if (fAddDiffusion == "single")
-          pm3D->FillEntryWithToySingleElectronTransportation(hit_position_xyz, vtx_xyz, flareEdep, whichPrim);
-        else if (sdName == "lArBoxSD/lar_box")
-          pm3D->FillEntry(hit_position_xyz, vtx_xyz, flareEdep, whichPrim);
+          pm3D->FillEntryWithToySingleElectronTransportation(hit_position_xyz, vtx_xyz, flareEdep, whichIndex);
+        else
+          pm3D->FillEntry(hit_position_xyz, vtx_xyz, flareEdep, whichIndex);
 
         // accumulate Edep in LAr
         edepInLAr += flareEdep;
-        ProngEInLAr[whichPrim] += flareEdep;
-        primaryTrackLengthInTPC[whichPrim] += hit->GetStepLength();
-        ShowerLengthInLAr[whichPrim] = (ShowerLengthInLAr[whichPrim]>len_hit) ? ShowerLengthInLAr[whichPrim] : len_hit;
-        if (!std::isnan(weighted_width_hit)) ShowerWidthInLAr[whichPrim] += weighted_width_hit;
+        ProngEInLAr[whichIndex] += flareEdep;
+        primaryTrackLengthInTPC[whichIndex] += hit->GetStepLength();
+        ShowerLengthInLAr[whichIndex] = (ShowerLengthInLAr[whichIndex]>len_hit) ? ShowerLengthInLAr[whichIndex] : len_hit;
+        if (!std::isnan(weighted_width_hit)) ShowerWidthInLAr[whichIndex] += weighted_width_hit;
 
         // accumulate dE/dx in LAr
         float_t longitudinal_distance_to_vtx = ((flareX-vtx_xyz[0])*primaries[0].Px()+
@@ -735,7 +798,7 @@ void AnalysisManager::FillFLArEOutput()
 
         // accumulate Edep in HCAL
         edepInHCALX += flareEdep;
-        ProngEInHadCal[whichPrim] += flareEdep;
+        ProngEInHadCal[whichIndex] += flareEdep;
       }
       else if (sdName == "FLArEHadCalYSD/lar_box" || 
                sdName == "FLArEMuonFinderYSD/lar_box" ||
@@ -749,14 +812,14 @@ void AnalysisManager::FillFLArEOutput()
 
         // accumulate Edep in HCAL
         edepInHCALY += flareEdep;
-        ProngEInHadCal[whichPrim] += flareEdep;
+        ProngEInHadCal[whichIndex] += flareEdep;
       }
     }
   }
 
   if (fSave2DEvd) pm3D->Write2DPMToFile(fFile,fFLArEDir); 
 
-  pm3D->Process3DPM(fH5file, neutrino, fSave3DEvd);
+  pm3D->Process3DPM(fH5file, initPDG, fslPDG, intType, scatteringType, initE, fSave3DEvd);
 
   sparseFractionMem = pm3D->GetSparseFractionMem();
   sparseFractionBins = pm3D->GetSparseFractionBins();
@@ -923,42 +986,45 @@ void AnalysisManager::FillFLArEPseudoReco()
 
   for (auto iPrim : primaryIDs )
   {
-    primaryPDG[iPrim] = primaries[iPrim].PDG();
+    // trackIDs go from 1 to N, you need index: 0 to N-1
+    G4int iiPrim = iPrim - 1;
 
-    float_t totProngE = ProngEInLAr[iPrim]+ProngEInHadCal[iPrim];
+    primaryPDG[iiPrim] = primaries[iiPrim].PDG();
+
+    float_t totProngE = ProngEInLAr[iiPrim]+ProngEInHadCal[iiPrim];
     if (totProngE>0)
     {
-      ShowerWidth[iPrim] = ShowerWidth[iPrim] / totProngE;
+      ShowerWidth[iiPrim] = ShowerWidth[iiPrim] / totProngE;
     }
-    if (ProngEInLAr[iPrim] > 0)
+    if (ProngEInLAr[iiPrim] > 0)
     {
-      ShowerWidthInLAr[iPrim] = ShowerWidthInLAr[iPrim] / ProngEInLAr[iPrim];
+      ShowerWidthInLAr[iiPrim] = ShowerWidthInLAr[iiPrim] / ProngEInLAr[iiPrim];
     }
 
-    double ShowerP = primaries[iPrim].P();
-    double costheta = primaries[iPrim].Pz() / ShowerP;
-    ProngAngleToBeamDir[iPrim] = TMath::ACos(costheta);
+    double ShowerP = primaries[iiPrim].P();
+    double costheta = primaries[iiPrim].Pz() / ShowerP;
+    ProngAngleToBeamDir[iiPrim] = TMath::ACos(costheta);
 
-    ProngAvgdEdx[iPrim] = (ProngEInLAr[iPrim] +
-                           ProngEInHadCal[iPrim]) /
-                          ShowerLength[iPrim];
-    ProngAvgdEdxInLAr[iPrim] = ProngEInLAr[iPrim] / ShowerLengthInLAr[iPrim];
+    ProngAvgdEdx[iiPrim] = (ProngEInLAr[iiPrim] +
+                           ProngEInHadCal[iiPrim]) /
+                          ShowerLength[iiPrim];
+    ProngAvgdEdxInLAr[iiPrim] = ProngEInLAr[iiPrim] / ShowerLengthInLAr[iiPrim];
 
     std::cout << std::setiosflags(std::ios::fixed) << std::setprecision(3);
-    std::cout << std::setw(10) << primaries[iPrim].PDG();
-    std::cout << std::setw(12) << ProngAngleToBeamDir[iPrim];
-    std::cout << std::setw(13) << primaryTrackLength[iPrim];
-    std::cout << std::setw(13) << ShowerLength[iPrim];
-    std::cout << std::setw(18) << ShowerWidthInLAr[iPrim];
-    std::cout << std::setw(12) << ProngEInLAr[iPrim];
-    std::cout << std::setw(12) << ProngEInHadCal[iPrim];
-    std::cout << std::setw(12) << ProngAvgdEdxInLAr[iPrim];
-    std::cout << std::setw(10) << primaries[iPrim].ProngType();
-    std::cout << std::setw(12) << primaries[iPrim].Pz() << std::endl;
+    std::cout << std::setw(10) << primaries[iiPrim].PDG();
+    std::cout << std::setw(12) << ProngAngleToBeamDir[iiPrim];
+    std::cout << std::setw(13) << primaryTrackLength[iiPrim];
+    std::cout << std::setw(13) << ShowerLength[iiPrim];
+    std::cout << std::setw(18) << ShowerWidthInLAr[iiPrim];
+    std::cout << std::setw(12) << ProngEInLAr[iiPrim];
+    std::cout << std::setw(12) << ProngEInHadCal[iiPrim];
+    std::cout << std::setw(12) << ProngAvgdEdxInLAr[iiPrim];
+    std::cout << std::setw(10) << primaries[iiPrim].ProngType();
+    std::cout << std::setw(12) << primaries[iiPrim].Pz() << std::endl;
   }
 
   slid::ShowerLID *shwlid = new slid::ShowerLID(pm3D->Get3DPixelMap(),
-                                                neutrino.NuVx(), neutrino.NuVy(), neutrino.NuVz(), 0., 0., 1.);
+                                                initX, initY, initZ, 0., 0., 1.);
   Double_t *ptr_dedx = shwlid->GetTotalDedxLongitudinal();
   std::copy(ptr_dedx, ptr_dedx + 3000, TotalDedxLongitudinal.begin());
 
@@ -969,7 +1035,7 @@ void AnalysisManager::FillFLArEPseudoReco()
         pm3D->Get2DPixelMapZY(iPrim + 1),
         pm3D->Get2DVtxPixelMapZX(iPrim + 1),
         pm3D->Get2DVtxPixelMapZY(iPrim + 1),
-        neutrino.NuVx(), neutrino.NuVy(), neutrino.NuVz(),
+        initX, initY, initZ,
         primaries[iPrim].Vx(), primaries[iPrim].Vy(), primaries[iPrim].Vz());
     dir_pol_x[iPrim] = linFit->GetDir().X();
     dir_pol_y[iPrim] = linFit->GetDir().Y();

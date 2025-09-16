@@ -1,6 +1,7 @@
 #include "generators/GeneratorBase.hh"
 #include "generators/BackgroundGenerator.hh"
 #include "generators/BackgroundGeneratorMessenger.hh"
+#include "generators/GeneratorVertexMetadata.hh"
 
 #include "geometry/GeometricalParameters.hh"
 
@@ -9,9 +10,9 @@
 #include "G4IonTable.hh"
 #include "G4SystemOfUnits.hh"
 #include "G4Poisson.hh"
-#include "Randomize.hh"
+#include "G4LorentzVector.hh"
 
-#include "TLorentzVector.h"
+#include "Randomize.hh"
 #include "TMath.h"
 #include "TFile.h"
 #include "TTree.h"
@@ -68,25 +69,37 @@ void BackgroundGenerator::LoadData()
 }
 
 
-void BackgroundGenerator::ShootParticle(G4Event* anEvent, G4int pdg, TLorentzVector x4, TLorentzVector p4) const
+void BackgroundGenerator::ShootParticle(G4Event* anEvent, G4int pdg, G4LorentzVector x4, G4LorentzVector p4)
 {
   // prepare a particle with the extracted starting position and momentum
   // once ready, shoot it with the gun!
   G4ParticleDefinition* particleDefinition = G4ParticleTable::GetParticleTable()->FindParticle(pdg);
  
-  /* uncomment for debugging.. 
+  /* uncomment for debugging..
   G4cout << "Particle PDG " << pdg << " mass " << particleDefinition->GetPDGMass()*MeV << G4endl;
-  G4cout << "  x4  " << x4.X() << " " << x4.Y() << " " << x4.Z() << " " << x4.T() << G4endl;
-  G4cout << "  p4  " << p4.X() << " " << p4.Y() << " " << p4.Z() << " " << p4.E() << G4endl;
-  G4cout << "  kinE " << (p4.E() - particleDefinition->GetPDGMass()*MeV)  << G4endl;
+  G4cout << "  x4  " << x4.x() << " " << x4.y() << " " << x4.z() << " " << x4.t() << G4endl;
+  G4cout << "  p4  " << p4.x() << " " << p4.y() << " " << p4.z() << " " << p4.e() << G4endl;
+  G4cout << "  kinE " << (p4.e() - particleDefinition->GetPDGMass()*MeV)  << G4endl;
   */
+
+  // save metadata info...
+  GeneratorVertexMetadata metadata;
+  metadata.generatorType = fGeneratorName;
+  metadata.processName = "Background";
+  metadata.weight = fBkgTimeWindow/s;
+  metadata.pdg = pdg;  
+  metadata.x4 = x4;
+  metadata.p4 = p4;
+  metadata.mass = particleDefinition->GetPDGMass()*MeV; 
+  metadata.charge = particleDefinition->GetPDGCharge(); 
+  fVertexMetadata.push_back(metadata);
 
   // load the gun...
   fGPS->SetParticleDefinition(particleDefinition);
-  fGPS->GetCurrentSource()->GetEneDist()->SetMonoEnergy(( p4.E() - particleDefinition->GetPDGMass()*MeV));  // kinetic energy
-  fGPS->GetCurrentSource()->GetAngDist()->SetParticleMomentumDirection(G4ThreeVector(p4.X(), p4.Y(), p4.Z()));
+  fGPS->GetCurrentSource()->GetEneDist()->SetMonoEnergy(( p4.e() - particleDefinition->GetPDGMass()*MeV));  // kinetic energy
+  fGPS->GetCurrentSource()->GetAngDist()->SetParticleMomentumDirection(G4ThreeVector(p4.x(), p4.y(), p4.z()));
   fGPS->GetCurrentSource()->GetPosDist()->SetPosDisType("Point");
-  fGPS->GetCurrentSource()->GetPosDist()->SetCentreCoords( G4ThreeVector(x4.X(), x4.Y(), x4.Z()) );
+  fGPS->GetCurrentSource()->GetPosDist()->SetCentreCoords( G4ThreeVector(x4.x(), x4.y(), x4.z()) );
   fGPS->GeneratePrimaryVertex(anEvent); // ...and shoot!
 }
 
@@ -181,12 +194,12 @@ void BackgroundGenerator::GeneratePrimaries(G4Event* anEvent)
       double zdircos = TMath::Sqrt(zdircos2); // always positive
 
       // now prepare inputs to load the gun
-      TLorentzVector x4(x*cm, y*cm, z, t); // tell G4 that zy are cm
+      G4LorentzVector x4(x*cm, y*cm, z, t); // tell G4 that zy are cm
 
       double mass = G4ParticleTable::GetParticleTable()->FindParticle(pdg)->GetPDGMass()*MeV; // in MeV
       double totE = E*GeV + mass; //total energy
       double p = TMath::Sqrt( totE*totE - mass*mass );
-      TLorentzVector p4( xdircos*p, ydircos*p, zdircos*p, totE);
+      G4LorentzVector p4( xdircos*p, ydircos*p, zdircos*p, totE);
   
       // you may fire when ready now 
       ShootParticle( anEvent, pdg, x4, p4);

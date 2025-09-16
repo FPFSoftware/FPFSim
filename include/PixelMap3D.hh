@@ -10,8 +10,6 @@
 
 #include "G4ThreeVector.hh"
 
-#include "FPFNeutrino.hh"
-
 #include "hep_hpc/hdf5/File.hpp"
 //#include "hep_hpc/hdf5/Ntuple.hpp"
 
@@ -27,7 +25,7 @@ class PixelMap3D {
     void FillEntryWithToyElectronTransportation(const Double_t* pos_xyz, const Double_t* vtx_xyz, Double_t edep, const Int_t idxPrim);
     void FillEntryWithToySingleElectronTransportation(const Double_t* pos_xyz, const Double_t* vtx_xyz, Double_t edep, const Int_t idxPrim);
     void Write2DPMToFile(TFile* thefile, TDirectory *thedir);
-    void Process3DPM(hep_hpc::hdf5::File &h5file, FPFNeutrino neutrino, G4bool save3D);
+    void Process3DPM(hep_hpc::hdf5::File &h5file, G4int initPDG, G4int fslPDG, G4int intType, G4int scatType, G4double initE, G4bool save3D);
 
     // this should go to a Geometry Service class
     G4double DistanceToAnode(G4double x);

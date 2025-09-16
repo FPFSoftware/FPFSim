@@ -3,9 +3,10 @@
 
 #include "generators/GeneratorBase.hh"
 
+#include "G4LorentzVector.hh"
+
 #include "TFile.h"
 #include "TH3D.h"
-#include "TLorentzVector.h"
 #include "globals.hh"
 
 class G4Event;
@@ -45,7 +46,7 @@ class BackgroundGenerator : public GeneratorBase
     G4double TPC_driftTime_s = 187.5e-6; // 187.5 us for 30cm drift
 
     // specific internal functions
-    void ShootParticle(G4Event* anEvent, G4int pdg, TLorentzVector x4, TLorentzVector p4) const;
+    void ShootParticle(G4Event* anEvent, G4int pdg, G4LorentzVector x4, G4LorentzVector p4);
     void SampleDirectionCosines(double& xdircos, double& ydircos, double E) const;
     int ExtractBackgroundParticles() const;
 

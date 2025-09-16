@@ -9,7 +9,7 @@
 
 #include "geometry/GeometricalParameters.hh"
 
-#include "PrimaryParticleInformation.hh"
+#include "EventInformation.hh"
 
 #include "G4Event.hh"
 #include "G4Exception.hh"
@@ -66,44 +66,13 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   G4cout << G4endl;
   G4cout << "===oooOOOooo=== Event Generator (# " << anEvent->GetEventID();
 
+  // reset event metadata
+  fGenerator->ResetEventMetadata();
+
   // produce an event with current generator
   fGenerator->GeneratePrimaries(anEvent);
 
-  // save additional truth information alongside primary particles
-  // this makes it available for the output tree (e.g: neutrino info for genie)
+  // save vertex metadata information into the event
+  anEvent->SetUserInformation(new EventInformation(fGenerator->GetEventMetadata()));
 
-  // TODO: make it more generic for other generators?
-  bool isGenie = (fGenerator->GetGeneratorName() == "genie");
-  // downcast: if it fails, we won't use it anyway...
-  GENIEGenerator *genieGen = dynamic_cast<GENIEGenerator*>(fGenerator);
-  G4int neuidx = (isGenie) ? genieGen->GetNeuIdx() : -1;
-  G4int neupdg = (isGenie) ? genieGen->GetNeuPDG() : -1;
-  TLorentzVector neup4 = (isGenie) ? genieGen->GetNeuP4() : TLorentzVector();
-  TLorentzVector neux4 = (isGenie) ? genieGen->GetNeuX4() : TLorentzVector();
-  G4int int_type = (isGenie) ? genieGen->GetInteractionTypeId() : -1;
-  G4int scattering_type = (isGenie) ? genieGen->GetScatteringTypeId() : -1;
-  G4double w = (isGenie) ? genieGen->GetW() : -1;
-  G4int fslpdg = (isGenie) ? genieGen->GetFSLPDG() : -1;
-  TLorentzVector fslp4 = (isGenie) ? genieGen->GetFSLP4() : TLorentzVector();
-
-  // loop over the vertices, and then over primary particles,
-  // and for each primary particle create an info object
-  G4int count_particles = 0;
-  for (G4int ivtx = 0; ivtx < anEvent->GetNumberOfPrimaryVertex(); ++ivtx) {
-    for (G4int ipp = 0; ipp < anEvent->GetPrimaryVertex(ivtx)->GetNumberOfParticle(); ++ipp) {
-
-      G4PrimaryParticle* primary_particle = anEvent->GetPrimaryVertex(ivtx)->GetPrimary(ipp);
-
-      if (primary_particle) {
-        primary_particle->SetUserInformation(new PrimaryParticleInformation(
-              count_particles, primary_particle->GetPDGcode(), primary_particle->GetMass(),
-			  primary_particle->GetCharge(),
-              primary_particle->GetMomentum(), anEvent->GetPrimaryVertex(ivtx)->GetPosition(),
-              neuidx, neupdg, neup4, neux4, int_type, scattering_type, w,
-              fslpdg, fslp4));
-
-        count_particles++;
-      }
-    }
-  }
 }

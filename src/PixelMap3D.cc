@@ -259,7 +259,7 @@ void PixelMap3D::FillEntryWithToySingleElectronTransportation(const Double_t* po
   }
 }
 
-void PixelMap3D::Process3DPM(File &h5file, FPFNeutrino nu, G4bool save3D)
+void PixelMap3D::Process3DPM(File &h5file, G4int initPDG, G4int fslPDG, G4int intType, G4int scatType, G4double initE, G4bool save3D)
 {
   static auto evt_data = 
     make_ntuple({h5file, "evt_data"},
@@ -270,8 +270,7 @@ void PixelMap3D::Process3DPM(File &h5file, FPFNeutrino nu, G4bool save3D)
                 make_scalar_column<int>("mode"),
                 make_scalar_column<float>("nuE"));
 
-  evt_data.insert(fEvtID, nu.NuPDG(), nu.NuFSLPDG(),
-                  nu.NuIntType(), nu.NuScatteringType(), nu.NuE());
+  evt_data.insert(fEvtID, initPDG, fslPDG, intType, scatType, initE);
 
   static auto pm_data = 
     make_ntuple({h5file, "pm_data"},
