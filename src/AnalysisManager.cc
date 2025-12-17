@@ -11,7 +11,6 @@
 #include <G4SystemOfUnits.hh>
 #include <Randomize.hh>
 #include <G4Poisson.hh>
-#include <G4Trajectory.hh>
 #include <G4LorentzVector.hh>
 
 #include <TDirectory.h>
@@ -35,6 +34,8 @@
 #include "reco/ShowerLID.hh"
 #include "reco/Barcode.hh"
 #include "FPFParticle.hh"
+#include "FPFTrajectory.hh"
+
 
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
@@ -64,7 +65,7 @@ AnalysisManager::AnalysisManager()
   fMessenger = new AnalysisManagerMessenger(this);
 
   fEvt = nullptr;
-  fTrk = nullptr;
+  fPar = nullptr;
   fPrim = nullptr;
   fFLArEHits = nullptr;
   fFLArEHCALHits = nullptr;
@@ -144,18 +145,23 @@ void AnalysisManager::bookPrimTree()
   fPrim->Branch("P", &primP, "P/F");
 }
 
-void AnalysisManager::bookTrkTree()
+void AnalysisManager::bookParTree()
 {
-  fTrk = new TTree("trajectories", "trajectories info");
-  fTrk->Branch("evtID", &evtID, "evtID/I");
-  fTrk->Branch("trackTID", &trackTID, "trackTID/I");
-  fTrk->Branch("trackPID", &trackPID, "trackPID/I");
-  fTrk->Branch("trackPDG", &trackPDG, "trackPDG/I");
-  fTrk->Branch("trackKinE", &trackKinE, "trackKinE/D");
-  fTrk->Branch("trackNPoints", &trackNPoints, "trackNPoints/I");
-  fTrk->Branch("trackPointX", &trackPointX);
-  fTrk->Branch("trackPointY", &trackPointY);
-  fTrk->Branch("trackPointZ", &trackPointZ);
+  fPar = new TTree("particles", "particle info");
+  fPar->Branch("evtID", &evtID, "evtID/I");
+  fPar->Branch("trackTID", &trackTID, "trackTID/I");
+  fPar->Branch("trackPID", &trackPID, "trackPID/I");
+  fPar->Branch("trackPDG", &trackPDG, "trackPDG/I");
+  fPar->Branch("trackKinE", &trackKinE, "trackKinE/D");
+  fPar->Branch("trackNPoints", &trackNPoints, "trackNPoints/I");
+
+  // if saving full trajectory, add vector of trajectory points
+  if (fSaveTrack)
+  {
+    fPar->Branch("trackPointX", &trackPointX);
+    fPar->Branch("trackPointY", &trackPointY);
+    fPar->Branch("trackPointZ", &trackPointZ);
+  }
 }
 
 //---------------------------------------------------------------------
@@ -327,7 +333,7 @@ void AnalysisManager::BeginOfRun()
   // Booking common output trees
   bookEvtTree();
   bookPrimTree();
-  if (fSaveTrack) bookTrkTree();
+  bookParTree();
 
   fSDNamelist = GeometricalParameters::Get()->GetSDNamelist();
   G4cout << "Number of SDs : " << fSDNamelist.size() << G4endl;
@@ -379,7 +385,7 @@ void AnalysisManager::EndOfRun()
   fFile->cd();
   fEvt->Write();
   fPrim->Write();
-  if (fSaveTrack) fTrk->Write();
+  fPar->Write();
 
   // save detector-specif trees in their directories
   if (fFlareSDs.size()>0)
@@ -495,7 +501,7 @@ void AnalysisManager::EndOfEvent(const G4Event *event)
 
   // FILL PRIMARIES/TRAJECTORIES TREE
   FillPrimariesTree(event);
-  if(fSaveTrack) FillTrajectoriesTree(event);
+  FillParticlesTree(event);
 
   //-----------------------------------------------------------
 
@@ -635,7 +641,7 @@ void AnalysisManager::FillPrimariesTree(const G4Event *event)
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
 
-void AnalysisManager::FillTrajectoriesTree(const G4Event* event)
+void AnalysisManager::FillParticlesTree(const G4Event* event)
 {
   int count_tracks = 0;
 
@@ -643,13 +649,13 @@ void AnalysisManager::FillTrajectoriesTree(const G4Event* event)
   auto trajectoryContainer = event->GetTrajectoryContainer(); 
   if (!trajectoryContainer)
   {
-    G4cout << "No tracks found: did you enable their storage with '/tracking/storeTrajectory 1'?" << G4endl;
+    G4cout << "No tracks found in the event!" << G4endl;
     return;
   }
 
   for (size_t i = 0; i < trajectoryContainer->entries(); ++i) 
   { 
-    auto trajectory = static_cast<G4Trajectory*>((*trajectoryContainer)[i]); 
+    auto trajectory = static_cast<FPFTrajectory*>((*trajectoryContainer)[i]); 
     trackTID = trajectory->GetTrackID();
     trackPID = trajectory->GetParentID();
     trackPDG = trajectory->GetPDGEncoding(); 
@@ -663,7 +669,7 @@ void AnalysisManager::FillTrajectoriesTree(const G4Event* event)
       trackPointY.push_back( pos.y() );
       trackPointZ.push_back( pos.z() );
     }
-    fTrk->Fill();
+    fPar->Fill();
     trackPointX.clear(); 
     trackPointY.clear();
     trackPointZ.clear();

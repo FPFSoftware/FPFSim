@@ -47,8 +47,8 @@ class AnalysisManager {
     void SetTrackPrimaryAncestor(G4int trackID, G4int ancestorID) { trackToPrimaryAncestor[trackID] = ancestorID; }
     G4int GetTrackPrimaryAncestor(G4int trackID) { return trackToPrimaryAncestor.at(trackID); }
 
-    // TODO: needed???
-    void AddOnePrimaryTrack() { nTestNPrimaryTrack++; }
+    // return whether saving full tracks in trajectories
+    G4bool GetSaveTrack() { return fSaveTrack; }
 
   private:
 
@@ -56,14 +56,14 @@ class AnalysisManager {
     // Book ROOT output TTrees
     // common + detector specific
     void bookEvtTree();  
-    void bookTrkTree();  
+    void bookParTree();  
     void bookPrimTree(); 
     void bookFLArETrees();      
     void bookFASER2Trees();
 
     void FillEventTree(const G4Event* event);
     void FillPrimariesTree(const G4Event* event);
-    void FillTrajectoriesTree(const G4Event* event);
+    void FillParticlesTree(const G4Event* event);
     
     void FillFLArEOutput();
     void FillFLArEPseudoReco();
@@ -100,7 +100,7 @@ class AnalysisManager {
     hep_hpc::hdf5::File fH5file;
     TFile*   fFile;
     TTree*   fEvt;
-    TTree*   fTrk;
+    TTree*   fPar;
     TTree*   fPrim;
 
     TDirectory* fFLArEDir;
@@ -114,9 +114,6 @@ class AnalysisManager {
 
     // track to primary ancestor
     std::map<G4int, G4int> trackToPrimaryAncestor;
-
-    // TODO: no longer needed?
-    G4int nTestNPrimaryTrack;
 
     //---------------------------------------------------
     // OUTPUT VARIABLES FOR COMMON TREES
@@ -145,7 +142,7 @@ class AnalysisManager {
     double W;  
  
     //---------------------------------------------------
-    // Output variables for TRAJECTORIES tree
+    // Output variables for PARTICLES tree
     int trackTID;
     int trackPID;
     int trackPDG;
