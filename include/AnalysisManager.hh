@@ -57,12 +57,10 @@ class AnalysisManager {
     // common + detector specific
     void bookEvtTree();  
     void bookParTree();  
-    void bookPrimTree(); 
     void bookFLArETrees();      
     void bookFASER2Trees();
 
     void FillEventTree(const G4Event* event);
-    void FillPrimariesTree(const G4Event* event);
     void FillParticlesTree(const G4Event* event);
     
     void FillFLArEOutput();
@@ -117,30 +115,45 @@ class AnalysisManager {
 
     //---------------------------------------------------
     // OUTPUT VARIABLES FOR COMMON TREES
+    //---------------------------------------------------
+    // Output variables for EVENT tree
 
+    // general vertex metadata 
     G4int evtID;
     G4int vertexID;
     double weight;
     std::string genType;
-    std::string processName;    
+    std::string processName; 
+    // vertex position
+    double vtxX, vtxY, vtxZ, vtxT;
+    // initiator info (incoming particle)
     int initPDG;           
-    double initX, initY, initZ, initT;
     double initPx, initPy, initPz, initE;
     double initM;     
-    double initQ;    
-    int intType;           
-    int scatteringType;    
+    double initQ;  
+    // target info
     int fslPDG;           
     int tgtPDG;     
     int tgtA;      
     int tgtZ;      
     int hitnucPDG; 
+    // interaction info
+    int intType;           
+    int scatteringType;    
     double xs;
     double Q2;  
     double xBj; 
     double y;   
     double W;  
- 
+    // primaries from vertex
+    int nPrimaries;
+    std::vector<int> primTID;
+    std::vector<int> primPDG;
+    std::vector<float> primPx;
+    std::vector<float> primPy;
+    std::vector<float> primPz;
+    std::vector<float> primE;
+
     //---------------------------------------------------
     // Output variables for PARTICLES tree
     int trackTID;
@@ -151,28 +164,6 @@ class AnalysisManager {
     std::vector<double> trackPointX;
     std::vector<double> trackPointY;
     std::vector<double> trackPointZ;
-
-    //---------------------------------------------------
-    // Output variables for PRIMARIES tree
-    UInt_t primVtxID;
-    UInt_t primParticleID;
-    UInt_t primTrackID;
-    UInt_t primPDG; // why unsigned?
-    float_t primM;
-    float_t primQ;
-    float_t primEta;
-    float_t primPhi;
-    float_t primPt;
-    float_t primP;
-    float_t primVx;
-    float_t primVy;
-    float_t primVz;
-    float_t primVt;
-    float_t primPx;
-    float_t primPy;
-    float_t primPz;
-    float_t primE;
-    float_t primKE;
 
     //---------------------------------------------------
     // OUTPUT VARIABLES FOR FLArE TREES
