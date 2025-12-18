@@ -56,7 +56,7 @@
   fSaveTrackCmd->SetDefaultValue(false);
 
   fParticleKinECutCmd = new G4UIcmdWithADoubleAndUnit("/out/parKinECut", this);
-  fParticleKinECutCmd->SetGuidance("set kinetic energy cut for particles tree");
+  fParticleKinECutCmd->SetGuidance("set kinetic energy cut for particle tree");
   fParticleKinECutCmd->SetUnitCandidates("MeV GeV keV");
   fParticleKinECutCmd->SetUnitCategory("Energy");
   fParticleKinECutCmd->SetDefaultUnit("keV");

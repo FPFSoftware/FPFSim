@@ -73,7 +73,7 @@ AnalysisManager::AnalysisManager()
   fActsHitsTree = nullptr;
 
   fSaveTrack = false;
-  fParKinECut = 50.0*keV;
+  fParKinECut = 100.0*keV;
   fSave3DEvd = false;
   fSave2DEvd = false;
   fSavePseudoReco = false;
