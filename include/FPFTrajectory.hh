@@ -9,6 +9,7 @@
 #include "G4TrajectoryPoint.hh"     
 #include "G4Track.hh"
 #include "G4Step.hh"
+#include "G4LorentzVector.hh"
 
 /// FPFTrajectory is a custom trajectory class that allows to disable
 /// storing the full trajectory point collections (memory intensive)
@@ -38,9 +39,10 @@ public:
     inline G4String GetParticleName() const { return fParticleName; }
     inline G4double GetCharge() const { return fPDGCharge; }
     inline G4int GetPDGEncoding() const { return fPDGEncoding; }
-    inline G4ThreeVector GetInitialMomentum() const { return fInitialMomentum; }
-    G4double GetInitialKineticEnergy() const; 
     inline G4String GetProcessName() const { return fProcessName; }
+    inline G4LorentzVector GetInitialP4() const {return fInitialP4; }
+    G4ThreeVector GetInitialMomentum() const;
+    G4double GetInitialKineticEnergy() const; 
 
     virtual void ShowTrajectory(std::ostream& os=G4cout) const;
     virtual void DrawTrajectory(G4int i_mode = 0) const;
@@ -66,7 +68,7 @@ private:
     G4int fPDGEncoding;
     G4double fPDGCharge;
     G4String fParticleName;
-    G4ThreeVector fInitialMomentum;
+    G4LorentzVector fInitialP4;
 
     // custom additions
     G4String fProcessName; // creator process

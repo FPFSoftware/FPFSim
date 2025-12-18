@@ -4,6 +4,7 @@
 #include "G4AttDef.hh"
 #include "G4AttValue.hh"
 #include "G4UnitsTable.hh"
+#include "G4LorentzVector.hh"
 
 #include "FPFTrajectory.hh"
 
@@ -12,14 +13,14 @@ G4Allocator<FPFTrajectory> aTrajAllocator;
 FPFTrajectory::FPFTrajectory()
     : fPositionRecord(0), fTrackID(0), fParentID(0),
       fPDGEncoding(0), fPDGCharge(0.0), fParticleName(""),
-      fProcessName(""), fInitialMomentum(G4ThreeVector())
+      fProcessName(""), fInitialP4(G4LorentzVector())
 {}
 
 FPFTrajectory::FPFTrajectory(const G4Track *aTrack, G4bool storePoints)
 {
     fTrackID = aTrack->GetTrackID();
     fParentID = aTrack->GetParentID();
-    fInitialMomentum = aTrack->GetMomentum();
+    fInitialP4 = aTrack->GetDynamicParticle()->Get4Momentum();
 
     G4ParticleDefinition *fpParticleDefinition = aTrack->GetDefinition();
     fPDGEncoding = fpParticleDefinition->GetPDGEncoding();
@@ -49,7 +50,7 @@ FPFTrajectory::FPFTrajectory(FPFTrajectory &right) : G4VTrajectory()
     fPDGEncoding = right.fPDGEncoding;
     fTrackID = right.fTrackID;
     fParentID = right.fParentID;
-    fInitialMomentum = right.fInitialMomentum;
+    fInitialP4 = right.fInitialP4;
     fPositionRecord = new TrajectoryPointContainer();
     fStorePoints = right.fStorePoints;
     fProcessName = right.fProcessName;
@@ -104,7 +105,7 @@ const std::map<G4String, G4AttDef> *FPFTrajectory::GetAttDefs() const
         (*store)[PDG] = G4AttDef(PDG, "PDG Encoding", "Physics", "", "G4int");
 
         G4String IMom("IMom");
-        (*store)[IMom] = G4AttDef(IMom, "Momentum of track at start of trajectory", "Physics", "", "G4ThreeVector");
+        (*store)[IMom] = G4AttDef(IMom, "4Momentum of track at start of trajectory", "Physics", "", "G4LorentzVector");
 
         G4String NTP("NTP");
         (*store)[NTP] = G4AttDef(NTP, "No. of points", "Physics", "", "G4int");
@@ -137,7 +138,7 @@ std::vector<G4AttValue> *FPFTrajectory::CreateAttValues() const
     values->push_back(G4AttValue("PDG", c.c_str(), ""));
 
     s.seekp(std::ios::beg);
-    s << G4BestUnit(fInitialMomentum, "Energy") << std::ends;
+    s << G4BestUnit(fInitialP4, "Energy") << std::ends;
     values->push_back(G4AttValue("IMom", c.c_str(), ""));
 
     s.seekp(std::ios::beg);
@@ -164,7 +165,7 @@ G4ParticleDefinition *FPFTrajectory::GetParticleDefinition() const
 
 void FPFTrajectory::MergeTrajectory(G4VTrajectory *secondTrajectory)
 {
-    if (!secondTrajectory)
+    if (!secondTrajectory) 
         return;
     FPFTrajectory *second = (FPFTrajectory *)secondTrajectory;
     G4int ent = second->GetPointEntries();
@@ -177,7 +178,13 @@ void FPFTrajectory::MergeTrajectory(G4VTrajectory *secondTrajectory)
     second->fPositionRecord->clear();
 }
 
-G4double FPFTrajectory::GetInitialKineticEnergy() const {
+G4ThreeVector FPFTrajectory::GetInitialMomentum() const 
+{
+    return G4ThreeVector(fInitialP4.px(), fInitialP4.py(), fInitialP4.pz());
+}
+
+G4double FPFTrajectory::GetInitialKineticEnergy() const 
+{
     const G4ParticleDefinition* p = GetParticleDefinition();
     double mom = GetInitialMomentum().mag();
     if (!p) return mom;

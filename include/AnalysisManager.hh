@@ -35,6 +35,7 @@ class AnalysisManager {
     // functions for controlling from the configuration file
     void setFileName(std::string val) { fFilename = val; }
     void saveTrack(G4bool val) { fSaveTrack = val; }
+    void parKinECut(G4double val) { fParKinECut = val; }
     void saveActs(G4bool val) { fSaveActs = val; }
     void savePseudoReco(G4bool val) { fSavePseudoReco = val; }
     void addDiffusion(G4String val) { fAddDiffusion = val; } 
@@ -74,6 +75,7 @@ class AnalysisManager {
     AnalysisManagerMessenger* fMessenger;
 
     G4bool fSaveTrack;
+    G4double fParKinECut;
     G4bool fSave3DEvd;
     G4bool fSave2DEvd;
     G4bool fSavePseudoReco;
@@ -108,36 +110,33 @@ class AnalysisManager {
 
     TDirectory* fFASER2Dir;
     TTree*   fActsHitsTree;
-    TTree*   fActsParticlesTree;
 
-    // track to primary ancestor
+    // track to primary ancestor (track id to track id)
     std::map<G4int, G4int> trackToPrimaryAncestor;
+
+    // map trackID to its barcode
+    std::map<G4int, ULong64_t> trackIDtoParticleID;
 
     //---------------------------------------------------
     // OUTPUT VARIABLES FOR COMMON TREES
     //---------------------------------------------------
     // Output variables for EVENT tree
 
-    // general vertex metadata 
     G4int evtID;
     G4int vertexID;
     double weight;
     std::string genType;
     std::string processName; 
-    // vertex position
     double vtxX, vtxY, vtxZ, vtxT;
-    // initiator info (incoming particle)
     int initPDG;           
     double initPx, initPy, initPz, initE;
     double initM;     
     double initQ;  
-    // target info
     int fslPDG;           
     int tgtPDG;     
     int tgtA;      
     int tgtZ;      
     int hitnucPDG; 
-    // interaction info
     int intType;           
     int scatteringType;    
     double xs;
@@ -145,7 +144,6 @@ class AnalysisManager {
     double xBj; 
     double y;   
     double W;  
-    // primaries from vertex
     int nPrimaries;
     std::vector<int> primTID;
     std::vector<int> primPDG;
@@ -155,15 +153,31 @@ class AnalysisManager {
     std::vector<float> primE;
 
     //---------------------------------------------------
-    // Output variables for PARTICLES tree
-    int trackTID;
-    int trackPID;
-    int trackPDG;
-    double trackKinE;
-    int trackNPoints;
-    std::vector<double> trackPointX;
-    std::vector<double> trackPointY;
-    std::vector<double> trackPointZ;
+    // Output variables for PARTICLES/TRAJECTORIES tree
+    
+    std::uint64_t particle_id; //barcode
+    int particle_TID;
+    int particle_PID;
+    int particle_PDG;
+    std::string particle_process;
+    float particle_vx;
+    float particle_vy;
+    float particle_vz;
+    float particle_vt;
+    float particle_px;
+    float particle_py;
+    float particle_pz;
+    float particle_m;
+    float particle_q;
+    float particle_eta;
+    float particle_phi;
+    float particle_pt;
+    float particle_p;
+    float particle_ke;
+    int traj_Npoints;
+    std::vector<float> traj_pointX;
+    std::vector<float> traj_pointY;
+    std::vector<float> traj_pointZ;
 
     //---------------------------------------------------
     // OUTPUT VARIABLES FOR FLArE TREES
@@ -242,35 +256,6 @@ class AnalysisManager {
     UInt_t ActsHitsLayerID;
     UInt_t ActsHitsApproachID;
     UInt_t ActsHitsSensitiveID;
-
-    // Acts Particle Information - need the truth info on the particles in order to do the truth tracking
-    std::vector<std::uint64_t> ActsParticlesParticleId;
-    std::vector<std::int32_t> ActsParticlesParticleType;
-    std::vector<std::uint32_t> ActsParticlesProcess;
-    std::vector<float> ActsParticlesVx;
-    std::vector<float> ActsParticlesVy;
-    std::vector<float> ActsParticlesVz;
-    std::vector<float> ActsParticlesVt;
-    std::vector<float> ActsParticlesPx;
-    std::vector<float> ActsParticlesPy;
-    std::vector<float> ActsParticlesPz;
-    std::vector<float> ActsParticlesM;
-    std::vector<float> ActsParticlesQ;
-    std::vector<float> ActsParticlesEta;
-    std::vector<float> ActsParticlesPhi;
-    std::vector<float> ActsParticlesPt;
-    std::vector<float> ActsParticlesP;
-    std::vector<std::uint32_t> ActsParticlesVertexPrimary;
-    std::vector<std::uint32_t> ActsParticlesVertexSecondary;
-    std::vector<std::uint32_t> ActsParticlesParticle;
-
-    std::vector<std::uint32_t> ActsParticlesGeneration;
-    std::vector<std::uint32_t> ActsParticlesSubParticle;
-    std::vector<float> ActsParticlesELoss;
-    std::vector<float> ActsParticlesPathInX0;
-    std::vector<float> ActsParticlesPathInL0;
-    std::vector<std::int32_t> ActsParticlesNumberOfHits;
-    std::vector<std::uint32_t> ActsParticlesOutcome;
 
 };
 

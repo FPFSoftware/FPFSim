@@ -36,6 +36,7 @@
 #include "G4UIcmdWithAString.hh"
 #include "G4UIcmdWithAnInteger.hh"
 #include "G4UIcmdWithABool.hh"
+#include "G4UIcmdWithADoubleAndUnit.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -50,9 +51,15 @@
   fFileCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
   fSaveTrackCmd = new G4UIcmdWithABool("/out/saveTrack", this);
-  fSaveTrackCmd->SetGuidance("whether save the information of all tracks");
+  fSaveTrackCmd->SetGuidance("whether save the full trajectories");
   fSaveTrackCmd->SetParameterName("saveTrack", true);
   fSaveTrackCmd->SetDefaultValue(false);
+
+  fParticleKinECutCmd = new G4UIcmdWithADoubleAndUnit("/out/parKinECut", this);
+  fParticleKinECutCmd->SetGuidance("set kinetic energy cut for particles tree");
+  fParticleKinECutCmd->SetUnitCandidates("MeV GeV keV");
+  fParticleKinECutCmd->SetUnitCategory("Energy");
+  fParticleKinECutCmd->SetDefaultUnit("keV");
 
   fFLArEDir = new G4UIdirectory("/out/flare/");
   fFLArEDir->SetGuidance("flare output control");
@@ -97,6 +104,7 @@ AnalysisManagerMessenger::~AnalysisManagerMessenger()
 {
   delete fFileCmd;
   delete fSaveTrackCmd;
+  delete fParticleKinECutCmd;
   delete fSave3DEvdCmd;
   delete fSave2DEvdCmd;
   delete fAddDiffusionCmd;
@@ -114,6 +122,7 @@ void AnalysisManagerMessenger::SetNewValue(G4UIcommand* command,G4String newValu
 {
   if (command == fFileCmd) fAnalysisManager->setFileName(newValues);
   if (command == fSaveTrackCmd) fAnalysisManager->saveTrack(fSaveTrackCmd->GetNewBoolValue(newValues));
+  if (command == fParticleKinECutCmd) fAnalysisManager->parKinECut(fParticleKinECutCmd->ConvertToDimensionedDouble(newValues));
 
   if (command == fEnableFLArEOutCmd) fAnalysisManager->enableFLArE(fEnableFLArEOutCmd->GetNewBoolValue(newValues));
   if (command == fSave3DEvdCmd) fAnalysisManager->save3DEvd(fSave3DEvdCmd->GetNewBoolValue(newValues));

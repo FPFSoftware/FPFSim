@@ -38,6 +38,8 @@ class G4UIcommand;
 class G4UIcmdWithAString;
 class G4UIcmdWithABool;
 class G4UIcmdWithAnInteger;
+class G4UIcmdWithADoubleAndUnit;
+
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -57,7 +59,8 @@ class AnalysisManagerMessenger: public G4UImessenger
     G4UIdirectory* fOutDir; 
     G4UIcmdWithAString* fFileCmd;
     G4UIcmdWithABool* fSaveTrackCmd; 
-    
+    G4UIcmdWithADoubleAndUnit* fParticleKinECutCmd;
+
     G4UIdirectory* fFLArEDir; 
     G4UIcmdWithABool* fEnableFLArEOutCmd;
     G4UIcmdWithABool* fSave3DEvdCmd;
