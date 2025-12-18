@@ -159,6 +159,7 @@ class AnalysisManager {
     int particle_TID;
     int particle_PID;
     int particle_PDG;
+    int particle_ancestor;
     std::string particle_process;
     float particle_vx;
     float particle_vy;

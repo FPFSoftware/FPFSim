@@ -135,6 +135,7 @@ void AnalysisManager::bookParTree()
   fPar->Branch("particle_pdg", &particle_PDG, "particle_pdg/I");
   fPar->Branch("track_id", &particle_TID, "track_id/I");
   fPar->Branch("parent_id", &particle_PID, "parent_id/I");
+  fPar->Branch("ancestor_id", &particle_ancestor, "ancestor_id/I");
   fPar->Branch("process", &particle_process);
   fPar->Branch("vx", &particle_vx, "vx/F");
   fPar->Branch("vy", &particle_vy, "vy/F");
@@ -586,14 +587,11 @@ void AnalysisManager::FillParticlesTree(const G4Event *event)
   for (size_t i = 0; i < trajectoryContainer->entries(); ++i)
   {
     auto trajectory = static_cast<FPFTrajectory *>((*trajectoryContainer)[i]);
-    
-    // do not save if below cut threshold
-    particle_ke = trajectory->GetInitialKineticEnergy();
-    if(particle_ke < fParKinECut) continue;
 
     particle_TID = trajectory->GetTrackID();
     particle_PID = trajectory->GetParentID();
     particle_PDG = trajectory->GetPDGEncoding();
+    particle_ancestor = trackToPrimaryAncestor.at(particle_TID);
     particle_process = trajectory->GetProcessName();
 
     auto particleId = ActsFatras::Barcode();
@@ -623,6 +621,10 @@ void AnalysisManager::FillParticlesTree(const G4Event *event)
     particle_phi = trajectory->GetInitialP4().phi();
     particle_pt = trajectory->GetInitialP4().vect().perp();
     particle_p = trajectory->GetInitialP4().vect().mag();
+    
+    // do not save if below cut threshold
+    particle_ke = trajectory->GetInitialKineticEnergy();
+    if(particle_ke < fParKinECut) continue;
   
     traj_Npoints = trajectory->GetPointEntries();
     traj_pointX.clear();
