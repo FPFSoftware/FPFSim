@@ -189,6 +189,7 @@ class AnalysisManager {
     UInt_t flareTrackID;
     UInt_t flareParticleID;
     UInt_t flareParentID;
+    UInt_t flareAncestorID;
     UInt_t flarePDG;
     UInt_t flareCopyNum;
     float_t flareT;

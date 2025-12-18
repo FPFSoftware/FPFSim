@@ -175,6 +175,7 @@ void AnalysisManager::bookFLArETrees()
   fFLArEHits->Branch("flareTrackID", &flareTrackID, "flareTrackID/I");
   fFLArEHits->Branch("flareBarcode", &flareParticleID, "flareParticleID/I");
   fFLArEHits->Branch("flareParentID", &flareParentID, "flareParentID/I");
+  fFLArEHits->Branch("flareAncestorID", &flareAncestorID, "flareAncestorID/I");
   fFLArEHits->Branch("flarePDG", &flarePDG, "flarePDG/I");
   fFLArEHits->Branch("flareCopyNum", &flareCopyNum, "flareCopyNum/I");
   fFLArEHits->Branch("flareT", &flareT, "flareT/I");
@@ -196,6 +197,7 @@ void AnalysisManager::bookFLArETrees()
   fFLArEHCALHits->Branch("hadTrackID", &flareTrackID, "hadTrackID/I");
   fFLArEHCALHits->Branch("hadBarcode", &flareParticleID, "hadParticleID/I");
   fFLArEHCALHits->Branch("hadParentID", &flareParentID, "hadParentID/I");
+  fFLArEHCALHits->Branch("hadAncestorID", &flareAncestorID, "hadAncestorID/I");
   fFLArEHCALHits->Branch("hadPDG", &flarePDG, "hadPDG/I");
   fFLArEHCALHits->Branch("hadCopyNum", &flareCopyNum, "hadCopyNum/I");
   fFLArEHCALHits->Branch("hadT", &flareT, "hadT/I");
@@ -591,7 +593,7 @@ void AnalysisManager::FillParticlesTree(const G4Event *event)
     particle_TID = trajectory->GetTrackID();
     particle_PID = trajectory->GetParentID();
     particle_PDG = trajectory->GetPDGEncoding();
-    particle_ancestor = trackToPrimaryAncestor.at(particle_TID);
+    particle_ancestor = GetTrackPrimaryAncestor(particle_TID);
     particle_process = trajectory->GetProcessName();
 
     auto particleId = ActsFatras::Barcode();
@@ -692,6 +694,7 @@ void AnalysisManager::FillFLArEOutput()
     {
       flareTrackID = hit->GetTID();
       flareParentID = hit->GetPID();
+      flareAncestorID = GetTrackPrimaryAncestor(flareTrackID);
       flarePDG = hit->GetPDG();
       flareCopyNum = hit->GetCopyNum();
       flareT = hit->GetTime();
@@ -711,7 +714,7 @@ void AnalysisManager::FillFLArEOutput()
       double vtx_xyz[3] = {primaries[0].Vx(), primaries[0].Vy(), primaries[0].Vz()};
 
       // which primary ancestor does this hit belong to?
-      G4int whichPrim = GetTrackPrimaryAncestor(flareTrackID);
+      G4int whichPrim = flareAncestorID;
       G4int whichIndex = whichPrim - 1; // need to start from zero
 
       // pseudo reco: track/shower length and width
