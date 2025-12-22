@@ -172,7 +172,7 @@ class AnalysisManager {
     //---------------------------------------------------
     // Output variables for PARTICLES/TRAJECTORIES tree
     
-    std::uint64_t particle_id; //barcode
+    ULong64_t particle_id; //barcode
     int particle_TID;
     int particle_PID;
     int particle_PDG;
@@ -204,7 +204,7 @@ class AnalysisManager {
     PixelMap3D* pm3D;
 
     UInt_t flareTrackID;
-    UInt_t flareParticleID;
+    ULong64_t flareParticleID;
     UInt_t flareParentID;
     UInt_t flareAncestorID;
     UInt_t flarePDG;

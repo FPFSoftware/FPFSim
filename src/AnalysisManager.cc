@@ -132,7 +132,7 @@ void AnalysisManager::bookParTree()
 {
   fPar = new TTree("particles", "particle info");
   fPar->Branch("event_id", &evtID, "event_id/I");
-  fPar->Branch("particle_id", &particle_id, "particle_id/I");
+  fPar->Branch("particle_id", &particle_id, "particle_id/l");
   fPar->Branch("particle_pdg", &particle_PDG, "particle_pdg/I");
   fPar->Branch("track_id", &particle_TID, "track_id/I");
   fPar->Branch("parent_id", &particle_PID, "parent_id/I");
@@ -174,7 +174,7 @@ void AnalysisManager::bookFLArETrees()
   fFLArEHits = new TTree("flare_hits", "FLArE hits info");
   fFLArEHits->Branch("flareEvtID", &evtID, "flareEvtID/I");
   fFLArEHits->Branch("flareTrackID", &flareTrackID, "flareTrackID/I");
-  fFLArEHits->Branch("flareBarcode", &flareParticleID, "flareParticleID/I");
+  fFLArEHits->Branch("flareBarcode", &flareParticleID, "flareParticleID/l");
   fFLArEHits->Branch("flareParentID", &flareParentID, "flareParentID/I");
   fFLArEHits->Branch("flareAncestorID", &flareAncestorID, "flareAncestorID/I");
   fFLArEHits->Branch("flarePDG", &flarePDG, "flarePDG/I");
@@ -195,7 +195,7 @@ void AnalysisManager::bookFLArETrees()
   fFLArEHCALHits = new TTree("hcal_hits", "FLArE HCAL hits info");
   fFLArEHCALHits->Branch("hadEvtID", &evtID, "hadEvtID/I");
   fFLArEHCALHits->Branch("hadTrackID", &flareTrackID, "hadTrackID/I");
-  fFLArEHCALHits->Branch("hadBarcode", &flareParticleID, "hadParticleID/I");
+  fFLArEHCALHits->Branch("hadBarcode", &flareParticleID, "hadParticleID/l");
   fFLArEHCALHits->Branch("hadParentID", &flareParentID, "hadParentID/I");
   fFLArEHCALHits->Branch("hadAncestorID", &flareAncestorID, "hadAncestorID/I");
   fFLArEHCALHits->Branch("hadPDG", &flarePDG, "hadPDG/I");
