@@ -58,8 +58,8 @@ class AnalysisManagerMessenger: public G4UImessenger
 
     G4UIdirectory* fOutDir; 
     G4UIcmdWithAString* fFileCmd;
-    G4UIcmdWithABool* fSaveTrackCmd; 
-    G4UIcmdWithADoubleAndUnit* fParticleKinECutCmd;
+    G4UIcmdWithABool* fSaveParticlesCmd;
+    G4UIcmdWithABool* fSaveTrajectoriesCmd; 
 
     G4UIdirectory* fFLArEDir; 
     G4UIcmdWithABool* fEnableFLArEOutCmd;

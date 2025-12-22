@@ -17,8 +17,8 @@
 /out/fileName test_backgrounds.root
 
 # store full trajectories for EVD
-/out/saveTrack false
-/out/parKinECut 350 keV
+/out/saveAllParticles false
+/out/saveTrajectories false
 
 # shoot background equivalent to 1 "spill"
 /run/beamOn 1

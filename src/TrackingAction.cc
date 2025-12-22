@@ -11,7 +11,7 @@ TrackingAction::TrackingAction() : G4UserTrackingAction() {;}
 void TrackingAction::PreUserTrackingAction(const G4Track* aTrack)
 {
   // find out whether saving the full trajectory points or not
-   bool storeTrajectoryPoints = AnalysisManager::GetInstance()->GetSaveTrack();
+   bool storeTrajectoryPoints = AnalysisManager::GetInstance()->GetSaveTrajectories();
 
   // initialize our custom trajectory class
   auto *traj = new FPFTrajectory(aTrack, storeTrajectoryPoints);

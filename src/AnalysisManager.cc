@@ -6,6 +6,7 @@
 #include <map>
 #include <iomanip>
 #include <random>
+#include <algorithm>
 
 #include <G4Event.hh>
 #include <G4SDManager.hh>
@@ -72,8 +73,8 @@ AnalysisManager::AnalysisManager()
   fFLArEPseudoReco = nullptr;
   fActsHitsTree = nullptr;
 
-  fSaveTrack = false;
-  fParKinECut = 100.0*keV;
+  fSaveAllParticles = false;
+  fSaveTrajectories = false;
   fSave3DEvd = false;
   fSave2DEvd = false;
   fSavePseudoReco = false;
@@ -151,7 +152,7 @@ void AnalysisManager::bookParTree()
   fPar->Branch("pt", &particle_pt, "pt/F");
   fPar->Branch("p", &particle_p, "p/F");
   fPar->Branch("ke", &particle_ke, "ke/F");
-  if (fSaveTrack) // if saving full trajectory, add vector of trajectory points
+  if (fSaveTrajectories) // if saving full trajectory, add vector of trajectory points
   {
     fPar->Branch("traj_Npoints", &traj_Npoints, "traj_Npoints/I");
     fPar->Branch("traj_pointX", &traj_pointX);
@@ -192,7 +193,6 @@ void AnalysisManager::bookFLArETrees()
 
   // FLArE HCAL hits
   fFLArEHCALHits = new TTree("hcal_hits", "FLArE HCAL hits info");
-
   fFLArEHCALHits->Branch("hadEvtID", &evtID, "hadEvtID/I");
   fFLArEHCALHits->Branch("hadTrackID", &flareTrackID, "hadTrackID/I");
   fFLArEHCALHits->Branch("hadBarcode", &flareParticleID, "hadParticleID/I");
@@ -311,8 +311,14 @@ void AnalysisManager::BeginOfRun()
   {
     G4cout << sdname.first << " " << sdname.second << G4endl;
 
+    // make it lowercase for case-insensitive check
+    std::string SDname = sdname.second;
+    std::transform(SDname.begin(), SDname.end(), SDname.begin(),
+               [](unsigned char c) { return std::tolower(c); });
+
     // if FLArE is enabled, book trees
-    if (fEnableFLArE && sdname.second.find("FLArE") != std::string::npos)
+    // but give option to disable output if requires
+    if (fEnableFLArE && SDname.find("flare") != std::string::npos)
     {
       fFlareSDs.push_back(sdname.first);
       bookFLArETrees();
@@ -320,7 +326,7 @@ void AnalysisManager::BeginOfRun()
 
     // if FASER2 is enabled, book ACTS trees
     // but give the option to disable output if required
-    else if (fSaveActs && sdname.second.find("FASER2") != std::string::npos)
+    else if (fSaveActs && SDname.find("faser") != std::string::npos)
     {
       fFaser2SDs.push_back(sdname.first);
       bookFASER2Trees();
@@ -395,8 +401,15 @@ void AnalysisManager::BeginOfEvent()
   // track ID to primary ancestor association
   trackToPrimaryAncestor.clear();
 
+  // track ID to parent ID association (daughter-father)
+  trackIDtoParentID.clear();
+
   // track ID to particle ID association
   trackIDtoParticleID.clear();
+  nextSubIndex.clear();
+
+  // track IDs to be stored in output tree
+  trackIDsToKeep.clear();
 
   // trajectory points (if enabled)
   // (actually need reset at every track)
@@ -450,10 +463,6 @@ void AnalysisManager::EndOfEvent(const G4Event *event)
   FillEventTree(event);
 
   //-----------------------------------------------------------
-  // FILL PARTICLES/TRAJECTORIES TREE
-  FillParticlesTree(event);
-
-  //-----------------------------------------------------------
   // FILL DETECTOR HITS
 
   // Get the hit collections
@@ -470,6 +479,14 @@ void AnalysisManager::EndOfEvent(const G4Event *event)
 
   if (fFaser2SDs.size() > 0)
     FillFASER2Output();
+
+  //-----------------------------------------------------------
+  // FILL PARTICLES/TRAJECTORIES TREE
+
+  // by default, only particles that left hits in SDs + their ancestors are saved
+  // so this needs the be filled last so we know what to save
+  FillParticlesTree(event);
+
 }
 
 //---------------------------------------------------------------------
@@ -557,6 +574,7 @@ void AnalysisManager::FillEventTree(const G4Event *event)
         // store a copy as a FPFParticle for further processing
         // this accumulates across entire event (no vertex reset)
         primaryIDs.push_back(tid); // store to avoid duplicates
+        RegisterTrackAndAncestors(tid); // store for saving in particles tree
         primaries.push_back(FPFParticle(pdg, 0,
                                         tid, primaryIDs.size() - 1, 1,
                                         m, vtxX, vtxY, vtxZ, vtxT,
@@ -574,6 +592,98 @@ void AnalysisManager::FillEventTree(const G4Event *event)
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
 
+std::uint64_t AnalysisManager::GetOrBuildParticleID(const G4int trackID)
+{
+  // If we already have it, just return it
+  auto it = trackIDtoParticleID.find(trackID);
+  if (it != trackIDtoParticleID.end())
+    return it->second;
+
+  // Find the primary ancestor (your existing helper)
+  G4int primaryTID = GetTrackPrimaryAncestor(trackID);
+
+  // Primary index (0-based) = Acts "particle" index
+  int primaryIndex = primaryTID - 1;
+
+  // compute generation = distance from this track back to its primary
+  unsigned int generation = 0;
+  {
+    G4int tid = trackID;
+    // Walk up parents until we reach the primary
+    while (true) 
+    {
+      auto itPar = trackIDtoParentID.find(tid);
+      if (itPar == trackIDtoParentID.end()) // should never happen
+      {
+        G4cout << "Something fishy going on in the 'trackIDtoParentID' map..." << G4endl;
+        break;
+      }  
+
+      G4int parentID = itPar->second;
+      if (parentID <= 0) // reached Geant4 primary
+        break;
+
+      generation++;
+      if (parentID == primaryTID) // reached our primary ancestor
+        break;
+
+      tid = parentID;
+    }
+  }
+
+  // Assign sub-particle index
+  // According to the doc: primaries must have generation=0 & sub=0.
+  unsigned int subParticle = 0;
+
+  int vertexPrimary   = 1;  // could map to true generator vertex idx?
+  int vertexSecondary = 0;  // don't encode secondary vertices for now
+
+  if (generation > 0) {
+    auto key = std::make_tuple(vertexPrimary, primaryIndex, (int)generation);
+    auto& counter = nextSubIndex[key];  // default-inits to 0 when first seen
+    subParticle = counter;
+    ++counter;
+  }
+
+  // Build the ActsFatras::Barcode
+  ActsFatras::Barcode bc;
+  bc.setVertexPrimary(vertexPrimary);
+  bc.setVertexSecondary(vertexSecondary);
+  bc.setParticle(primaryIndex);       // which primary
+  bc.setGeneration(generation);       // depth from that primary
+  bc.setSubParticle(subParticle);     // sibling index within generation
+
+  std::uint64_t value = bc.value();
+
+  // Cache and return
+  trackIDtoParticleID[trackID] = value;
+  return value;
+}
+
+//---------------------------------------------------------------------
+
+void AnalysisManager::RegisterTrackAndAncestors(const G4int trackID)
+{
+  // is this track already registered? 
+  // try to insert this track into the keep-set
+  auto [it, inserted] = trackIDsToKeep.insert(trackID);
+  if (!inserted)
+  {
+    // if already inserted, then its ancestors are as well
+    // just return
+    return;
+  }
+    
+  // now we go up checking its parents
+  G4int parentID = trackIDtoParentID.at(trackID);
+  if( parentID > 0 )
+  {
+    RegisterTrackAndAncestors(parentID);
+  }
+}
+
+//---------------------------------------------------------------------
+
 void AnalysisManager::FillParticlesTree(const G4Event *event)
 {
   int count_tracks = 0;
@@ -581,7 +691,7 @@ void AnalysisManager::FillParticlesTree(const G4Event *event)
   auto trajectoryContainer = event->GetTrajectoryContainer();
   if (!trajectoryContainer)
   {
-    G4cout << "No trajectories found in the event!" << G4endl;
+    G4cout << "No particle trajectories found in the event!" << G4endl;
     return;
   }
 
@@ -595,19 +705,17 @@ void AnalysisManager::FillParticlesTree(const G4Event *event)
     particle_PDG = trajectory->GetPDGEncoding();
     particle_ancestor = GetTrackPrimaryAncestor(particle_TID);
     particle_process = trajectory->GetProcessName();
+    particle_id = GetOrBuildParticleID(particle_TID);
 
-    auto particleId = ActsFatras::Barcode();
-    particleId.setVertexPrimary(1);
-    particleId.setVertexSecondary(0);
-    particleId.setParticle(particle_TID - 1); // The track ID is the primary particle index plus one
-    particleId.setGeneration(particle_PID);
-    sub_part_map.try_emplace(particle_TID- 1, sub_part_map.size());
-    // This is a fudge - assumes that the secondary particles are always sub-particles of the primary particle
-    particleId.setSubParticle(particle_PID == 0 ? 0 : sub_part_map[particle_TID - 1]);
-    particle_id = particleId.value();
-
-    // store in map for use in other trees!
-    trackIDtoParticleID[particle_TID] = particle_id;
+    // NOTE: we don't save all particles (unless specifically requested)
+    // we save only what we registered for saving while scanning hits
+    if( !fSaveAllParticles )
+    {
+      // does it exist in the registry?
+      if (trackIDsToKeep.find(particle_TID) == trackIDsToKeep.end()) {
+        continue;  // if not, skip saving this particle entirely
+      }
+    }
 
     // first point is vertex (always stored even if traj is disabled)
     particle_vx = trajectory->GetPoint(0)->GetPosition().x();
@@ -623,10 +731,7 @@ void AnalysisManager::FillParticlesTree(const G4Event *event)
     particle_phi = trajectory->GetInitialP4().phi();
     particle_pt = trajectory->GetInitialP4().vect().perp();
     particle_p = trajectory->GetInitialP4().vect().mag();
-    
-    // do not save if below cut threshold
     particle_ke = trajectory->GetInitialKineticEnergy();
-    if(particle_ke < fParKinECut) continue;
   
     traj_Npoints = trajectory->GetPointEntries();
     traj_pointX.clear();
@@ -693,6 +798,8 @@ void AnalysisManager::FillFLArEOutput()
     for (auto hit : *hitCollection->GetVector())
     {
       flareTrackID = hit->GetTID();
+      RegisterTrackAndAncestors(flareTrackID); // register for saving in particle tree
+
       flareParentID = hit->GetPID();
       flareAncestorID = GetTrackPrimaryAncestor(flareTrackID);
       flarePDG = hit->GetPDG();
@@ -708,7 +815,7 @@ void AnalysisManager::FillFLArEOutput()
       flareDeltaPy = hit->GetDeltaMom().y();
       flareDeltaPz = hit->GetDeltaMom().z();
       flareEdep = hit->GetEdep();
-      flareParticleID = trackIDtoParticleID.at(flareTrackID);
+      flareParticleID = GetOrBuildParticleID(flareTrackID);
 
       double hit_position_xyz[3] = {flareX, flareY, flareZ};
       double vtx_xyz[3] = {primaries[0].Vx(), primaries[0].Vy(), primaries[0].Vz()};
@@ -846,7 +953,9 @@ void AnalysisManager::FillFASER2Output()
       ActsHitsGeometryID = 0;
 
       int hitID = hit->GetTrackID();
-      ActsHitsParticleID = trackIDtoParticleID.at(hitID);
+      RegisterTrackAndAncestors(hitID); // register for saving in particle tree
+
+      ActsHitsParticleID = GetOrBuildParticleID(hitID);
 
       ActsHitsX = hit->GetX();
       ActsHitsY = hit->GetY();

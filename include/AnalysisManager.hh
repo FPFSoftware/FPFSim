@@ -4,6 +4,7 @@
 #include <set>
 #include <vector>
 #include <string>
+#include <unordered_set>
 
 #include "globals.hh"
 #include "G4Event.hh"
@@ -34,8 +35,8 @@ class AnalysisManager {
     //------------------------------------------------
     // functions for controlling from the configuration file
     void setFileName(std::string val) { fFilename = val; }
-    void saveTrack(G4bool val) { fSaveTrack = val; }
-    void parKinECut(G4double val) { fParKinECut = val; }
+    void saveAllParticles(G4bool val) { fSaveAllParticles = val; }
+    void saveTrajectories(G4bool val) { fSaveTrajectories = val; }
     void saveActs(G4bool val) { fSaveActs = val; }
     void savePseudoReco(G4bool val) { fSavePseudoReco = val; }
     void addDiffusion(G4String val) { fAddDiffusion = val; } 
@@ -48,8 +49,17 @@ class AnalysisManager {
     void SetTrackPrimaryAncestor(G4int trackID, G4int ancestorID) { trackToPrimaryAncestor[trackID] = ancestorID; }
     G4int GetTrackPrimaryAncestor(G4int trackID) { return trackToPrimaryAncestor.at(trackID); }
 
+    // build TID to parentID association
+    // filled progressively from StackingAction
+    void SetTrackParentID(G4int trackID, G4int parentID) { trackIDtoParentID[trackID] = parentID; }
+    G4int GetTrackParentID(G4int trackID) { return trackIDtoParentID.at(trackID); }
+
     // return whether saving full tracks in trajectories
-    G4bool GetSaveTrack() { return fSaveTrack; }
+    G4bool GetSaveTrajectories() { return fSaveTrajectories; }
+
+    // register track and its ancestors for saving
+    void RegisterTrackAndAncestors(const G4int trackID);
+    std::uint64_t GetOrBuildParticleID(const G4int trackID);
 
   private:
 
@@ -74,8 +84,8 @@ class AnalysisManager {
     static AnalysisManager* fInstance;
     AnalysisManagerMessenger* fMessenger;
 
-    G4bool fSaveTrack;
-    G4double fParKinECut;
+    G4bool fSaveAllParticles;
+    G4bool fSaveTrajectories;
     G4bool fSave3DEvd;
     G4bool fSave2DEvd;
     G4bool fSavePseudoReco;
@@ -92,6 +102,19 @@ class AnalysisManager {
     G4int nPrimaryVertex;
     std::vector<FPFParticle> primaries;
     std::vector<int> primaryIDs;
+
+    // track to primary ancestor (track id to track id)
+    std::map<G4int, G4int> trackToPrimaryAncestor;
+
+    // map track id to its barcode
+    std::map<G4int, ULong64_t> trackIDtoParticleID;
+    std::map<std::tuple<int,int,int>, unsigned int> nextSubIndex;
+
+    // map track id to its parent id
+    std::map<G4int, G4int> trackIDtoParentID;
+
+    // list of track ids to be saved 
+    std::unordered_set<G4int> trackIDsToKeep;
 
     //------------------------------------------------
     // output files and trees
@@ -110,12 +133,6 @@ class AnalysisManager {
 
     TDirectory* fFASER2Dir;
     TTree*   fActsHitsTree;
-
-    // track to primary ancestor (track id to track id)
-    std::map<G4int, G4int> trackToPrimaryAncestor;
-
-    // map trackID to its barcode
-    std::map<G4int, ULong64_t> trackIDtoParticleID;
 
     //---------------------------------------------------
     // OUTPUT VARIABLES FOR COMMON TREES
