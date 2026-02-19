@@ -92,8 +92,8 @@ void FLArETPCDetectorConstruction::BuildFLArETPC()
     lArBoxVis->SetVisibility(false);
     lArBoxLog->SetVisAttributes(lArBoxVis);
 
-    G4double dimBoxZ = 350*mm; //the size of the mini boxes' z side
-    G4double dimBoxXY = 300*mm; // the size of the mini boxes' x and y sides
+    G4double dimBoxZ = 100*mm; //the size of the mini boxes' z side
+    G4double dimBoxXY = 100*mm; // the size of the mini boxes' x and y sides
 
     GeometricalParameters::Get()->SetScoreHalfSizes(G4ThreeVector(dimBoxXY,dimBoxXY,dimBoxZ));
 
