@@ -657,10 +657,15 @@ void AnalysisManager::FillPrimaryTruthTree(G4int sdId, std::string sdName)
     else if( sdName.find("Neutron") != std::string::npos ) PDG = 2112;
     else PDG = -1;
 
-    for (auto &score : *scoremap) 
-    {  
-      copyNum = score.first;
-      sumLength = *(score.second);
+    for(int c = 0; c < volumes.size(); c++)
+    {
+      sumLength = 0.0;
+      copyNum = c;
+      auto it = scoremap->GetMap()->find(copyNum);
+      if(it != scoremap->GetMap()->end())
+      {
+        sumLength = *(it->second);
+      }
 
       xvol = volumes.at(copyNum).x();
       yvol = volumes.at(copyNum).y();
