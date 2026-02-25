@@ -180,7 +180,7 @@ void AnalysisManager::bookFLArETrees()
   fFLArEHits->Branch("flarePDG", &flarePDG, "flarePDG/I");
   fFLArEHits->Branch("flareCopyNum", &flareCopyNum, "flareCopyNum/I");
   fFLArEHits->Branch("flareT", &flareT, "flareT/I");
-  fFLArEHits->Branch("flareX", &flareX, "flareX/F"); // Pre-position
+  fFLArEHits->Branch("flareX", &flareX, "flareX/F"); // Post-position
   fFLArEHits->Branch("flareY", &flareY, "flareY/F");
   fFLArEHits->Branch("flareZ", &flareZ, "flareZ/F");
   fFLArEHits->Branch("flarePx", &flarePx, "flarePx/F"); // momentum
@@ -201,7 +201,7 @@ void AnalysisManager::bookFLArETrees()
   fFLArEHCALHits->Branch("hadPDG", &flarePDG, "hadPDG/I");
   fFLArEHCALHits->Branch("hadCopyNum", &flareCopyNum, "hadCopyNum/I");
   fFLArEHCALHits->Branch("hadT", &flareT, "hadT/I");
-  fFLArEHCALHits->Branch("hadX", &flareX, "hadX/F"); // Pre-position
+  fFLArEHCALHits->Branch("hadX", &flareX, "hadX/F"); // Post-position
   fFLArEHCALHits->Branch("hadY", &flareY, "hadY/F");
   fFLArEHCALHits->Branch("hadZ", &flareZ, "hadZ/F");
   fFLArEHCALHits->Branch("hadPx", &flarePx, "hadPx/F"); // momentum
