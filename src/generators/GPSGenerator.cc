@@ -54,10 +54,13 @@ void GPSGenerator::LoadData()
 { // nothing to load!
 } 
 
-void GPSGenerator::GeneratePrimaries(G4Event* anEvent) 
+void GPSGenerator::GeneratePrimaries(G4Event* anEvent)
 {
   // complete line from PrimaryGeneratorAction..
   G4cout << "): General Particle Source ===oooOOOooo===" << G4endl;
+
+  // Generate primary vertex first
+  fGPS->GeneratePrimaryVertex(anEvent);
 
   // preparing to ship metadata
   GeneratorVertexMetadata metadata;
@@ -65,15 +68,13 @@ void GPSGenerator::GeneratePrimaries(G4Event* anEvent)
   metadata.processName = "Gun";
   metadata.weight = 1.0;
   metadata.pdg = fGPS->GetParticleDefinition()->GetPDGEncoding();
-  metadata.mass = fGPS->GetParticleDefinition()->GetPDGMass(); 
-  metadata.charge = fGPS->GetParticleDefinition()->GetPDGCharge(); 
+  metadata.mass = fGPS->GetParticleDefinition()->GetPDGMass();
+  metadata.charge = fGPS->GetParticleDefinition()->GetPDGCharge();
   G4PrimaryVertex* vtx = anEvent->GetPrimaryVertex();
   G4PrimaryParticle* pp = vtx->GetPrimary(0);
   metadata.x4 = G4LorentzVector(vtx->GetX0(),vtx->GetY0(),vtx->GetZ0(),vtx->GetT0());
   metadata.p4 = G4LorentzVector(pp->GetPx(),pp->GetPy(),pp->GetPz(),pp->GetTotalEnergy());
   fVertexMetadata.push_back(metadata);
-
-  fGPS->GeneratePrimaryVertex(anEvent);
 }
 
 
