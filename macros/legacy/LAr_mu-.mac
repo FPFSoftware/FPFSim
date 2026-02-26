@@ -13,6 +13,6 @@
 /gps/ene/mono 5 GeV
 
 
-/histo/fileName 5GeV.root
+/out/fileName 5GeV.root
 
 /run/beamOn 1

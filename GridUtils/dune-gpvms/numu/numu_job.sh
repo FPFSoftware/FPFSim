@@ -33,9 +33,9 @@ cat << EOF >> temp.mac
 /gen/genie/genieInput numu_kling_ar40_e5000.ghep.root
 /gen/genie/genieIStart ${istart}
 
-/histo/saveHit false
-/histo/circleFit true
-/histo/fileName ${outputfile}
+
+
+/out/fileName ${outputfile}
 
 /run/beamOn ${num_evt_per_file}
 EOF

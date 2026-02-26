@@ -14,10 +14,10 @@
 /gps/ene/mono 24.865388 GeV
 
 # define output options
-/histo/save3DEvd false
-/histo/save2DEvd false
-/histo/saveHit false
-/histo/fileName pi0_momentum_25GeV.root
+/out/flare/save3DEvd false
+/out/flare/save2DEvd false
+
+/out/fileName pi0_momentum_25GeV.root
 
 # shoot 1 particles
 /run/beamOn 1

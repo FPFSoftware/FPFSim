@@ -31,7 +31,6 @@ GeometricalParameters::GeometricalParameters()
   fFLArEPos = G4ThreeVector(0., 0., 4300.*mm); 
   
   // BabyMIND
-  fUseBabyMIND = false; //default
   fBabyMINDMagnetPlateThickness = 30*mm;
   fBabyMINDMagnetPlateSizeX = 3.5*m;
   fBabyMINDMagnetPlateSizeY = 2.*m;

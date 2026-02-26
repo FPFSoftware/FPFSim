@@ -18,7 +18,7 @@ FPFParticle::FPFParticle()
   , fPx(-999)
   , fPy(-999)
   , fPz(-999)
-    , fE(-999)
+  , fE(-999)
 {
 }
 
@@ -49,7 +49,7 @@ FPFParticle::FPFParticle(const int pdg,
   , fPx(Px)
   , fPy(Py)
   , fPz(Pz)
-    , fE(E)
+  , fE(E)
 {
 }
 

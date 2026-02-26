@@ -17,6 +17,12 @@ LArBoxSD::LArBoxSD(G4String name) : G4VSensitiveDetector(name) {
 G4bool LArBoxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* R0hist) {
   G4Track* aTrack = aStep->GetTrack();
 
+  G4float edep = aStep->GetTotalEnergyDeposit();
+  if(edep <= 0.02*MeV) //no energy deposited, skip
+  { 
+    return false;
+  }
+
   // enumerator: fAlive, fStopButAlive, fStopAndKill, fKillTrackAndSecondaries, fSuspend, fPostponeToNextEvent
   // https://apc.u-paris.fr/~franco/g4doxy/html/G4TrackStatus_8hh.html#734825af9cdc612606614fdce0545157
   // http://geant4.in2p3.fr/2005/Workshop/ShortCourse/session1/M.Asai.pdf
@@ -24,10 +30,10 @@ G4bool LArBoxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* R0hist) {
   //G4cout<<"debug (track status): "<<TrackStatus<<G4endl;
 
   G4ThreeVector TrackVertex = aTrack->GetVertexPosition();
-  G4double TrackLength      = aTrack->GetTrackLength();
+  G4float TrackLength       = aTrack->GetTrackLength();
 
   G4int ParticleName = aTrack->GetParticleDefinition()->GetPDGEncoding();
-  G4double ParticleMass = aTrack->GetParticleDefinition()->GetPDGMass();
+  G4float ParticleMass = aTrack->GetParticleDefinition()->GetPDGMass();
   G4int PID          = aTrack->GetParentID();
   G4int TID          = aTrack->GetTrackID();
   G4int Stepno       = aTrack->GetCurrentStepNumber();
@@ -60,18 +66,21 @@ G4bool LArBoxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* R0hist) {
 //  }
 
   // extra info
-  G4double edep      = aStep->GetTotalEnergyDeposit();
   G4ThreeVector pos  = 0.5*(PreStepPosition + PostStepPosition);
   G4String PreVolume = PreStep->GetPhysicalVolume()->GetName();
   G4int copyNumPre = PreStep->GetTouchableHandle()->GetCopyNumber();
   G4String PostVolume = PostStep->GetPhysicalVolume()->GetName();
   G4int copyNumPost = PostStep->GetTouchableHandle()->GetCopyNumber();
   G4int StepStatus   = PostStep->GetStepStatus();
+  G4int copyNum = aStep->GetPreStepPoint()->GetTouchableHandle()->GetCopyNumber();
+  G4ThreeVector delta_momentum = (PostStep->GetMomentum())-InitMomentum;
 
   TrackInformation* aTrackInfo = (TrackInformation*)(aTrack->GetUserInformation());
   G4int trackIsFromPrimaryPizero = 0;
   G4int trackIsFromFSLPizero = 0;
   G4int trackIsFromPrimaryLepton = 0;
+  G4int trackPDG = aTrack->GetParticleDefinition()->GetPDGEncoding();
+  G4float Time = aTrack->GetLocalTime();
   if (aTrackInfo) {
     trackIsFromPrimaryPizero = aTrackInfo->IsTrackFromPrimaryPizero();
     trackIsFromFSLPizero = aTrackInfo->IsTrackFromFSLPizero();
@@ -88,6 +97,12 @@ G4bool LArBoxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* R0hist) {
   hit->SetPID(PID);
   hit->SetTID(TID);
   hit->SetStepNo(Stepno);
+
+  hit->SetCopyNum(copyNum);
+  hit->SetPDG(trackPDG);
+  hit->SetDeltaMom(delta_momentum);
+  hit->SetTime(Time);
+
   hit->SetPreStepPosition(PreStepPosition);
   hit->SetPostStepPosition(PostStepPosition);
   hit->SetInitMomentum(InitMomentum);

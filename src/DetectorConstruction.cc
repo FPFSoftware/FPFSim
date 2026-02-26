@@ -2,6 +2,7 @@
 #include "DetectorConstructionMaterial.hh"
 #include "DetectorConstructionMessenger.hh"
 #include "LArBoxSD.hh"
+#include "FASER2TrackerSD.hh"
 
 #include "geometry/FASER2DetectorConstruction.hh"
 #include "geometry/GeometricalParameters.hh"
@@ -34,7 +35,8 @@
 #include <G4PSTrackLength.hh>
 #include <G4SDParticleFilter.hh> 
 
-using namespace std;
+#include <filesystem>
+#include <string>
 
 G4ThreadLocal G4UniformMagField* DetectorConstruction::magField = 0;
 G4ThreadLocal G4FieldManager* DetectorConstruction::fieldMgr = 0;
@@ -267,6 +269,12 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   if (m_saveGdml) {
     G4GDMLParser fParser;
     G4cout << "Exporting geometry to " << m_fileGdml << G4endl;
+
+    if(std::filesystem::exists(m_fileGdml)){
+      G4cout << "  File already exists. Deleting first..." << G4endl;
+      std::filesystem::remove(m_fileGdml);
+    }
+
     fParser.Write(m_fileGdml, worldPV, false);
   }
 
@@ -281,10 +289,10 @@ void DetectorConstruction::ConstructSDandField() {
 
   if (m_addFLArE) {
 
-    LArBoxSD* TPCModuleSD = new LArBoxSD("lArBoxSD");
+    LArBoxSD* TPCModuleSD = new LArBoxSD("FLArEBoxSD");
     TPCModuleLogical->SetSensitiveDetector(TPCModuleSD);
     sdManager->AddNewDetector(TPCModuleSD);
-    GeometricalParameters::Get()->AddSD2List(SDIdx, "lArBoxSD/lar_box");
+    GeometricalParameters::Get()->AddSD2List(SDIdx,"FLArEBoxSD/lar_box");
     SDIdx++;
     
     if (m_useNativeG4Scorer){
@@ -334,16 +342,16 @@ void DetectorConstruction::ConstructSDandField() {
 
     if (m_useBabyMIND) {
 
-      LArBoxSD* BabyMINDHorBarSD = new LArBoxSD("BabyMINDHorBarSD");
+      LArBoxSD* BabyMINDHorBarSD = new LArBoxSD("FLArEBabyMINDHorBarSD");
       BabyMINDHorizontalBar->SetSensitiveDetector(BabyMINDHorBarSD);
       sdManager->AddNewDetector(BabyMINDHorBarSD);
-      GeometricalParameters::Get()->AddSD2List(SDIdx, "BabyMINDHorBarSD/lar_box");
+      GeometricalParameters::Get()->AddSD2List(SDIdx,"FLArEBabyMINDHorBarSD/lar_box");
       SDIdx++;
 
-      LArBoxSD* BabyMINDVerBarSD = new LArBoxSD("BabyMINDVerBarSD");
+      LArBoxSD* BabyMINDVerBarSD = new LArBoxSD("FLArEBabyMINDVerBarSD");
       BabyMINDVerticalBar->SetSensitiveDetector(BabyMINDVerBarSD);
       sdManager->AddNewDetector(BabyMINDVerBarSD);
-      GeometricalParameters::Get()->AddSD2List(SDIdx, "BabyMINDVerBarSD/lar_box");
+      GeometricalParameters::Get()->AddSD2List(SDIdx,"FLArEBabyMINDVerBarSD/lar_box");
       SDIdx++;
 
       // magnetic field for BabyMIND
@@ -355,40 +363,40 @@ void DetectorConstruction::ConstructSDandField() {
 
     } else {
 
-      LArBoxSD* HadCalXSD = new LArBoxSD("HadCalXSD");
+      LArBoxSD* HadCalXSD = new LArBoxSD("FLArEHadCalXSD");
       HadCalXCellLogical->SetSensitiveDetector(HadCalXSD);
       sdManager->AddNewDetector(HadCalXSD);
-      GeometricalParameters::Get()->AddSD2List(SDIdx, "HadCalXSD/lar_box");
+      GeometricalParameters::Get()->AddSD2List(SDIdx, "FLArEHadCalXSD/lar_box");
       SDIdx++;
 
-      LArBoxSD* HadCalYSD = new LArBoxSD("HadCalYSD");
+      LArBoxSD* HadCalYSD = new LArBoxSD("FLArEHadCalYSD");
       HadCalYCellLogical->SetSensitiveDetector(HadCalYSD);
       sdManager->AddNewDetector(HadCalYSD);
-      GeometricalParameters::Get()->AddSD2List(SDIdx, "HadCalYSD/lar_box");
+      GeometricalParameters::Get()->AddSD2List(SDIdx, "FLArEHadCalYSD/lar_box");
       SDIdx++;
 
-      LArBoxSD* MuonFinderXSD = new LArBoxSD("MuonFinderXSD");
+      LArBoxSD* MuonFinderXSD = new LArBoxSD("FLArEMuonFinderXSD");
       MuonFinderXCellLogical->SetSensitiveDetector(MuonFinderXSD);
       sdManager->AddNewDetector(MuonFinderXSD);
-      GeometricalParameters::Get()->AddSD2List(SDIdx, "MuonFinderXSD/lar_box");
+      GeometricalParameters::Get()->AddSD2List(SDIdx, "FLArEMuonFinderXSD/lar_box");
       SDIdx++;
 
-      LArBoxSD* MuonFinderYSD = new LArBoxSD("MuonFinderYSD");
+      LArBoxSD* MuonFinderYSD = new LArBoxSD("FLArEMuonFinderYSD");
       MuonFinderYCellLogical->SetSensitiveDetector(MuonFinderYSD);
       sdManager->AddNewDetector(MuonFinderYSD);
-      GeometricalParameters::Get()->AddSD2List(SDIdx, "MuonFinderYSD/lar_box");
+      GeometricalParameters::Get()->AddSD2List(SDIdx, "FLArEMuonFinderYSD/lar_box");
       SDIdx++;
 
-      LArBoxSD* HadAbsorbSD = new LArBoxSD("HadAbsorbSD");
+      LArBoxSD* HadAbsorbSD = new LArBoxSD("FLArEHadAbsorbSD");
       HadAbsorLayersLogical->SetSensitiveDetector(HadAbsorbSD);
       sdManager->AddNewDetector(HadAbsorbSD);
-      GeometricalParameters::Get()->AddSD2List(SDIdx, "HadAbsorbSD/lar_box");
+      GeometricalParameters::Get()->AddSD2List(SDIdx, "FLArEHadAbsorbSD/lar_box");
       SDIdx++;
 
-      LArBoxSD* MuonFinderAbsorbSD = new LArBoxSD("MuonFinderAbsorbSD");
+      LArBoxSD* MuonFinderAbsorbSD = new LArBoxSD("FLArEMuonFinderAbsorbSD");
       MuonFinderAbsorLayersLogical->SetSensitiveDetector(MuonFinderAbsorbSD);
       sdManager->AddNewDetector(MuonFinderAbsorbSD);
-      GeometricalParameters::Get()->AddSD2List(SDIdx, "MuonFinderAbsorbSD/lar_box");
+      GeometricalParameters::Get()->AddSD2List(SDIdx, "FLArEMuonFinderAbsorbSD/lar_box");
       SDIdx++;
 
       // magnetic field for HadCatcher + MuonFinder
@@ -429,26 +437,24 @@ void DetectorConstruction::ConstructSDandField() {
   }
 
   if (m_addFASER2) {
-    for (auto& station: FASER2TrackingLogical)
-    {
-      LArBoxSD* TrkScinSD = new LArBoxSD("FASER2TrackerSD"+ std::to_string(SDIdx));
-      station->SetSensitiveDetector(TrkScinSD);
-      sdManager->AddNewDetector(TrkScinSD);
-      GeometricalParameters::Get()->AddSD2List(SDIdx, "FASER2TrackerSD"+ std::to_string(SDIdx)+"/lar_box");
-      SDIdx++;
-    }
-
-    LArBoxSD* FASER2VetoSD = new LArBoxSD("FASER2VetoSD");
-    FASER2VetoLogical->SetSensitiveDetector(FASER2VetoSD);
-    sdManager->AddNewDetector(FASER2VetoSD);
-    GeometricalParameters::Get()->AddSD2List(SDIdx, "FASER2VetoSD/lar_box");
+    
+    FASER2TrackerSD* TrkScinSD = new FASER2TrackerSD("FASER2TrackerSD");
+    FASER2TrackingLogical->SetSensitiveDetector(TrkScinSD);
+    sdManager->AddNewDetector(TrkScinSD);
+    GeometricalParameters::Get()->AddSD2List(SDIdx, "FASER2TrackerSD/tracker_box");
     SDIdx++;
 
-    LArBoxSD* FASER2MuonDetSD = new LArBoxSD("FASER2MuonSD");
-    FASER2MuonLogical->SetSensitiveDetector(FASER2MuonDetSD);
-    sdManager->AddNewDetector(FASER2MuonDetSD);
-    GeometricalParameters::Get()->AddSD2List(SDIdx, "FASER2MuonSD/lar_box");
-    SDIdx++;
+    // LArBoxSD* FASER2VetoSD = new LArBoxSD("FASER2VetoSD"); //TODO: Should implement a new SD class for FASER2Veto
+    // FASER2VetoLogical->SetSensitiveDetector(FASER2VetoSD);
+    // sdManager->AddNewDetector(FASER2VetoSD);
+    // GeometricalParameters::Get()->AddSD2List(SDIdx, "FASER2VetoSD/lar_box");
+    // SDIdx++;
+
+    // LArBoxSD* FASER2MuonDetSD = new LArBoxSD("FASER2MuonSD"); //TODO: Should probably be a FASER2TrackerSD
+    // FASER2MuonLogical->SetSensitiveDetector(FASER2MuonDetSD);
+    // sdManager->AddNewDetector(FASER2MuonDetSD);
+    // GeometricalParameters::Get()->AddSD2List(SDIdx, "FASER2MuonSD/lar_box");
+    // SDIdx++;
 
     // FASER2 magnetic field
     G4ThreeVector fieldValueFASER2 = GeometricalParameters::Get()->GetFASER2MagnetField();

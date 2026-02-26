@@ -21,5 +21,5 @@
 ## 200MeV, 500MeV, 1GeV, 5GeV, 10GeV, 50GeV, 100GeV
 ## 200GeV, 300GeV, 500GeV, 800GeV, 1000GeV
 /gps/ene/mono 5 GeV
-/histo/fileName 5GeV.root
+/out/fileName 5GeV.root
 /run/beamOn 10000

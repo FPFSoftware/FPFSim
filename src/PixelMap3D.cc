@@ -17,7 +17,7 @@ using namespace hep_hpc::hdf5;
 PixelMap3D::PixelMap3D(const Int_t evtID, const Int_t nPrim, const Int_t PDG, const Double_t* res) :
   fEvtID(evtID), fNPrim(nPrim), fGeneratorPDG(PDG)
 {
-  G4cout<<"Creating PixelMap3D for event "<<fEvtID<<G4endl;
+  G4cout<< "Creating PixelMap3D for event " << fEvtID << G4endl;
   fResX = res[0]; fResY = res[1]; fResZ = res[2];
 }
 
@@ -259,7 +259,7 @@ void PixelMap3D::FillEntryWithToySingleElectronTransportation(const Double_t* po
   }
 }
 
-void PixelMap3D::Process3DPM(File &h5file, FPFNeutrino nu, G4bool save3D)
+void PixelMap3D::Process3DPM(File &h5file, G4int initPDG, G4int fslPDG, G4int intType, G4int scatType, G4double initE, G4bool save3D)
 {
   static auto evt_data = 
     make_ntuple({h5file, "evt_data"},
@@ -270,8 +270,7 @@ void PixelMap3D::Process3DPM(File &h5file, FPFNeutrino nu, G4bool save3D)
                 make_scalar_column<int>("mode"),
                 make_scalar_column<float>("nuE"));
 
-  evt_data.insert(fEvtID, nu.NuPDG(), nu.NuFSLPDG(),
-                  nu.NuIntType(), nu.NuScatteringType(), nu.NuE());
+  evt_data.insert(fEvtID, initPDG, fslPDG, intType, scatType, initE);
 
   static auto pm_data = 
     make_ntuple({h5file, "pm_data"},
@@ -296,26 +295,29 @@ void PixelMap3D::Process3DPM(File &h5file, FPFNeutrino nu, G4bool save3D)
   delete[] bins;
 }
 
-void PixelMap3D::Write2DPMToFile(TFile* thefile)
+void PixelMap3D::Write2DPMToFile(TFile *thefile, TDirectory* thedir)
 {
+  thefile->cd(thedir->GetName());
   std::string dirname = "edep2D/evt_"+std::to_string(fEvtID)+"/";
-  thefile->mkdir(dirname.c_str());
-  thefile->cd(dirname.c_str());
+  thedir->mkdir(dirname.c_str());
+  thedir->cd(dirname.c_str());
   for (int i=0; i<fNPrim+1; ++i) {
     if (hitClusterZX[i]->GetEntries()==0) hitClusterZX[i]->SetEntries(1);
     if (hitClusterZY[i]->GetEntries()==0) hitClusterZY[i]->SetEntries(1);
     hitClusterZX[i]->Write();
     hitClusterZY[i]->Write();
   }
+  thefile->cd(thedir->GetName());
   dirname = "edep2Dvtx/evt_"+std::to_string(fEvtID)+"/";
-  thefile->mkdir(dirname.c_str());
-  thefile->cd(dirname.c_str());
+  thedir->mkdir(dirname.c_str());
+  thedir->cd(dirname.c_str());
   for (int i=0; i<fNPrim+1; ++i) {
     if (vtxHitClusterZX[i]->GetEntries()==0) vtxHitClusterZX[i]->SetEntries(1);
     if (vtxHitClusterZY[i]->GetEntries()==0) vtxHitClusterZY[i]->SetEntries(1);
     vtxHitClusterZX[i]->Write();
     vtxHitClusterZY[i]->Write();
   }
+  thefile->cd();
 }
 
 G4double PixelMap3D::DistanceToAnode(G4double x) {

@@ -87,73 +87,59 @@ void FLArETPCDetectorConstruction::BuildFLArETPC()
     //fFLArETPCLog->SetUserLimits(new G4UserLimits(0.5*mm));
   } else if (fDetGeomOption == GeometricalParameters::tpcConfigOption::ThreeBySeven) {
     G4cout << "TPC module configuration: 3x7" << G4endl;
-    lArBoxLog = new G4LogicalVolume(lArBox, detectorMaterial, "TPCModuleLogical");
+    lArBoxLog = new G4LogicalVolume(lArBox, detectorMaterial, "lArLogical");
     auto lArBoxVis = new G4VisAttributes(G4Colour(86./255, 152./255, 195./255));
     lArBoxVis->SetVisibility(false);
     lArBoxLog->SetVisAttributes(lArBoxVis);
 
+    G4double TPCModuleWidth  = fLArSizeX / 3.0;
+    G4double TPCModuleHeight = fLArSizeY;
+    G4double TPCModuleLength = fLArSizeZ / 7.0;
+
+    //auto TPCModuleSolid = new G4Box("TPCModuleBox", TPCModuleWidth/2, TPCModuleHeight/2, TPCModuleLength/2);
+    //fFLArETPCLog = new G4LogicalVolume(TPCModuleSolid, detectorMaterial, "TPCModuleLogical");
+    // OVVERRIDE for rad studies...
     G4double dimBoxZ = 100*mm; //the size of the mini boxes' z side
     G4double dimBoxXY = 100*mm; // the size of the mini boxes' x and y sides
-
     GeometricalParameters::Get()->SetScoreHalfSizes(G4ThreeVector(dimBoxXY,dimBoxXY,dimBoxZ));
+ 	  auto miniBox  = new G4Box("miniBox", (dimBoxXY/2),(dimBoxXY/2),(dimBoxZ/2));
+	  fFLArETPCLog  = new G4LogicalVolume(miniBox, detectorMaterial, "miniBoxLog");
 
-    G4double TPCLayerWidth   = fLArSizeX;
-    G4double TPCLayerHeight  = fLArSizeY;
-    G4double TPCLayerLength  = fLArSizeZ / 7.0;
-    G4double TPCModuleWidth  = TPCLayerWidth / 3.0;
-    G4double TPCModuleHeight = TPCLayerHeight;
-    G4double TPCModuleLength = TPCLayerLength;
+	  //making indiv boxes below to replace the replicas (more copy nums saved)
+    int boxCt = 0;
+    //double startEndX = (fLArSizeX/2) - 0.5*TPCModuleWidth;
+    //double startEndZ = (fLArSizeZ/2) - 0.5*TPCModuleLength;
+    // OVVERIDE for rad studies 
+    G4double startEndZ = (fLArSizeZ)/2 - 0.5*dimBoxZ;
+    G4double startEndY = (fLArSizeY)/2 - 0.5*dimBoxXY;
+    G4double startEndX = (fLArSizeX)/2 - 0.5*dimBoxXY;
 
-    auto TPCLayerSolid
-      = new G4Box("TPCLayerBox", TPCLayerWidth/2, TPCLayerHeight/2, TPCLayerLength/2);
-    auto TPCLayerLogical
-      = new G4LogicalVolume(TPCLayerSolid, detectorMaterial, "TPCLayerLogical");
-    auto TPCModuleSolid
-      = new G4Box("TPCModuleBox", TPCModuleWidth/2, TPCModuleHeight/2, TPCModuleLength/2);
-    //fFLArETPCLog = new G4LogicalVolume(TPCModuleSolid, detectorMaterial, "TPCModuleLog"); //old TPC
+    //for (int boxNumZ = 0; boxNumZ < 7; boxNumZ++) {
+    //  for (int boxNumX = 0; boxNumX < 3; boxNumX++){
+    //    G4ThreeVector pos (boxNumX*TPCModuleWidth - startEndX, 0, boxNumZ*TPCModuleLength - startEndZ );
+    //    new G4PVPlacement(0, pos, fFLArETPCLog, "TPCModulePhysical", lArBoxLog, false, boxCt);
+    //    boxCt++;
+    //  }
+    //}
+    // OVVERIDE for rad studies...
+    for (int boxNumX =  0; boxNumX < (fLArSizeX/dimBoxXY); boxNumX++ ) {
+      for (int boxNumY =  0 ; boxNumY < (fLArSizeY/dimBoxXY); boxNumY++) {
+        for (int boxNumZ = 0 ; boxNumZ < (fLArSizeZ/dimBoxZ); boxNumZ++ ) {
+          G4ThreeVector pos(boxNumX*dimBoxXY-startEndX, boxNumY*dimBoxXY-startEndY, boxNumZ*dimBoxZ-startEndZ);
+          new	G4PVPlacement(0,pos,fFLArETPCLog,"miniPlaced",lArBoxLog,false,boxCt);
+          GeometricalParameters::Get()->AddScoreVolume(boxCt,pos);
+          boxCt++;
+        }
+      }
+    }
 
-
- 	 auto miniBox  = new G4Box("miniBox", (dimBoxXY/2),
-								(dimBoxXY/2),
-								(dimBoxZ/2));
-	fFLArETPCLog  = new G4LogicalVolume(miniBox, detectorMaterial, "miniBoxLog");
-
-	//adding the boxes
-	G4double startEndZ = (fLArSizeZ)/2  - 0.5*dimBoxZ;
-	G4double startEndY = (fLArSizeY)/2  - 0.5*dimBoxXY;
-	G4double startEndX = (fLArSizeX)/2 - 0.5*dimBoxXY;
-
-    int count = 0;
-
-	for (int boxNumX =  0; boxNumX < (fLArSizeX/dimBoxXY); boxNumX++ ) {
-		for (int boxNumY =  0 ; boxNumY < (fLArSizeY/dimBoxXY); boxNumY++) {
-			for (int boxNumZ = 0 ; boxNumZ < (fLArSizeZ/dimBoxZ); boxNumZ++ ) {
-
-
-      G4ThreeVector pos(boxNumX*dimBoxXY-startEndX, boxNumY*dimBoxXY-startEndY, boxNumZ*dimBoxZ-startEndZ);
-			new	G4PVPlacement(0,
-					              pos,
-					              fFLArETPCLog,
-                        "miniPlaced",
-                        lArBoxLog,
-                        false,
-                        count);
-      GeometricalParameters::Get()->AddScoreVolume(count,pos);
-			count++;
-			}
-		}
-	}
-   //new G4PVReplica("TPCModulePhysical", fFLArETPCLog, TPCLayerLogical, kXAxis, 3, TPCModuleWidth);
-    //new G4PVReplica("TPC", TPCLayerLogical, lArBoxLog, kZAxis, 7, TPCLayerLength);
     G4VisAttributes* TPCModuleVis = new G4VisAttributes(G4Colour(86./255, 152./255, 195./255));
     TPCModuleVis->SetVisibility(true);
     TPCModuleVis->SetForceWireframe(true);
     TPCModuleVis->SetForceAuxEdgeVisible(true);
-    TPCLayerLogical->SetVisAttributes(lArBoxVis);
     fFLArETPCLog->SetVisAttributes(TPCModuleVis);
-    //fFLArETPCLog->SetUserLimits(new G4UserLimits(0.5*mm));
-
-     }
+    //fFLArETPCLog->SetUserLimits(new G4UserLimits(1.0*mm)); // FIXME?
+  }
 }
 
 void FLArETPCDetectorConstruction::BuildCryostatInsulation()

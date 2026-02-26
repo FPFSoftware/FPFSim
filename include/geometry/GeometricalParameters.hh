@@ -1,7 +1,6 @@
 #ifndef GeometricalParameters_hh
 #define GeometricalParameters_hh
 
-#include <set>
 #include <map>
 
 #include "G4String.hh"
@@ -220,7 +219,7 @@ class GeometricalParameters  {
 
     // Sensitive detectors
     void AddSD2List(int idx, std::string val) { fSDNamelist.insert(std::make_pair(idx, val)); }
-    std::set<std::pair<int, std::string> > GetSDNamelist() { return fSDNamelist; }
+    std::map<int, std::string> GetSDNamelist() { return fSDNamelist; }
 
     void AddScoreVolume(int cpyNum, G4ThreeVector v) { fScoreVolumes.insert(std::make_pair(cpyNum,v)); }
     std::map<int,G4ThreeVector> GetScoreVolumes() { return fScoreVolumes; }
@@ -235,7 +234,7 @@ class GeometricalParameters  {
     G4double fHallHeadDistance; ///<- distance between the entrance wall and the first detector
     G4double fHallOffsetX; // x offset of hall center from the LOS
     G4double fHallOffsetY; // x offset of hall center from the LOS
-
+    
     // rock envelope
     G4bool fEnableRockEnvelope;
     G4double fRockFrontThickness;
@@ -316,7 +315,6 @@ class GeometricalParameters  {
     
     G4bool fFASER2FillCaloAndWall; // if true then fill volumes with material, otherwise use air to save CPU
 
-
     // FASERnu2 Emulsion detector
     G4double fFASERnu2TotalSizeZ;
     // Emulsion/Tungsten
@@ -345,7 +343,8 @@ class GeometricalParameters  {
     G4ThreeVector fFORMOSAPos;
 
     // Sensitive detectors
-    std::set<std::pair<int, std::string> > fSDNamelist;
+    std::map<int, std::string> fSDNamelist;
+    
     std::map<int,G4ThreeVector> fScoreVolumes;
     G4ThreeVector fScoreHalfSizes;
 };
