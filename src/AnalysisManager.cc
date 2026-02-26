@@ -597,7 +597,7 @@ void AnalysisManager::FillEventTree(const G4Event *event)
       G4PrimaryParticle *primary_particle = event->GetPrimaryVertex(ivtx)->GetPrimary(ipp);
       if (primary_particle)
       {
-        int tid = ipp + 1; // confirm matches track id?
+        int tid = primary_particle->GetTrackID();
         int pdg = primary_particle->GetPDGcode();
         double px = primary_particle->GetMomentum().x();
         double py = primary_particle->GetMomentum().y();
