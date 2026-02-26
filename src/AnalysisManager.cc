@@ -166,11 +166,11 @@ void AnalysisManager::bookRadTrees(){
   fRadScoreDir = fFile->mkdir("scores");
   fFile->cd(fRadScoreDir->GetName());
 
-  for (auto sdname : SDNamelist){
+  std::string match = "lArBoxMFD";
+  for (auto sdname : fSDNamelist){
 
-    std::string match = "lArBoxMFD/";
-    if( sdname.second.find(match) == std::string::npos ) continue;
-
+    if (sdname.second.find(match) == std::string::npos)
+      continue;
     std::string name = sdname.second;
     name.erase( name.find(match), match.length());
 
@@ -328,7 +328,6 @@ void AnalysisManager::BeginOfRun()
   // Booking common output trees
   bookEvtTree();
   bookParTree();
-  bookRadTrees();
 
   fSDNamelist = GeometricalParameters::Get()->GetSDNamelist();
   G4cout << "Number of SDs : " << fSDNamelist.size() << G4endl;
@@ -360,11 +359,9 @@ void AnalysisManager::BeginOfRun()
       bookFASER2Trees();
     }
 
-    else if (SDname.find("lArBoxMFD") != std::string::npos)
-    {
-      fRadScoreSDs.push_back(sdname.first);
-    }
   }
+
+  bookRadTrees();
 
   // if FLArE is enabled & its geometry was found
   // prepare .h5 output file
@@ -963,10 +960,16 @@ void AnalysisManager::FillFLArEOutput()
 
 void AnalysisManager::FillRadOutput()
 {
-  for (const int sdId : fRadScoreSDs)
-  {
-    std::string sdName = fSDNamelist.at(sdId);
-    auto scoremap = static_cast<G4THitsMap<G4double>*>(hcofEvent->GetHC(sdId));
+
+  std::string match = "lArBoxMFD";
+  for (auto sdname : fSDNamelist){
+
+    if (sdname.second.find(match) == std::string::npos)
+      continue;
+
+    std::string sdName = sdname.second;
+    auto sdId = sdname.first;
+    auto scoremap = static_cast<G4THitsMap<G4double>*>(fHCofEvent->GetHC(sdId));
     auto volumes = GeometricalParameters::Get()->GetScoreVolumes();
     auto dims = GeometricalParameters::Get()->GetScoreHalfSizes();
     

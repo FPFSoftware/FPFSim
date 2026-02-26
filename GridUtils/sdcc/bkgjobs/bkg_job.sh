@@ -75,9 +75,11 @@ function generate_macros {
 /gen/bkg/backgroundWindow ${twindow}
 /gen/bkg/eventOffset ${istart}
 
+/out/flare/enableOutput false
 /out/flare/save3DEvd false
 /out/flare/save2DEvd false
 /out/flare/addDiffusion false
+/out/faser/actsHits false
 /out/fileName ${outputfile}
 
 /run/beamOn ${n_evt_per_job}

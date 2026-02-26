@@ -99,7 +99,6 @@ class AnalysisManager {
     std::map<int, std::string> fSDNamelist;
     std::vector<int> fFlareSDs;
     std::vector<int> fFaser2SDs;
-    std::vector<int> fRadScoreSDs;
     
     G4HCofThisEvent* fHCofEvent;
     
