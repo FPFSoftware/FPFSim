@@ -6,7 +6,7 @@
 
 # Production name for output directories
 # This is used to place output logs and files
-export prodname="test_campaign"
+export prodname="test_nu_campaign"
 
 # Define how many jobs, how many files
 # Jobs will be placed in the same cluster
@@ -18,13 +18,11 @@ export builddir="/direct/lbne+u/${USER}/FPFSim/build"
 export fpfsim="${builddir}/FPFSim"
 export setup="${builddir}/../sdcc_setup.sh"
 
-# Generator options
-export twindow="200 us"
-export inputbkg="${builddir}/../backgrounds/background_input.root"
-
 # Path to geometry macro
-export geometry="${builddir}/macros/geometry_options/FLArE_only_BabyMIND.mac"
-export rock="false"
+export geometry="${builddir}/macros/geometry_options/FPF_hall_Option1a_FORMOSAlast_BabyMIND.mac"
+
+# Path to genie gst file on GPFS
+export geniegst="/gpfs01/lbne/users/fpf/${USER}/numu_kling_ar40_e5000.gst.root"
 
 # Path to log/output directory
 export outdir="/gpfs01/lbne/users/fpf/$USER/CONDOR_OUTPUT"
@@ -34,7 +32,7 @@ export logdir="/gpfs01/lbne/users/fpf/$USER/CONDOR_LOGS"
 ###------------------------------------------------------------------
 
 function generate_macros {
-  
+
   list=$1
 
   # for each job
@@ -45,13 +43,13 @@ function generate_macros {
     seed1=$((42+i))
     seed2=$((47+i))
 
-    # select the event numbering offset for this job
+    # select the start entry for the gst file
     istart=$((n_evt_per_job*i))
 
-    # select name for output file 
+    # select name for output file
     outputfile="${prodname}_${i}.root"
-    
-    # final macro path  
+
+    # final macro path
     macfile="${logdir}/${prodname}/mac/${prodname}_${i}.mac"
     if [ -f ${macfile} ]; then
       echo "${macfile} exists, delete file first"
@@ -63,16 +61,13 @@ function generate_macros {
     rm temp.mac
     cat << EOF >> temp.mac
 /control/execute ${geometry}
-/det/enableRock ${rock}
-/det/flare/useNativeG4Scorer true
 
 /random/setSeeds ${seed1} ${seed2}
 /run/initialize
 
-/gen/select background
-/gen/bkg/backgroundInput ${inputbkg}
-/gen/bkg/backgroundWindow ${twindow}
-/gen/bkg/eventOffset ${istart}
+/gen/select genie
+/gen/genie/genieInput ${geniegst}
+/gen/genie/genieIStart ${istart}
 
 /out/flare/save3DEvd false
 /out/flare/save2DEvd false
@@ -81,7 +76,7 @@ function generate_macros {
 
 /run/beamOn ${n_evt_per_job}
 EOF
-    
+
     # move the macro to final destination
     cp temp.mac ${macfile}
   done
@@ -99,7 +94,7 @@ function generate_submission_file {
   cat << EOF >> ${sub}
 universe                = vanilla
 notification            = never
-executable              = batch_bkg_script.sh
+executable              = batch_nu_script.sh
 arguments               = \$(ClusterId) \$(ProcId) ${fpfsim} ${listpath} ${setup}
 initialdir              = ${outdir}/${prodname}
 output                  = ${logdir}/${prodname}/out/\$(ClusterId).\$(ProcId).out
@@ -130,13 +125,13 @@ if [ -d "${outdir}/${prodname}" ] && [ "$(ls -A ${outdir}/${prodname})" ]; then
   exit 1
 else
   mkdir -p ${outdir}/${prodname}
-  if [ -d "${logdir}/${prodname}/out/" ] && [ "$(ls -A ${logdir}/${prodname}/out/)" ]; 
+  if [ -d "${logdir}/${prodname}/out/" ] && [ "$(ls -A ${logdir}/${prodname}/out/)" ];
     then rm ${logdir}/${prodname}/out/*; fi
-  if [ -d "${logdir}/${prodname}/err/" ] && [ "$(ls -A ${logdir}/${prodname}/err/)" ]; 
+  if [ -d "${logdir}/${prodname}/err/" ] && [ "$(ls -A ${logdir}/${prodname}/err/)" ];
     then rm ${logdir}/${prodname}/err/*; fi
-  if [ -d "${logdir}/${prodname}/log/" ] && [ "$(ls -A ${logdir}/${prodname}/log/)" ]; 
+  if [ -d "${logdir}/${prodname}/log/" ] && [ "$(ls -A ${logdir}/${prodname}/log/)" ];
     then rm ${logdir}/${prodname}/log/*; fi
-  if [ -d "${logdir}/${prodname}/mac/" ] && [ "$(ls -A ${logdir}/${prodname}/mac/)" ]; 
+  if [ -d "${logdir}/${prodname}/mac/" ] && [ "$(ls -A ${logdir}/${prodname}/mac/)" ];
     then rm ${logdir}/${prodname}/mac/*; fi
 fi
 
@@ -144,7 +139,7 @@ fi
 # generate all macros for each job
 # as well as a list of their paths
 echo "Generating list of .mac files..."
-  
+
 macrolist="macrolist.txt"
 if [ -f ${macrolist} ]; then
   rm ${macrolist}
