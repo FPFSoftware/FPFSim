@@ -226,6 +226,14 @@ class GeometricalParameters  {
     void SetScoreHalfSizes(G4ThreeVector v) { fScoreHalfSizes = v;}
     G4ThreeVector GetScoreHalfSizes() { return fScoreHalfSizes; }
 
+    // Energy bin boundaries for each scorer, keyed by scorer name (e.g. "MuPlus_Bin0")
+    void AddScorerEnergyBin(std::string name, G4double eMin, G4double eMax) {
+      fScorerEnergyBins[name] = {eMin, eMax};
+    }
+    std::pair<G4double,G4double> GetScorerEnergyBin(const std::string& name) const {
+      return fScorerEnergyBins.at(name);
+    }
+
   private:
     //the singleton
     static GeometricalParameters *me;
@@ -344,9 +352,12 @@ class GeometricalParameters  {
 
     // Sensitive detectors
     std::map<int, std::string> fSDNamelist;
-    
+
     std::map<int,G4ThreeVector> fScoreVolumes;
     G4ThreeVector fScoreHalfSizes;
+
+    // Energy bin boundaries per scorer name
+    std::map<std::string, std::pair<G4double,G4double>> fScorerEnergyBins;
 };
 
 #endif 

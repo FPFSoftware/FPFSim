@@ -264,6 +264,7 @@ class AnalysisManager {
     double sumLength;
     double xvol, yvol, zvol;
     double dx, dy, dz;
+    double energyBinMin, energyBinMax;
 
     //---------------------------------------------------
     // OUTPUT VARIABLES FOR FASER2 TREES

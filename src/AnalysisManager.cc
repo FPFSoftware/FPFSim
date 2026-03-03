@@ -172,7 +172,7 @@ void AnalysisManager::bookRadTrees(){
     if (sdname.second.find(match) == std::string::npos)
       continue;
     std::string name = sdname.second;
-    name.erase( name.find(match), match.length());
+    name.erase( name.find(match), match.length() + 1); // +1 to strip the trailing "/"
 
     auto t = new TTree(name.c_str(), "score info for FLArE");
     t->Branch("evtID", &evtID, "evtID/I");
@@ -185,6 +185,8 @@ void AnalysisManager::bookRadTrees(){
     t->Branch("dx", &dx, "dx/D");
     t->Branch("dy", &dy, "dy/D");
     t->Branch("dz", &dz, "dz/D");
+    t->Branch("energyBinMin", &energyBinMin, "energyBinMin/D");
+    t->Branch("energyBinMax", &energyBinMax, "energyBinMax/D");
     radTrees[sdname.first] = t;
   }
   fFile->cd();
@@ -978,6 +980,12 @@ void AnalysisManager::FillRadOutput()
     else if( sdName.find("Gamma") != std::string::npos ) PDG = 22;
     else if( sdName.find("Neutron") != std::string::npos ) PDG = 2112;
     else PDG = -1;
+
+    // Extract scorer name (strip "lArBoxMFD/" prefix) and look up energy bin boundaries
+    std::string scorerName = sdName.substr(sdName.find('/') + 1);
+    auto [eMin, eMax] = GeometricalParameters::Get()->GetScorerEnergyBin(scorerName);
+    energyBinMin = eMin / MeV;
+    energyBinMax = (eMax == DBL_MAX) ? -1. : eMax / MeV; // -1 flags open upper bound
 
     for(int c = 0; c < volumes.size(); c++)
     {

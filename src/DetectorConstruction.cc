@@ -33,7 +33,8 @@
 #include <G4SubtractionSolid.hh>
 #include <G4MultiFunctionalDetector.hh>
 #include <G4PSTrackLength.hh>
-#include <G4SDParticleFilter.hh> 
+#include <G4SDParticleFilter.hh>
+#include <G4SDParticleWithEnergyFilter.hh>
 
 #include <filesystem>
 #include <string>
@@ -298,46 +299,45 @@ void DetectorConstruction::ConstructSDandField() {
     if (m_useNativeG4Scorer){
     G4MultiFunctionalDetector* mfd = new G4MultiFunctionalDetector("lArBoxMFD");
 
-    auto muplusScorer = new G4PSTrackLength("MuPlusTrackLength");
-    auto muplusFilter = new G4SDParticleFilter("MuPlusFilter");
-    muplusFilter->add("mu+");
-    muplusScorer->SetFilter(muplusFilter);
-    muplusScorer->SetUnit("mm");
+    // Per-species energy bins (MeV). Edit these once physics-motivated values are known.
+    // Each entry: { particle name, ROOT-safe label, PDG, { {Emin, Emax}, ... } }
+    // The last bin of each species should use DBL_MAX as Emax (open upper bound).
+    struct SpeciesConfig {
+      std::string particle;
+      std::string label;
+      std::vector<std::pair<G4double,G4double>> bins; // (Emin, Emax) in MeV
+    };
+    std::vector<SpeciesConfig> speciesConfigs = {
+      { "mu+",     "MuPlus",  { {0., 500.*MeV}, {500.*MeV, 5000.*MeV}, {5000.*MeV, DBL_MAX} } },
+      { "mu-",     "MuMinus", { {0., 500.*MeV}, {500.*MeV, 5000.*MeV}, {5000.*MeV, DBL_MAX} } },
+      { "neutron", "Neutron", { {0., 100.*keV},   {100.*keV,   1.*MeV}, {1.*MeV,  10.*MeV}, {10.*MeV,   DBL_MAX} } },
+      { "gamma",   "Gamma",   { {0., 1.*MeV},  {1.*MeV,  10.*MeV}, {10.*MeV,  100.*MeV}, {100.*MeV,  DBL_MAX} } },
+    };
 
-    auto muminusScorer = new G4PSTrackLength("MuMinusTrackLength");
-    auto muminusFilter = new G4SDParticleFilter("MuMinusFilter");
-    muminusFilter->add("mu-");
-    muminusScorer->SetFilter(muminusFilter);
-    muminusScorer->SetUnit("mm");
+    for (const auto& cfg : speciesConfigs) {
+      for (size_t ibin = 0; ibin < cfg.bins.size(); ibin++) {
+        G4double eMin = cfg.bins[ibin].first;
+        G4double eMax = cfg.bins[ibin].second;
+        std::string scorerName = cfg.label + "_Bin" + std::to_string(ibin);
 
-    auto neutronScorer = new G4PSTrackLength("NeutronTrackLength");
-    auto neutronFilter = new G4SDParticleFilter("NeutronFilter");
-    neutronFilter->add("neutron");
-    neutronScorer->SetFilter(neutronFilter);
-    neutronScorer->SetUnit("mm");
+        auto scorer = new G4PSTrackLength(scorerName);
+        scorer->SetUnit("mm");
 
-    auto gammaScorer = new G4PSTrackLength("GammaTrackLength");
-    auto gammaFilter = new G4SDParticleFilter("GammaFilter");
-    gammaFilter->add("gamma");
-    gammaScorer->SetFilter(gammaFilter);
-    gammaScorer->SetUnit("mm");
+        auto filter = new G4SDParticleWithEnergyFilter(scorerName + "_Filter", eMin, eMax);
+        filter->add(cfg.particle);
+        scorer->SetFilter(filter);
 
-    mfd->RegisterPrimitive(muplusScorer);
-    mfd->RegisterPrimitive(muminusScorer);
-    mfd->RegisterPrimitive(neutronScorer);
-    mfd->RegisterPrimitive(gammaScorer);
+        mfd->RegisterPrimitive(scorer);
+
+        std::string sdPath = "lArBoxMFD/" + scorerName;
+        GeometricalParameters::Get()->AddSD2List(SDIdx, sdPath);
+        GeometricalParameters::Get()->AddScorerEnergyBin(scorerName, eMin, eMax);
+        SDIdx++;
+      }
+    }
 
     TPCModuleLogical->SetSensitiveDetector(mfd);
     sdManager->AddNewDetector(mfd);
-
-    GeometricalParameters::Get()->AddSD2List(SDIdx, "lArBoxMFD/MuPlusTrackLength");
-    SDIdx++;
-    GeometricalParameters::Get()->AddSD2List(SDIdx, "lArBoxMFD/MuMinusTrackLength");
-    SDIdx++;
-    GeometricalParameters::Get()->AddSD2List(SDIdx, "lArBoxMFD/NeutronTrackLength");
-    SDIdx++;
-    GeometricalParameters::Get()->AddSD2List(SDIdx, "lArBoxMFD/GammaTrackLength");
-    SDIdx++;
     }
 
     if (m_useBabyMIND) {
