@@ -16,9 +16,9 @@
 /out/flare/addDiffusion false
 /out/fileName test_backgrounds.root
 
-# store and save trajectories for EVD
-/tracking/storeTrajectory 0
-/out/saveTrack false
+# store full trajectories for EVD
+/out/saveAllParticles false
+/out/saveTrajectories false
 
 # shoot background equivalent to 1 "spill"
 /run/beamOn 1

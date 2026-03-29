@@ -1,6 +1,7 @@
 #include "TrackingAction.hh"
 #include "TrackInformation.hh"
 #include "AnalysisManager.hh"
+#include "FPFTrajectory.hh"
 
 #include "G4TrackingManager.hh"
 #include "G4Track.hh"
@@ -9,14 +10,23 @@ TrackingAction::TrackingAction() : G4UserTrackingAction() {;}
 
 void TrackingAction::PreUserTrackingAction(const G4Track* aTrack)
 {
+  // find out whether saving the full trajectory points or not
+   bool storeTrajectoryPoints = AnalysisManager::GetInstance()->GetSaveTrajectories();
+
+  // initialize our custom trajectory class
+  auto *traj = new FPFTrajectory(aTrack, storeTrajectoryPoints);
+
+  // hand it over to the manager
+  fpTrackingManager->SetTrajectory(traj);
+  fpTrackingManager->SetStoreTrajectory(true);
 }
 
 void TrackingAction::PostUserTrackingAction(const G4Track* aTrack)
 {
-  if (aTrack->GetParentID()==0) 
-  {
-    AnalysisManager::GetInstance()->AddOnePrimaryTrack();
-  }
+  /// the following blocks store additional information into the track
+  /// via the TrackInformation object (G4VTrackUserInformation)
+  /// it is currently used in some FLARE SD volume to change how to save things
+  /// TODO: consider for removal to simplify structure!
   if (aTrack->GetParentID()==0) 
   {
     if (aTrack->GetParticleDefinition()->GetPDGEncoding()==111) 
@@ -36,7 +46,6 @@ void TrackingAction::PostUserTrackingAction(const G4Track* aTrack)
               TrackInformation* info =  new TrackInformation();
               info->SetTrackIsFromPrimaryPizero(1);
               (*secondaries)[i]->SetUserInformation(info);
-              AnalysisManager::GetInstance()->AddOnePrimaryTrack();
             }
           }
         }
@@ -64,7 +73,6 @@ void TrackingAction::PostUserTrackingAction(const G4Track* aTrack)
             TrackInformation* info =  new TrackInformation();
             info->SetTrackIsFromPrimaryLepton(1);
             (*secondaries)[i]->SetUserInformation(info);
-            AnalysisManager::GetInstance()->AddOnePrimaryTrack();
           }
         }
       }
@@ -90,19 +98,10 @@ void TrackingAction::PostUserTrackingAction(const G4Track* aTrack)
               TrackInformation* info =  new TrackInformation();
               info->SetTrackIsFromFSLPizero(1);
               (*secondaries)[i]->SetUserInformation(info);
-              AnalysisManager::GetInstance()->AddOnePrimaryTrack();
             }
           }
         }
       }
     }
   }
-  
-  //TrackInformation* aTrackInfo = (TrackInformation*)(aTrack->GetUserInformation());
-  //if (aTrackInfo) {
-  //  if (aTrackInfo->IsTrackFromPrimaryTau() | aTrackInfo->IsTrackFromPrimaryPizero()) {
-  //    std::cout<<aTrack->GetParentID()<<" "<<aTrack->GetParticleDefinition()->GetPDGEncoding()<<std::endl;
-  //    aTrackInfo->Print();
-  //  }
-  //}
 }

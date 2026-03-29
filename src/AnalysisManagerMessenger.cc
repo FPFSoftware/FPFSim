@@ -36,6 +36,7 @@
 #include "G4UIcmdWithAString.hh"
 #include "G4UIcmdWithAnInteger.hh"
 #include "G4UIcmdWithABool.hh"
+#include "G4UIcmdWithADoubleAndUnit.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -49,10 +50,15 @@
   fFileCmd->SetGuidance("set name for the histograms file");
   fFileCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-  fSaveTrackCmd = new G4UIcmdWithABool("/out/saveTrack", this);
-  fSaveTrackCmd->SetGuidance("whether save the information of all tracks");
-  fSaveTrackCmd->SetParameterName("saveTrack", true);
-  fSaveTrackCmd->SetDefaultValue(false);
+  fSaveParticlesCmd = new G4UIcmdWithABool("/out/saveAllParticles", this);
+  fSaveParticlesCmd->SetGuidance("whether saving all particles in the event");
+  fSaveParticlesCmd->SetParameterName("saveAllParticles", true);
+  fSaveParticlesCmd->SetDefaultValue(false);
+
+  fSaveTrajectoriesCmd = new G4UIcmdWithABool("/out/saveTrajectories", this);
+  fSaveTrajectoriesCmd->SetGuidance("whether saving the full trajectories");
+  fSaveTrajectoriesCmd->SetParameterName("saveTrajectories", true);
+  fSaveTrajectoriesCmd->SetDefaultValue(false);
 
   fFLArEDir = new G4UIdirectory("/out/flare/");
   fFLArEDir->SetGuidance("flare output control");
@@ -96,7 +102,8 @@
 AnalysisManagerMessenger::~AnalysisManagerMessenger()
 {
   delete fFileCmd;
-  delete fSaveTrackCmd;
+  delete fSaveParticlesCmd;
+  delete fSaveTrajectoriesCmd;
   delete fSave3DEvdCmd;
   delete fSave2DEvdCmd;
   delete fAddDiffusionCmd;
@@ -113,7 +120,8 @@ AnalysisManagerMessenger::~AnalysisManagerMessenger()
 void AnalysisManagerMessenger::SetNewValue(G4UIcommand* command,G4String newValues)
 {
   if (command == fFileCmd) fAnalysisManager->setFileName(newValues);
-  if (command == fSaveTrackCmd) fAnalysisManager->saveTrack(fSaveTrackCmd->GetNewBoolValue(newValues));
+  if (command == fSaveParticlesCmd) fAnalysisManager->saveAllParticles(fSaveParticlesCmd->GetNewBoolValue(newValues));
+  if (command == fSaveTrajectoriesCmd) fAnalysisManager->saveTrajectories(fSaveTrajectoriesCmd->GetNewBoolValue(newValues));
 
   if (command == fEnableFLArEOutCmd) fAnalysisManager->enableFLArE(fEnableFLArEOutCmd->GetNewBoolValue(newValues));
   if (command == fSave3DEvdCmd) fAnalysisManager->save3DEvd(fSave3DEvdCmd->GetNewBoolValue(newValues));

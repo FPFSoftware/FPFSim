@@ -23,6 +23,7 @@ class EventInformation : public G4VUserEventInformation
 
     /// Prints the information about the event.
     virtual void Print() const;
+    virtual void Print(int i) const;
 
   private:
     /// Set of vertex metadata

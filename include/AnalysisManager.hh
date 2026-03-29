@@ -4,6 +4,7 @@
 #include <set>
 #include <vector>
 #include <string>
+#include <unordered_set>
 
 #include "globals.hh"
 #include "G4Event.hh"
@@ -34,7 +35,8 @@ class AnalysisManager {
     //------------------------------------------------
     // functions for controlling from the configuration file
     void setFileName(std::string val) { fFilename = val; }
-    void saveTrack(G4bool val) { fSaveTrack = val; }
+    void saveAllParticles(G4bool val) { fSaveAllParticles = val; }
+    void saveTrajectories(G4bool val) { fSaveTrajectories = val; }
     void saveActs(G4bool val) { fSaveActs = val; }
     void savePseudoReco(G4bool val) { fSavePseudoReco = val; }
     void addDiffusion(G4String val) { fAddDiffusion = val; } 
@@ -47,8 +49,17 @@ class AnalysisManager {
     void SetTrackPrimaryAncestor(G4int trackID, G4int ancestorID) { trackToPrimaryAncestor[trackID] = ancestorID; }
     G4int GetTrackPrimaryAncestor(G4int trackID) { return trackToPrimaryAncestor.at(trackID); }
 
-    // TODO: needed???
-    void AddOnePrimaryTrack() { nTestNPrimaryTrack++; }
+    // build TID to parentID association
+    // filled progressively from StackingAction
+    void SetTrackParentID(G4int trackID, G4int parentID) { trackIDtoParentID[trackID] = parentID; }
+    G4int GetTrackParentID(G4int trackID) { return trackIDtoParentID.at(trackID); }
+
+    // return whether saving full tracks in trajectories
+    G4bool GetSaveTrajectories() { return fSaveTrajectories; }
+
+    // register track and its ancestors for saving
+    void RegisterTrackAndAncestors(const G4int trackID);
+    std::uint64_t GetOrBuildParticleID(const G4int trackID);
 
   private:
 
@@ -56,14 +67,12 @@ class AnalysisManager {
     // Book ROOT output TTrees
     // common + detector specific
     void bookEvtTree();  
-    void bookTrkTree();  
-    void bookPrimTree(); 
+    void bookParTree();  
     void bookFLArETrees();      
     void bookFASER2Trees();
 
     void FillEventTree(const G4Event* event);
-    void FillPrimariesTree(const G4Event* event);
-    void FillTrajectoriesTree(const G4Event* event);
+    void FillParticlesTree(const G4Event* event);
     
     void FillFLArEOutput();
     void FillFLArEPseudoReco();
@@ -75,7 +84,8 @@ class AnalysisManager {
     static AnalysisManager* fInstance;
     AnalysisManagerMessenger* fMessenger;
 
-    G4bool fSaveTrack;
+    G4bool fSaveAllParticles;
+    G4bool fSaveTrajectories;
     G4bool fSave3DEvd;
     G4bool fSave2DEvd;
     G4bool fSavePseudoReco;
@@ -93,6 +103,19 @@ class AnalysisManager {
     std::vector<FPFParticle> primaries;
     std::vector<int> primaryIDs;
 
+    // track to primary ancestor (track id to track id)
+    std::map<G4int, G4int> trackToPrimaryAncestor;
+
+    // map track id to its barcode
+    std::map<G4int, ULong64_t> trackIDtoParticleID;
+    std::map<std::tuple<int,int,int>, unsigned int> nextSubIndex;
+
+    // map track id to its parent id
+    std::map<G4int, G4int> trackIDtoParentID;
+
+    // list of track ids to be saved 
+    std::unordered_set<G4int> trackIDsToKeep;
+
     //------------------------------------------------
     // output files and trees
     std::string fFilename;
@@ -100,7 +123,7 @@ class AnalysisManager {
     hep_hpc::hdf5::File fH5file;
     TFile*   fFile;
     TTree*   fEvt;
-    TTree*   fTrk;
+    TTree*   fPar;
     TTree*   fPrim;
 
     TDirectory* fFLArEDir;
@@ -110,72 +133,69 @@ class AnalysisManager {
 
     TDirectory* fFASER2Dir;
     TTree*   fActsHitsTree;
-    TTree*   fActsParticlesTree;
-
-    // track to primary ancestor
-    std::map<G4int, G4int> trackToPrimaryAncestor;
-
-    // TODO: no longer needed?
-    G4int nTestNPrimaryTrack;
 
     //---------------------------------------------------
     // OUTPUT VARIABLES FOR COMMON TREES
+    //---------------------------------------------------
+    // Output variables for EVENT tree
 
     G4int evtID;
     G4int vertexID;
     double weight;
     std::string genType;
-    std::string processName;    
+    std::string processName; 
+    double vtxX, vtxY, vtxZ, vtxT;
     int initPDG;           
-    double initX, initY, initZ, initT;
     double initPx, initPy, initPz, initE;
     double initM;     
-    double initQ;    
-    int intType;           
-    int scatteringType;    
+    double initQ;  
     int fslPDG;           
     int tgtPDG;     
     int tgtA;      
     int tgtZ;      
     int hitnucPDG; 
+    int intType;           
+    int scatteringType;    
     double xs;
     double Q2;  
     double xBj; 
     double y;   
     double W;  
- 
-    //---------------------------------------------------
-    // Output variables for TRAJECTORIES tree
-    int trackTID;
-    int trackPID;
-    int trackPDG;
-    double trackKinE;
-    int trackNPoints;
-    std::vector<double> trackPointX;
-    std::vector<double> trackPointY;
-    std::vector<double> trackPointZ;
+    int nPrimaries;
+    std::vector<int> primTID;
+    std::vector<int> primPDG;
+    std::vector<float> primPx;
+    std::vector<float> primPy;
+    std::vector<float> primPz;
+    std::vector<float> primE;
 
     //---------------------------------------------------
-    // Output variables for PRIMARIES tree
-    UInt_t primVtxID;
-    UInt_t primParticleID;
-    UInt_t primTrackID;
-    UInt_t primPDG; // why unsigned?
-    float_t primM;
-    float_t primQ;
-    float_t primEta;
-    float_t primPhi;
-    float_t primPt;
-    float_t primP;
-    float_t primVx;
-    float_t primVy;
-    float_t primVz;
-    float_t primVt;
-    float_t primPx;
-    float_t primPy;
-    float_t primPz;
-    float_t primE;
-    float_t primKE;
+    // Output variables for PARTICLES/TRAJECTORIES tree
+    
+    ULong64_t particle_id; //barcode
+    int particle_TID;
+    int particle_PID;
+    int particle_PDG;
+    int particle_ancestor;
+    std::string particle_process;
+    float particle_vx;
+    float particle_vy;
+    float particle_vz;
+    float particle_vt;
+    float particle_px;
+    float particle_py;
+    float particle_pz;
+    float particle_m;
+    float particle_q;
+    float particle_eta;
+    float particle_phi;
+    float particle_pt;
+    float particle_p;
+    float particle_ke;
+    int traj_Npoints;
+    std::vector<float> traj_pointX;
+    std::vector<float> traj_pointY;
+    std::vector<float> traj_pointZ;
 
     //---------------------------------------------------
     // OUTPUT VARIABLES FOR FLArE TREES
@@ -184,8 +204,9 @@ class AnalysisManager {
     PixelMap3D* pm3D;
 
     UInt_t flareTrackID;
-    UInt_t flareParticleID;
+    ULong64_t flareParticleID;
     UInt_t flareParentID;
+    UInt_t flareAncestorID;
     UInt_t flarePDG;
     UInt_t flareCopyNum;
     float_t flareT;
@@ -254,35 +275,6 @@ class AnalysisManager {
     UInt_t ActsHitsLayerID;
     UInt_t ActsHitsApproachID;
     UInt_t ActsHitsSensitiveID;
-
-    // Acts Particle Information - need the truth info on the particles in order to do the truth tracking
-    std::vector<std::uint64_t> ActsParticlesParticleId;
-    std::vector<std::int32_t> ActsParticlesParticleType;
-    std::vector<std::uint32_t> ActsParticlesProcess;
-    std::vector<float> ActsParticlesVx;
-    std::vector<float> ActsParticlesVy;
-    std::vector<float> ActsParticlesVz;
-    std::vector<float> ActsParticlesVt;
-    std::vector<float> ActsParticlesPx;
-    std::vector<float> ActsParticlesPy;
-    std::vector<float> ActsParticlesPz;
-    std::vector<float> ActsParticlesM;
-    std::vector<float> ActsParticlesQ;
-    std::vector<float> ActsParticlesEta;
-    std::vector<float> ActsParticlesPhi;
-    std::vector<float> ActsParticlesPt;
-    std::vector<float> ActsParticlesP;
-    std::vector<std::uint32_t> ActsParticlesVertexPrimary;
-    std::vector<std::uint32_t> ActsParticlesVertexSecondary;
-    std::vector<std::uint32_t> ActsParticlesParticle;
-
-    std::vector<std::uint32_t> ActsParticlesGeneration;
-    std::vector<std::uint32_t> ActsParticlesSubParticle;
-    std::vector<float> ActsParticlesELoss;
-    std::vector<float> ActsParticlesPathInX0;
-    std::vector<float> ActsParticlesPathInL0;
-    std::vector<std::int32_t> ActsParticlesNumberOfHits;
-    std::vector<std::uint32_t> ActsParticlesOutcome;
 
 };
 

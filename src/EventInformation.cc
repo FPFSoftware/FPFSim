@@ -13,13 +13,9 @@ EventInformation::EventInformation(std::vector<GeneratorVertexMetadata> genMetad
 EventInformation::~EventInformation()
 {}
 
-void EventInformation::Print() const 
+void EventInformation::Print(int i) const
 {
   G4cout << G4endl;
-  G4cout << "EventInformation: " << fGenMetadata.size() << " vertex(es)" << G4endl;
-  for(int i=0; i<fGenMetadata.size(); i++ )
-  {
-    G4cout << G4endl;
     G4cout << "Vertex : " << i << G4endl
       << "Generator : " << fGenMetadata[i].generatorType << G4endl
       << "Process name : " << fGenMetadata[i].processName << G4endl
@@ -28,6 +24,13 @@ void EventInformation::Print() const
                             << fGenMetadata[i].p4.z() << ", " << fGenMetadata[i].p4.e() << ")" << G4endl
       << "Initiator x4 : (" << fGenMetadata[i].x4.x() << ", " << fGenMetadata[i].x4.y() << ", " 
                             << fGenMetadata[i].x4.z() << ", " << fGenMetadata[i].x4.t() << ")" << G4endl;
-  }
+}
+
+void EventInformation::Print() const 
+{
+  G4cout << G4endl;
+  G4cout << "EventInformation: " << fGenMetadata.size() << " vertex(es)" << G4endl;
+  for(int i=0; i<fGenMetadata.size(); i++ )
+    Print(i);  
 }
 
